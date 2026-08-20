@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { MapContainer, TileLayer, Marker, Popup, Circle, Polygon } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, Popup, Circle, Polygon, useMapEvents } from 'react-leaflet'
 import L from 'leaflet'
 import { area as turfArea, bbox, bboxPolygon, circle as turfCircle, featureCollection, intersect, polygon as turfPolygon, union } from '@turf/turf'
 import 'leaflet/dist/leaflet.css'
@@ -112,7 +112,12 @@ async function getPopulation(area) {
   }
 }
 
-function PlantMarker({ plant, selected, simulation, copy, onClick }) {
+function PlacementHandler({ active, onPlace }) {
+  useMapEvents({ click: event => { if (active) onPlace(event.latlng) } })
+  return null
+}
+
+function PlantMarker({ plant, selected, simulation, copy, onClick, onMove }) {
   const color = STATUS_COLOR[plant.status] || '#6b7280'
   const icon = L.divIcon({
     className: '',
@@ -136,7 +141,7 @@ function PlantMarker({ plant, selected, simulation, copy, onClick }) {
   })() : null
 
   return <>
-    <Marker position={[plant.lat, plant.lng]} icon={icon} eventHandlers={{ click: () => onClick(plant) }}>
+    <Marker position={[plant.lat, plant.lng]} icon={icon} draggable={plant.custom} eventHandlers={{ click: () => onClick(plant), dragend: event => onMove?.(plant.id, event.target.getLatLng()) }}>
       <Popup>
         <div style={{ minWidth: 180 }}>
           <strong>{plant.name}</strong>
@@ -160,9 +165,16 @@ export default function NuclearMap() {
   const [conditions, setConditions] = useState({ level: 'medium', direction: 90, windForce: 3, rainfall: 'none', duration: 4 })
   const [simulation, setSimulation] = useState(null)
   const [population, setPopulation] = useState({ status: 'idle', result: null })
+  const [customPlants, setCustomPlants] = useState([])
+  const [placingPlant, setPlacingPlant] = useState(false)
+  const [newPlant, setNewPlant] = useState({ name: '自定义核电站', reactorType: 'PWR', capacity: 1000, status: 'operating' })
   const selectPlant = plant => { setSelectedPlant(previous => previous?.id === plant.id ? null : plant); setSimulation(null); setPopulation({ status: 'idle', result: null }) }
   const update = (key, value) => setConditions(previous => ({ ...previous, [key]: value }))
+  const updateNewPlant = (key, value) => setNewPlant(previous => ({ ...previous, [key]: value }))
   const copy = COPY[locale]
+  const customCopy = locale === 'zh'
+    ? { title: '新建核电站', name: '名称', reactor: '堆型', capacity: '装机容量（MW）', status: '状态', place: '在地图上放置', placing: '请在地图任意位置点击放置', location: '自定义位置', remove: '删除此核电站' }
+    : { title: 'Create nuclear plant', name: 'Name', reactor: 'Reactor type', capacity: 'Capacity (MW)', status: 'Status', place: 'Place on map', placing: 'Click anywhere on the map to place it', location: 'Custom location', remove: 'Delete this plant' }
   const runSimulation = (event) => {
     event.preventDefault()
     if (!selectedPlant) return
@@ -173,11 +185,31 @@ export default function NuclearMap() {
       .then(result => setPopulation({ status: 'success', result }))
       .catch(() => setPopulation({ status: 'error', result: null }))
   }
+  const placePlant = ({ lat, lng }) => {
+    const plant = { ...newPlant, id: `custom-${Date.now()}`, name: newPlant.name || customCopy.title, capacity: Number(newPlant.capacity) || 0, lat, lng, country: customCopy.location, custom: true }
+    setCustomPlants(previous => [...previous, plant])
+    setSelectedPlant(plant)
+    setSimulation(null)
+    setPopulation({ status: 'idle', result: null })
+    setPlacingPlant(false)
+  }
+  const movePlant = (id, { lat, lng }) => {
+    setCustomPlants(previous => previous.map(plant => plant.id === id ? { ...plant, lat, lng } : plant))
+    setSelectedPlant(previous => previous?.id === id ? { ...previous, lat, lng } : previous)
+    setSimulation(null)
+  }
+  const removePlant = id => {
+    setCustomPlants(previous => previous.filter(plant => plant.id !== id))
+    setSelectedPlant(null)
+    setSimulation(null)
+    setPopulation({ status: 'idle', result: null })
+  }
 
   return <div style={{ position: 'relative', width: '100vw', height: '100vh' }}>
     <MapContainer center={[30, 10]} zoom={3} minZoom={2} style={{ width: '100%', height: '100%' }} zoomControl>
       <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>' noWrap />
-      {plants.map(plant => <PlantMarker key={plant.id} plant={plant} selected={selectedPlant?.id === plant.id} simulation={simulation} copy={copy} onClick={selectPlant} />)}
+      <PlacementHandler active={placingPlant} onPlace={placePlant} />
+      {[...plants, ...customPlants].map(plant => <PlantMarker key={plant.id} plant={plant} selected={selectedPlant?.id === plant.id} simulation={simulation} copy={copy} onClick={selectPlant} onMove={movePlant} />)}
     </MapContainer>
 
     <div style={{ position: 'absolute', bottom: 30, left: 16, zIndex: 1000, background: 'rgba(15,15,15,0.85)', color: 'white', padding: '12px 16px', borderRadius: 8, fontSize: 12, backdropFilter: 'blur(4px)' }}>
@@ -197,6 +229,7 @@ export default function NuclearMap() {
       <label style={{ display: 'block', marginBottom: 12 }}><span style={{ display: 'block', color: '#d1d5db', marginBottom: 4 }}>{copy.duration}</span><input type="number" min="0" step="1" value={conditions.duration} onChange={event => update('duration', event.target.value)} style={fieldStyle} /><span style={{ color: '#9ca3af', fontSize: 11 }}>{copy.ongoing}</span></label>
       <button type="submit" disabled={!selectedPlant} style={{ width: '100%', padding: '8px 10px', fontSize: 13, fontWeight: 600, background: selectedPlant ? '#dc2626' : '#4b5563', color: 'white', border: 'none', borderRadius: 4, cursor: selectedPlant ? 'pointer' : 'not-allowed' }}>{copy.trigger}</button>
       {simulation && <button type="button" onClick={() => { setSimulation(null); setPopulation({ status: 'idle', result: null }) }} style={{ width: '100%', padding: '7px 10px', marginTop: 8, fontSize: 12, background: '#374151', color: 'white', border: 'none', borderRadius: 4, cursor: 'pointer' }}>{copy.clear}</button>}
+      {selectedPlant?.custom && <button type="button" onClick={() => removePlant(selectedPlant.id)} style={{ width: '100%', padding: '7px 10px', marginTop: 8, fontSize: 12, background: '#7f1d1d', color: 'white', border: '1px solid #ef4444', borderRadius: 4, cursor: 'pointer' }}>{customCopy.remove}</button>}
       {population.status !== 'idle' && <div style={{ marginTop: 12, paddingTop: 10, borderTop: '1px solid #374151' }}>
         <div style={{ fontWeight: 600, marginBottom: 4 }}>{copy.populationTitle}</div>
         {population.status === 'loading' && <div style={{ color: '#fbbf24' }}>{copy.populationLoading}</div>}
@@ -205,6 +238,15 @@ export default function NuclearMap() {
         <div style={{ color: '#9ca3af', fontSize: 11, lineHeight: 1.45, marginTop: 5 }}>{copy.populationNote}</div>
       </div>}
       <div style={{ color: '#9ca3af', fontSize: 11, lineHeight: 1.45, marginTop: 10 }}>{copy.disclaimer}</div>
+    </form>
+
+    <form onSubmit={event => { event.preventDefault(); setPlacingPlant(true) }} style={{ ...panelStyle, top: 600 }}>
+      <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 10 }}>{customCopy.title}</div>
+      <label style={{ display: 'block', marginBottom: 9 }}><span style={{ display: 'block', color: '#d1d5db', marginBottom: 4 }}>{customCopy.name}</span><input value={newPlant.name} onChange={event => updateNewPlant('name', event.target.value)} style={fieldStyle} /></label>
+      <label style={{ display: 'block', marginBottom: 9 }}><span style={{ display: 'block', color: '#d1d5db', marginBottom: 4 }}>{customCopy.reactor}</span><select value={newPlant.reactorType} onChange={event => updateNewPlant('reactorType', event.target.value)} style={fieldStyle}><option>PWR</option><option>BWR</option><option>PHWR</option><option>HTGR</option><option>FBR</option><option>SMR</option></select></label>
+      <label style={{ display: 'block', marginBottom: 9 }}><span style={{ display: 'block', color: '#d1d5db', marginBottom: 4 }}>{customCopy.capacity}</span><input type="number" min="1" value={newPlant.capacity} onChange={event => updateNewPlant('capacity', event.target.value)} style={fieldStyle} /></label>
+      <label style={{ display: 'block', marginBottom: 12 }}><span style={{ display: 'block', color: '#d1d5db', marginBottom: 4 }}>{customCopy.status}</span><select value={newPlant.status} onChange={event => updateNewPlant('status', event.target.value)} style={fieldStyle}>{Object.keys(STATUS_COLOR).map(key => <option key={key} value={key}>{copy.status[key]}</option>)}</select></label>
+      <button type="submit" style={{ width: '100%', padding: '8px 10px', fontSize: 13, fontWeight: 600, background: placingPlant ? '#f59e0b' : '#2563eb', color: 'white', border: 'none', borderRadius: 4, cursor: 'pointer' }}>{placingPlant ? customCopy.placing : customCopy.place}</button>
     </form>
 
     <div style={{ position: 'absolute', top: 16, left: '50%', transform: 'translateX(-50%)', zIndex: 1000, color: 'white', fontSize: 18, fontWeight: 700, textShadow: '0 1px 4px rgba(0,0,0,0.8)', letterSpacing: 2, pointerEvents: 'none' }}>{copy.title}</div>
