@@ -1,10 +1,10 @@
 import { useState } from 'react'
-import { MapContainer, TileLayer, Marker, Popup, Circle } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, Popup, Circle, Polygon } from 'react-leaflet'
 import L from 'leaflet'
+import { area as turfArea, bbox, bboxPolygon, circle as turfCircle, featureCollection, intersect, polygon as turfPolygon, union } from '@turf/turf'
 import 'leaflet/dist/leaflet.css'
 import plants from '../data/plants.json'
 
-// Fix default marker icon issue with Vite
 delete L.Icon.Default.prototype._getIconUrl
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
@@ -12,183 +12,201 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
 })
 
-const STATUS_COLOR = {
-  operating: '#22c55e',
-  decommissioned: '#6b7280',
-  construction: '#f59e0b',
+const STATUS_COLOR = { operating: '#22c55e', decommissioned: '#6b7280', construction: '#f59e0b' }
+const REFERENCE_ZONES = [
+  { radius: 16000, color: '#f97316', key: 'plume' },
+  { radius: 80000, color: '#eab308', key: 'ingestion' },
+]
+const SCENARIO_LEVELS = {
+  low: { coreRadius: 3, zones: [{ radius: 16, color: '#f97316', key: 'plume' }, { radius: 50, color: '#eab308', key: 'monitoring' }] },
+  medium: { coreRadius: 5, zones: [{ radius: 30, color: '#f97316', key: 'plume' }, { radius: 100, color: '#eab308', key: 'monitoring' }] },
+  high: { coreRadius: 10, zones: [{ radius: 60, color: '#f97316', key: 'plume' }, { radius: 200, color: '#eab308', key: 'monitoring' }] },
+}
+const RAINFALL = {
+  none: { distanceFactor: 1, opacity: 0.15 },
+  light: { distanceFactor: 0.9, opacity: 0.17 },
+  moderate: { distanceFactor: 0.76, opacity: 0.2 },
+  heavy: { distanceFactor: 0.62, opacity: 0.24 },
 }
 
-const IMPACT_ZONES = [
-  { radius: 5000,   color: '#ef4444', label: '立即危险区 (5km)' },
-  { radius: 30000,  color: '#f97316', label: '紧急疏散区 (30km)' },
-  { radius: 80000,  color: '#eab308', label: '预防行动区 (80km)' },
-  { radius: 300000, color: '#3b82f6', label: '放射性沉降区 (300km)' },
-]
+const COPY = {
+  zh: {
+    title: '☢ StrikeScope — 全球核电站场景推演', statusTitle: '核电站状态', reactor: '堆型', capacity: '装机容量', selectPlant: '选择电站', planning: '规划参考区', simulation: '模拟范围', core: '全向近场警戒', downwind: '（顺风）', scenario: '事故场景推演', selectHint: '请先点击地图上的核电站', release: '放射性释放规模', direction: '扩散方向', wind: '风力', rainfall: '降雨强度', duration: '释放持续时间（小时）', trigger: '触发模拟', clear: '清除模拟', ongoing: '输入 0 代表持续释放；远场仅表示稀释后的参考影响。', rainHint: '降雨越强，模拟越偏向近场湿沉降。', windHint: '0级无风 · 3级微风 · 6级强风 · 9级烈风 · 12级飓风', directionHint: '0° 北 · 90° 东 · 180° 南 · 270° 西', populationTitle: '模拟区域估算人口', populationLoading: '正在计算人口…', populationError: '暂时无法取得人口估算', populationNote: '基于 WorldPop 人口栅格；为模拟区域内常住人口估算，不代表实际暴露或撤离人数。', disclaimer: '仅为可视化推演：结合装机容量、释放时间与风向生成示意羽流；不是剂量预测或应急指令。', status: { operating: '运营中', decommissioned: '已关闭', construction: '建设中' }, reference: { plume: '羽流应急规划参考区 (16km)', ingestion: '摄入途径规划参考区 (80km)' }, level: { low: '小规模释放', medium: '中等规模释放', high: '大规模释放' }, zone: { plume: '羽流防护参考', monitoring: '监测参考' }, rain: { none: '无雨', light: '小雨', moderate: '中雨', heavy: '大雨' }, unknown: '未知', north: '北', east: '东', south: '南', west: '西', mw: 'MW', forceSuffix: '级', unitSeparator: ' · ',
+  },
+  en: {
+    title: '☢ StrikeScope — Nuclear Scenario Explorer', statusTitle: 'Plant status', reactor: 'Reactor type', capacity: 'Installed capacity', selectPlant: 'Select plant', planning: 'Planning references', simulation: 'Simulation zones', core: 'All-direction near-field alert', downwind: ' (downwind)', scenario: 'Accident scenario', selectHint: 'Select a nuclear plant on the map first', release: 'Radioactive release scale', direction: 'Plume direction', wind: 'Wind force', rainfall: 'Rainfall', duration: 'Release duration (hours)', trigger: 'Run simulation', clear: 'Clear simulation', ongoing: 'Enter 0 for an ongoing release; the far field is a diluted reference only.', rainHint: 'Stronger rain shifts this illustration toward near-field wet deposition.', windHint: '0 calm · 3 gentle breeze · 6 strong breeze · 9 strong gale · 12 hurricane', directionHint: '0° N · 90° E · 180° S · 270° W', populationTitle: 'Estimated residents in simulation area', populationLoading: 'Calculating population…', populationError: 'Population estimate is currently unavailable', populationNote: 'Based on WorldPop population grids; this estimates resident population in the simulated area, not actual exposure or evacuation.', disclaimer: 'Visualization only: this illustrative plume uses capacity, duration, and wind. It is not a dose forecast or emergency instruction.', status: { operating: 'Operating', decommissioned: 'Closed', construction: 'Under construction' }, reference: { plume: 'Plume planning reference (16 km)', ingestion: 'Ingestion planning reference (80 km)' }, level: { low: 'Small release', medium: 'Moderate release', high: 'Large release' }, zone: { plume: 'Plume protection reference', monitoring: 'Monitoring reference' }, rain: { none: 'No rain', light: 'Light rain', moderate: 'Moderate rain', heavy: 'Heavy rain' }, unknown: 'Unknown', north: 'N', east: 'E', south: 'S', west: 'W', mw: 'MW', forceSuffix: '', unitSeparator: ' · ',
+  },
+}
 
-function PlantMarker({ plant, selected, onClick }) {
+function destination([lat, lng], bearing, distanceKm) {
+  const distance = distanceKm / 6371
+  const bearingRad = bearing * Math.PI / 180
+  const latRad = lat * Math.PI / 180
+  const lngRad = lng * Math.PI / 180
+  const targetLat = Math.asin(Math.sin(latRad) * Math.cos(distance) + Math.cos(latRad) * Math.sin(distance) * Math.cos(bearingRad))
+  const targetLng = lngRad + Math.atan2(Math.sin(bearingRad) * Math.sin(distance) * Math.cos(latRad), Math.cos(distance) - Math.sin(latRad) * Math.sin(targetLat))
+  return [targetLat * 180 / Math.PI, ((targetLng * 180 / Math.PI + 540) % 360) - 180]
+}
+
+function plumeSector(center, radiusKm, direction, spreadDegrees) {
+  const start = direction - spreadDegrees / 2
+  return [center, ...Array.from({ length: 25 }, (_, index) => destination(center, start + spreadDegrees * index / 24, radiusKm))]
+}
+
+function simulationArea(plant, simulation) {
+  const level = SCENARIO_LEVELS[simulation.level]
+  const capacityFactor = Math.max(0.65, 0.65 + (plant.capacity || 1000) / 4000)
+  const durationFactor = simulation.duration === 0 ? 2.2 : 1 + Math.log1p(simulation.duration) * 0.16
+  const spread = Math.max(30, 100 - simulation.windForce * 6)
+  const rainfall = RAINFALL[simulation.rainfall]
+  const core = turfCircle([plant.lng, plant.lat], level.coreRadius * capacityFactor, { units: 'kilometers', steps: 48 })
+  const outerZone = level.zones.at(-1)
+  const sectorPoints = plumeSector([plant.lat, plant.lng], outerZone.radius * capacityFactor * durationFactor * rainfall.distanceFactor, simulation.direction, spread)
+  const sector = turfPolygon([[...sectorPoints.map(([lat, lng]) => [lng, lat]), [plant.lng, plant.lat]]])
+  return union(featureCollection([core, sector])).geometry
+}
+
+const pause = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds))
+
+async function requestPopulation(area) {
+  const submitted = await fetch('https://api.worldpop.org/v2/population', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ geojson: area, year: 2026, resolution: '1km' }),
+  })
+  if (!submitted.ok) throw new Error(`Population request failed (${submitted.status})`)
+  const { task_id: taskId } = await submitted.json()
+  for (let attempt = 0; attempt < 30; attempt += 1) {
+    await pause(1000)
+    const task = await fetch(`https://api.worldpop.org/v2/tasks/${taskId}`)
+    if (!task.ok) throw new Error(`Population task failed (${task.status})`)
+    const result = await task.json()
+    if (result.status === 'success') return result.result
+    if (result.status === 'failure') throw new Error(result.error || 'Population task failed')
+  }
+  throw new Error('Population request timed out')
+}
+
+function splitPopulationArea(area) {
+  if (turfArea(area) / 1e6 <= 45000) return [area]
+  const [west, south, east, north] = bbox(area)
+  const areas = []
+  for (let lng = Math.floor(west); lng < Math.ceil(east); lng += 1) {
+    for (let lat = Math.floor(south); lat < Math.ceil(north); lat += 1) {
+      const clipped = intersect(featureCollection([area, bboxPolygon([lng, lat, Math.min(lng + 1, east), Math.min(lat + 1, north)])]))
+      if (clipped) areas.push(clipped.geometry)
+    }
+  }
+  return areas
+}
+
+async function getPopulation(area) {
+  const parts = splitPopulationArea(area)
+  const results = []
+  for (let index = 0; index < parts.length; index += 3) {
+    results.push(...await Promise.all(parts.slice(index, index + 3).map(requestPopulation)))
+  }
+  return {
+    ...results[0],
+    total_population: results.reduce((total, result) => total + result.total_population, 0),
+  }
+}
+
+function PlantMarker({ plant, selected, simulation, copy, onClick }) {
   const color = STATUS_COLOR[plant.status] || '#6b7280'
-
   const icon = L.divIcon({
     className: '',
-    html: `<div style="
-      width:12px;height:12px;
-      border-radius:50%;
-      background:${color};
-      border:2px solid white;
-      box-shadow:0 0 4px rgba(0,0,0,0.5);
-      cursor:pointer;
-      ${selected ? 'width:16px;height:16px;box-shadow:0 0 8px ' + color : ''}
-    "></div>`,
-    iconSize: selected ? [16, 16] : [12, 12],
-    iconAnchor: selected ? [8, 8] : [6, 6],
+    html: `<div style="width:${selected ? 16 : 12}px;height:${selected ? 16 : 12}px;border-radius:50%;background:${color};border:2px solid white;box-shadow:0 0 ${selected ? 8 : 4}px ${selected ? color : 'rgba(0,0,0,0.5)'};cursor:pointer"></div>`,
+    iconSize: selected ? [16, 16] : [12, 12], iconAnchor: selected ? [8, 8] : [6, 6],
   })
-
-  return (
-    <>
-      <Marker
-        position={[plant.lat, plant.lng]}
-        icon={icon}
-        eventHandlers={{ click: () => onClick(plant) }}
-      >
-        <Popup>
-          <div style={{ minWidth: 180 }}>
-            <strong>{plant.name}</strong>
-            <div style={{ color: '#6b7280', fontSize: 12, marginTop: 2 }}>{plant.country}</div>
-            <div style={{ marginTop: 6, fontSize: 13 }}>
-              <span>堆型：{plant.reactorType}</span><br />
-              <span>状态：
-                <span style={{ color }}>{plant.status === 'operating' ? '运营中' : plant.status === 'decommissioned' ? '已关闭' : '建设中'}</span>
-              </span><br />
-              {plant.capacity > 0 && <span>装机容量：{plant.capacity} MW</span>}
-            </div>
-            <button
-              onClick={() => onClick(plant)}
-              style={{
-                marginTop: 8, padding: '4px 10px', fontSize: 12,
-                background: '#ef4444', color: 'white', border: 'none',
-                borderRadius: 4, cursor: 'pointer', width: '100%'
-              }}
-            >
-              显示影响范围
-            </button>
-          </div>
-        </Popup>
-      </Marker>
-
-      {selected && IMPACT_ZONES.map(zone => (
-        <Circle
-          key={zone.radius}
-          center={[plant.lat, plant.lng]}
-          radius={zone.radius}
-          pathOptions={{
-            color: zone.color,
-            fillColor: zone.color,
-            fillOpacity: 0.08,
-            weight: 1.5,
-            dashArray: zone.radius === 300000 ? '6,4' : null,
-          }}
-        />
-      ))}
+  const simulationZones = simulation && selected ? (() => {
+    const level = SCENARIO_LEVELS[simulation.level]
+    // Electrical capacity is only a visual proxy for potential inventory, but
+    // keep the scale distinct enough for different-sized stations to compare.
+    const capacityFactor = Math.max(0.65, 0.65 + (plant.capacity || 1000) / 4000)
+    // 0 represents an ongoing release. Its finite visual extent is a diluted
+    // far-field reference, not a claim that the plume stops at that boundary.
+    const durationFactor = simulation.duration === 0 ? 2.2 : 1 + Math.log1p(simulation.duration) * 0.16
+    const spread = Math.max(30, 100 - simulation.windForce * 6)
+    const rainfall = RAINFALL[simulation.rainfall]
+    return <>
+      <Circle center={[plant.lat, plant.lng]} radius={level.coreRadius * capacityFactor * 1000} pathOptions={{ color: '#ef4444', fillColor: '#ef4444', fillOpacity: 0.18, weight: 1.5 }} />
+      {[...level.zones].reverse().map(zone => <Polygon key={zone.key} positions={plumeSector([plant.lat, plant.lng], zone.radius * capacityFactor * durationFactor * rainfall.distanceFactor, simulation.direction, spread)} pathOptions={{ color: zone.color, fillColor: zone.color, fillOpacity: rainfall.opacity, weight: 1.5 }} />)}
     </>
-  )
+  })() : null
+
+  return <>
+    <Marker position={[plant.lat, plant.lng]} icon={icon} eventHandlers={{ click: () => onClick(plant) }}>
+      <Popup>
+        <div style={{ minWidth: 180 }}>
+          <strong>{plant.name}</strong>
+          <div style={{ color: '#6b7280', fontSize: 12, marginTop: 2 }}>{plant.country}</div>
+          <div style={{ marginTop: 6, fontSize: 13 }}>{copy.reactor}: {plant.reactorType}<br />{copy.statusTitle}: <span style={{ color }}>{copy.status[plant.status]}</span><br />{plant.capacity > 0 && <>{copy.capacity}: {plant.capacity} {copy.mw}</>}</div>
+          <button onClick={() => onClick(plant)} style={{ marginTop: 8, padding: '4px 10px', fontSize: 12, background: '#ef4444', color: 'white', border: 'none', borderRadius: 4, cursor: 'pointer', width: '100%' }}>{copy.selectPlant}</button>
+        </div>
+      </Popup>
+    </Marker>
+    {selected && !simulation && REFERENCE_ZONES.map(zone => <Circle key={zone.radius} center={[plant.lat, plant.lng]} radius={zone.radius} pathOptions={{ color: zone.color, fillColor: zone.color, fillOpacity: 0.08, weight: 1.5, dashArray: '6,4' }} />)}
+    {simulationZones}
+  </>
 }
 
-export default function NuclearMap() {
-  const [selectedPlant, setSelectedPlant] = useState(null)
+const fieldStyle = { width: '100%', padding: 7, borderRadius: 4, border: '1px solid #4b5563', background: '#1f2937', color: 'white' }
+const panelStyle = { position: 'absolute', top: 16, right: 16, zIndex: 1000, background: 'rgba(15,15,15,0.92)', color: 'white', padding: 16, borderRadius: 8, fontSize: 13, backdropFilter: 'blur(4px)', width: 270 }
 
-  const handleClick = (plant) => {
-    setSelectedPlant(prev => prev?.id === plant.id ? null : plant)
+export default function NuclearMap() {
+  const [locale] = useState(() => typeof navigator !== 'undefined' && (navigator.language || '').toLowerCase().startsWith('zh') ? 'zh' : 'en')
+  const [selectedPlant, setSelectedPlant] = useState(null)
+  const [conditions, setConditions] = useState({ level: 'medium', direction: 90, windForce: 3, rainfall: 'none', duration: 4 })
+  const [simulation, setSimulation] = useState(null)
+  const [population, setPopulation] = useState({ status: 'idle', result: null })
+  const selectPlant = plant => { setSelectedPlant(previous => previous?.id === plant.id ? null : plant); setSimulation(null); setPopulation({ status: 'idle', result: null }) }
+  const update = (key, value) => setConditions(previous => ({ ...previous, [key]: value }))
+  const copy = COPY[locale]
+  const runSimulation = (event) => {
+    event.preventDefault()
+    if (!selectedPlant) return
+    const nextSimulation = { level: conditions.level, direction: Number(conditions.direction), windForce: Number(conditions.windForce), rainfall: conditions.rainfall, duration: Number(conditions.duration) }
+    setSimulation(nextSimulation)
+    setPopulation({ status: 'loading', result: null })
+    getPopulation(simulationArea(selectedPlant, nextSimulation))
+      .then(result => setPopulation({ status: 'success', result }))
+      .catch(() => setPopulation({ status: 'error', result: null }))
   }
 
-  return (
-    <div style={{ position: 'relative', width: '100vw', height: '100vh' }}>
-      <MapContainer
-        center={[30, 10]}
-        zoom={3}
-        minZoom={2}
-        style={{ width: '100%', height: '100%' }}
-        zoomControl={true}
-      >
-        <TileLayer
-          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-          noWrap={true}
-        />
-        {plants.map(plant => (
-          <PlantMarker
-            key={plant.id}
-            plant={plant}
-            selected={selectedPlant?.id === plant.id}
-            onClick={handleClick}
-          />
-        ))}
-      </MapContainer>
+  return <div style={{ position: 'relative', width: '100vw', height: '100vh' }}>
+    <MapContainer center={[30, 10]} zoom={3} minZoom={2} style={{ width: '100%', height: '100%' }} zoomControl>
+      <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>' noWrap />
+      {plants.map(plant => <PlantMarker key={plant.id} plant={plant} selected={selectedPlant?.id === plant.id} simulation={simulation} copy={copy} onClick={selectPlant} />)}
+    </MapContainer>
 
-      {/* 图例 */}
-      <div style={{
-        position: 'absolute', bottom: 30, left: 16, zIndex: 1000,
-        background: 'rgba(15,15,15,0.85)', color: 'white',
-        padding: '12px 16px', borderRadius: 8, fontSize: 12,
-        backdropFilter: 'blur(4px)',
-      }}>
-        <div style={{ fontWeight: 600, marginBottom: 8 }}>核电站状态</div>
-        {Object.entries(STATUS_COLOR).map(([k, v]) => (
-          <div key={k} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-            <div style={{ width: 10, height: 10, borderRadius: '50%', background: v }} />
-            <span>{{ operating: '运营中', decommissioned: '已关闭', construction: '建设中' }[k]}</span>
-          </div>
-        ))}
-
-        {selectedPlant && (
-          <>
-            <div style={{ fontWeight: 600, margin: '12px 0 8px' }}>影响范围</div>
-            {IMPACT_ZONES.map(z => (
-              <div key={z.radius} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                <div style={{ width: 20, height: 2, background: z.color }} />
-                <span>{z.label}</span>
-              </div>
-            ))}
-          </>
-        )}
-      </div>
-
-      {/* 选中电站信息 */}
-      {selectedPlant && (
-        <div style={{
-          position: 'absolute', top: 16, right: 16, zIndex: 1000,
-          background: 'rgba(15,15,15,0.9)', color: 'white',
-          padding: '16px 20px', borderRadius: 8, fontSize: 13,
-          backdropFilter: 'blur(4px)', minWidth: 200,
-        }}>
-          <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 4 }}>{selectedPlant.name}</div>
-          <div style={{ color: '#9ca3af', marginBottom: 10 }}>{selectedPlant.country}</div>
-          <div style={{ lineHeight: 1.8 }}>
-            <div>堆型：{selectedPlant.reactorType}</div>
-            {selectedPlant.capacity > 0 && <div>装机：{selectedPlant.capacity} MW</div>}
-            <div>坐标：{selectedPlant.lat.toFixed(2)}, {selectedPlant.lng.toFixed(2)}</div>
-          </div>
-          <button
-            onClick={() => setSelectedPlant(null)}
-            style={{
-              marginTop: 12, padding: '4px 10px', fontSize: 12,
-              background: '#374151', color: 'white', border: 'none',
-              borderRadius: 4, cursor: 'pointer', width: '100%'
-            }}
-          >
-            关闭
-          </button>
-        </div>
-      )}
-
-      {/* 标题 */}
-      <div style={{
-        position: 'absolute', top: 16, left: '50%', transform: 'translateX(-50%)',
-        zIndex: 1000, color: 'white', fontSize: 18, fontWeight: 700,
-        textShadow: '0 1px 4px rgba(0,0,0,0.8)', letterSpacing: 2,
-        pointerEvents: 'none',
-      }}>
-        ☢ StrikeScope — 全球核电站影响范围
-      </div>
+    <div style={{ position: 'absolute', bottom: 30, left: 16, zIndex: 1000, background: 'rgba(15,15,15,0.85)', color: 'white', padding: '12px 16px', borderRadius: 8, fontSize: 12, backdropFilter: 'blur(4px)' }}>
+      <div style={{ fontWeight: 600, marginBottom: 8 }}>{copy.statusTitle}</div>
+      {Object.entries(STATUS_COLOR).map(([key, color]) => <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}><div style={{ width: 10, height: 10, borderRadius: '50%', background: color }} /><span>{copy.status[key]}</span></div>)}
+      {selectedPlant && !simulation && <><div style={{ fontWeight: 600, margin: '12px 0 8px' }}>{copy.planning}</div>{REFERENCE_ZONES.map(zone => <div key={zone.radius} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}><div style={{ width: 20, height: 2, background: zone.color }} /><span>{copy.reference[zone.key]}</span></div>)}</>}
+      {simulation && <><div style={{ fontWeight: 600, margin: '12px 0 8px' }}>{copy.simulation}</div><div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}><div style={{ width: 10, height: 10, borderRadius: '50%', background: '#ef4444' }} /><span>{copy.core}</span></div>{SCENARIO_LEVELS[simulation.level].zones.map(zone => <div key={zone.key} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}><div style={{ width: 20, height: 2, background: zone.color }} /><span>{copy.zone[zone.key]}{copy.downwind}</span></div>)}</>}
     </div>
-  )
+
+    <form onSubmit={runSimulation} style={panelStyle}>
+      <div style={{ fontWeight: 700, fontSize: 15 }}>{copy.scenario}</div>
+      <div style={{ color: selectedPlant ? '#9ca3af' : '#fbbf24', marginTop: 5, marginBottom: 12 }}>{selectedPlant ? `${selectedPlant.name}${copy.unitSeparator}${selectedPlant.capacity || copy.unknown} ${copy.mw}` : copy.selectHint}</div>
+      <label style={{ display: 'block', marginBottom: 10 }}><span style={{ display: 'block', color: '#d1d5db', marginBottom: 4 }}>{copy.release}</span><select value={conditions.level} onChange={event => update('level', event.target.value)} style={fieldStyle}>{Object.keys(SCENARIO_LEVELS).map(key => <option key={key} value={key}>{copy.level[key]}</option>)}</select></label>
+      <label style={{ display: 'block', marginBottom: 10 }}><span style={{ display: 'block', color: '#d1d5db', marginBottom: 4 }}>{copy.direction}: {conditions.direction}°</span><input type="range" min="0" max="359" value={conditions.direction} onChange={event => update('direction', event.target.value)} style={{ width: '100%' }} /><span style={{ color: '#9ca3af', fontSize: 11 }}>{copy.directionHint}</span></label>
+      <label style={{ display: 'block', marginBottom: 10 }}><span style={{ display: 'block', color: '#d1d5db', marginBottom: 4 }}>{copy.wind}: {conditions.windForce}{copy.forceSuffix}</span><input type="range" min="0" max="12" step="1" value={conditions.windForce} onChange={event => update('windForce', event.target.value)} style={{ width: '100%' }} /><span style={{ color: '#9ca3af', fontSize: 11 }}>{copy.windHint}</span></label>
+      <label style={{ display: 'block', marginBottom: 10 }}><span style={{ display: 'block', color: '#d1d5db', marginBottom: 4 }}>{copy.rainfall}</span><select value={conditions.rainfall} onChange={event => update('rainfall', event.target.value)} style={fieldStyle}>{Object.keys(RAINFALL).map(key => <option key={key} value={key}>{copy.rain[key]}</option>)}</select><span style={{ color: '#9ca3af', fontSize: 11 }}>{copy.rainHint}</span></label>
+      <label style={{ display: 'block', marginBottom: 12 }}><span style={{ display: 'block', color: '#d1d5db', marginBottom: 4 }}>{copy.duration}</span><input type="number" min="0" step="1" value={conditions.duration} onChange={event => update('duration', event.target.value)} style={fieldStyle} /><span style={{ color: '#9ca3af', fontSize: 11 }}>{copy.ongoing}</span></label>
+      <button type="submit" disabled={!selectedPlant} style={{ width: '100%', padding: '8px 10px', fontSize: 13, fontWeight: 600, background: selectedPlant ? '#dc2626' : '#4b5563', color: 'white', border: 'none', borderRadius: 4, cursor: selectedPlant ? 'pointer' : 'not-allowed' }}>{copy.trigger}</button>
+      {simulation && <button type="button" onClick={() => { setSimulation(null); setPopulation({ status: 'idle', result: null }) }} style={{ width: '100%', padding: '7px 10px', marginTop: 8, fontSize: 12, background: '#374151', color: 'white', border: 'none', borderRadius: 4, cursor: 'pointer' }}>{copy.clear}</button>}
+      {population.status !== 'idle' && <div style={{ marginTop: 12, paddingTop: 10, borderTop: '1px solid #374151' }}>
+        <div style={{ fontWeight: 600, marginBottom: 4 }}>{copy.populationTitle}</div>
+        {population.status === 'loading' && <div style={{ color: '#fbbf24' }}>{copy.populationLoading}</div>}
+        {population.status === 'success' && <div style={{ fontSize: 20, fontWeight: 700, color: '#f8fafc' }}>{Math.round(population.result.total_population).toLocaleString(locale === 'zh' ? 'zh-CN' : 'en-US')}</div>}
+        {population.status === 'error' && <div style={{ color: '#fca5a5' }}>{copy.populationError}</div>}
+        <div style={{ color: '#9ca3af', fontSize: 11, lineHeight: 1.45, marginTop: 5 }}>{copy.populationNote}</div>
+      </div>}
+      <div style={{ color: '#9ca3af', fontSize: 11, lineHeight: 1.45, marginTop: 10 }}>{copy.disclaimer}</div>
+    </form>
+
+    <div style={{ position: 'absolute', top: 16, left: '50%', transform: 'translateX(-50%)', zIndex: 1000, color: 'white', fontSize: 18, fontWeight: 700, textShadow: '0 1px 4px rgba(0,0,0,0.8)', letterSpacing: 2, pointerEvents: 'none' }}>{copy.title}</div>
+  </div>
 }

@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Downloaded source exports are reproducible but too large / licence-dependent
+data/source/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
