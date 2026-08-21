@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
-/* Convert a GEM Global Nuclear Power Tracker CSV/JSON export (unit-level) into
- * the facility-level data used by StrikeScope. */
+/* Convert a GEM Global Nuclear Power Tracker CSV/JSON/XLSX export (unit-level)
+ * into the facility-level data used by StrikeScope. */
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { extname, resolve } from 'node:path'
 import * as XLSX from 'xlsx'
@@ -12,14 +12,33 @@ const metaOutput = resolve(root, 'src/data/plants.meta.json')
 
 const fields = {
   id: ['GEM location ID', 'Location ID', 'Plant ID', 'Project ID', 'ID'],
-  name: ['Plant name', 'Project name', 'Facility name', 'Name'],
-  unit: ['Unit name', 'Unit'],
+  name: ['Project Name', 'Plant name', 'Facility name', 'Name'],
+  localName: ['Project Name in Local Language / Script'],
+  unit: ['Unit name', 'Unit Name', 'Unit'],
   country: ['Country/Area', 'Country', 'Country or area'],
   lat: ['Latitude', 'Latitude (decimal degrees)', 'lat'],
   lng: ['Longitude', 'Longitude (decimal degrees)', 'lon', 'lng'],
   status: ['Status', 'Project status'],
-  reactorType: ['Reactor type', 'Reactor Type', 'Technology type', 'Technology Type'],
+  reactorType: ['Reactor Type', 'Reactor type', 'Technology type', 'Technology Type'],
   capacity: ['Capacity (MW)', 'Capacity MW', 'Capacity', 'Net Capacity (MW)'],
+  startYear: ['Start Year'],
+  operator: ['Operator'],
+}
+
+const REACTOR_TYPE_ABBREVIATIONS = {
+  'boiling water reactor': 'BWR',
+  'fast breeder reactor': 'FBR',
+  'gas-cooled reactor': 'GCR',
+  'heavy water gas-cooled reactor': 'HWGCR',
+  'heavy water light water reactor': 'HWLWR',
+  'high temperature gas reactor': 'HTGR',
+  'light water graphite reactor': 'LWGR',
+  'liquid-metal-cooled fast reactor': 'LMFR',
+  'microreactor': 'Microreactor',
+  'pressurized heavy water reactor': 'PHWR',
+  'pressurized water reactor': 'PWR',
+  'small modular reactor': 'SMR',
+  'steam-generating heavy water reactor': 'SGHWR',
 }
 
 const argument = (name) => {
@@ -48,7 +67,7 @@ function parseCsv(text) {
 
 function parseSpreadsheet(buffer) {
   const workbook = XLSX.read(buffer, { type: 'buffer' })
-  const sheet = workbook.Sheets[workbook.SheetNames[0]]
+  const sheet = workbook.Sheets.Data ?? workbook.Sheets[workbook.SheetNames[0]]
   if (!sheet) throw new Error('Spreadsheet has no worksheet.')
   return XLSX.utils.sheet_to_json(sheet, { defval: '' })
 }
@@ -69,6 +88,15 @@ function statusOf(value) {
   if (['construction', 'under construction'].includes(valueLower)) return 'construction'
   if (['retired', 'permanent shutdown', 'mothballed', 'shelved'].includes(valueLower)) return 'decommissioned'
   return null
+}
+
+function abbreviateReactorType(value) {
+  const label = String(value).trim()
+  return REACTOR_TYPE_ABBREVIATIONS[label.toLowerCase()] || label
+}
+
+function cleanProjectName(value) {
+  return String(value).trim().replace(/\s+nuclear power (plant|station)$/i, '')
 }
 
 async function source() {
@@ -104,20 +132,34 @@ try {
     const key = locationId || [name, get(row, 'country'), lat, lng].map((item) => String(item).trim().toLowerCase()).join('|')
     const previous = sites.get(key)
     const reactorType = String(get(row, 'reactorType')).trim(); const unit = String(get(row, 'unit')).trim()
-    if (!previous) sites.set(key, { name, country: String(get(row, 'country')).trim() || '未知', lat, lng, status, capacity: asNumber(get(row, 'capacity')), reactorTypes: new Set(reactorType ? [reactorType] : []), units: new Set(unit ? [unit] : []) })
-    else {
+    const localName = String(get(row, 'localName')).trim(); const operator = String(get(row, 'operator')).trim()
+    const startYear = asNumber(get(row, 'startYear'))
+    if (!previous) {
+      sites.set(key, {
+        name, localName, country: String(get(row, 'country')).trim() || 'Unknown', lat, lng, status,
+        capacity: asNumber(get(row, 'capacity')), reactorTypes: new Set(reactorType ? [reactorType] : []),
+        units: new Set(unit ? [unit] : []), operators: new Set(operator ? [operator] : []),
+        startYears: startYear > 1900 ? [startYear] : [],
+      })
+    } else {
       previous.capacity += asNumber(get(row, 'capacity'))
       if (reactorType) previous.reactorTypes.add(reactorType)
       if (unit) previous.units.add(unit)
+      if (operator) previous.operators.add(operator)
+      if (startYear > 1900) previous.startYears.push(startYear)
+      if (!previous.localName && localName) previous.localName = localName
       const rank = { operating: 3, construction: 2, decommissioned: 1 }
       if (rank[status] > rank[previous.status]) previous.status = status
     }
   }
 
   const plants = [...sites.values()].sort((a, b) => a.country.localeCompare(b.country) || a.name.localeCompare(b.name)).map((site, index) => ({
-    id: index + 1, name: site.name, country: site.country,
+    id: index + 1, name: site.localName || cleanProjectName(site.name), nameEn: cleanProjectName(site.name), country: site.country,
     lat: Number(site.lat.toFixed(6)), lng: Number(site.lng.toFixed(6)), status: site.status,
-    reactorType: [...site.reactorTypes].join(', ') || '未知', capacity: Math.round(site.capacity), unitCount: site.units.size || 1,
+    reactorType: [...site.reactorTypes].map(abbreviateReactorType).join(', ') || 'Unknown',
+    capacity: Math.round(site.capacity), unitCount: site.units.size || 1,
+    ...(site.startYears.length ? { startYear: Math.min(...site.startYears) } : {}),
+    ...(site.operators.size ? { operator: [...site.operators].join(' / ') } : {}),
   }))
   await mkdir(resolve(root, 'src/data'), { recursive: true })
   await writeFile(output, `${JSON.stringify(plants, null, 2)}\n`)

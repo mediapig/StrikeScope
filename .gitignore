@@ -15,6 +15,9 @@ dist-ssr
 # Downloaded source exports are reproducible but too large / licence-dependent
 data/source/
 
+# Sync run metadata embeds the local source file path
+src/data/plants.meta.json
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

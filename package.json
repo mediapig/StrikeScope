@@ -8,8 +8,7 @@
     "build": "vite build",
     "lint": "oxlint",
     "preview": "vite preview",
-    "data:sync": "node scripts/sync-nuclear-data.mjs",
-    "data:add-english-names": "node scripts/add-english-plant-names.mjs"
+    "data:sync": "node scripts/sync-nuclear-data.mjs"
   },
   "dependencies": {
     "@turf/turf": "^7.4.0",
