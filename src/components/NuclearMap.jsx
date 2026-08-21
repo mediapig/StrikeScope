@@ -1,21 +1,34 @@
-import { useEffect, useState } from 'react'
-import { MapContainer, TileLayer, Marker, Popup, Circle, Polygon, useMap, useMapEvents } from 'react-leaflet'
-import L from 'leaflet'
+import { useEffect, useRef, useState } from 'react'
+import Map, { Marker, NavigationControl, Popup, Source, Layer } from 'react-map-gl/maplibre'
+import { setWorkerUrl } from 'maplibre-gl'
+import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url'
+import 'maplibre-gl/dist/maplibre-gl.css'
 import { area as turfArea, bbox, bboxPolygon, circle as turfCircle, featureCollection, intersect, polygon as turfPolygon, union } from '@turf/turf'
-import 'leaflet/dist/leaflet.css'
 import plants from '../data/plants.json'
 
-delete L.Icon.Default.prototype._getIconUrl
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-})
+// Bundlers can't resolve maplibre-gl's own worker URL from inside its module
+// graph, so it must be pointed at the worker chunk explicitly.
+setWorkerUrl(maplibreWorkerUrl)
 
-const STATUS_COLOR = { operating: '#22c55e', decommissioned: '#6b7280', construction: '#f59e0b' }
+const MAP_STYLE = {
+  version: 8,
+  projection: { type: 'globe' },
+  sky: { 'atmosphere-blend': ['interpolate', ['linear'], ['zoom'], 0, 1, 5, 1, 7, 0] },
+  sources: {
+    carto: {
+      type: 'raster',
+      tiles: ['a', 'b', 'c'].map(sub => `https://${sub}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png`),
+      tileSize: 256,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+    },
+  },
+  layers: [{ id: 'carto-dark', type: 'raster', source: 'carto' }],
+}
+
+const STATUS_COLOR = { operating: '#22c55e', decommissioned: '#6b7280', construction: '#f59e0b', planned: '#3b82f6' }
 const REFERENCE_ZONES = [
-  { radius: 16000, color: '#f97316', key: 'plume' },
-  { radius: 80000, color: '#eab308', key: 'ingestion' },
+  { radiusKm: 16, color: '#f97316', key: 'plume' },
+  { radiusKm: 80, color: '#eab308', key: 'ingestion' },
 ]
 const SCENARIO_LEVELS = {
   low: { coreRadius: 3, zones: [{ radius: 16, color: '#f97316', key: 'plume' }, { radius: 50, color: '#eab308', key: 'monitoring' }] },
@@ -31,23 +44,26 @@ const RAINFALL = {
 
 const COPY = {
   zh: {
-    title: '☢ StrikeScope — 全球核电站场景推演', statusTitle: '核电站状态', reactor: '堆型', capacity: '装机容量', selectPlant: '选择电站', planning: '规划参考区', simulation: '模拟范围', core: '全向近场警戒', downwind: '（顺风）', scenario: '事故场景推演', selectHint: '请先点击地图上的核电站', release: '放射性释放规模', direction: '扩散方向', wind: '风力', rainfall: '降雨强度', duration: '释放持续时间（小时）', trigger: '触发模拟', clear: '清除模拟', ongoing: '输入 0 代表持续释放；远场仅表示稀释后的参考影响。', rainHint: '降雨越强，模拟越偏向近场湿沉降。', windHint: '0级无风 · 3级微风 · 6级强风 · 9级烈风 · 12级飓风', directionHint: '0° 北 · 90° 东 · 180° 南 · 270° 西', populationTitle: '模拟区域估算人口', populationLoading: '正在计算人口…', populationError: '暂时无法取得人口估算', populationNote: '基于 WorldPop 人口栅格；为模拟区域内常住人口估算，不代表实际暴露或撤离人数。', disclaimer: '仅为可视化推演：结合装机容量、释放时间与风向生成示意羽流；不是剂量预测或应急指令。', status: { operating: '运营中', decommissioned: '已关闭', construction: '建设中' }, reference: { plume: '羽流应急规划参考区 (16km)', ingestion: '摄入途径规划参考区 (80km)' }, level: { low: '小规模释放', medium: '中等规模释放', high: '大规模释放' }, zone: { plume: '羽流防护参考', monitoring: '监测参考' }, rain: { none: '无雨', light: '小雨', moderate: '中雨', heavy: '大雨' }, unknown: '未知', north: '北', east: '东', south: '南', west: '西', mw: 'MW', forceSuffix: '级', unitSeparator: ' · ', searchPlaceholder: '搜索电站或国家…', dataSource: '数据来源：Global Energy Monitor 全球核电追踪（Global Nuclear Power Tracker）', units: '机组数', commissioned: '投产年份', plannedStart: '计划投产', operator: '运营商',
+    title: '☢ StrikeScope — 全球核电站场景推演', statusTitle: '核电站状态', reactor: '堆型', capacity: '装机容量', selectPlant: '选择电站', planning: '规划参考区', simulation: '模拟范围', core: '全向近场警戒', downwind: '（顺风）', scenario: '事故场景推演', selectHint: '请先点击地图上的核电站', release: '放射性释放规模', direction: '扩散方向', wind: '风力', rainfall: '降雨强度', duration: '释放持续时间（小时）', trigger: '触发模拟', clear: '清除模拟', ongoing: '输入 0 代表持续释放；远场仅表示稀释后的参考影响。', rainHint: '降雨越强，模拟越偏向近场湿沉降。', windHint: '0级无风 · 3级微风 · 6级强风 · 9级烈风 · 12级飓风', directionHint: '0° 北 · 90° 东 · 180° 南 · 270° 西', populationTitle: '模拟区域估算人口', populationLoading: '正在计算人口…', populationError: '暂时无法取得人口估算', populationNote: '基于 WorldPop 人口栅格；为模拟区域内常住人口估算，不代表实际暴露或撤离人数。', disclaimer: '仅为可视化推演：结合装机容量、释放时间与风向生成示意羽流；不是剂量预测或应急指令。', status: { operating: '运营中', decommissioned: '已关闭', construction: '建设中', planned: '计划中' }, reference: { plume: '羽流应急规划参考区 (16km)', ingestion: '摄入途径规划参考区 (80km)' }, level: { low: '小规模释放', medium: '中等规模释放', high: '大规模释放' }, zone: { plume: '羽流防护参考', monitoring: '监测参考' }, rain: { none: '无雨', light: '小雨', moderate: '中雨', heavy: '大雨' }, unknown: '未知', north: '北', east: '东', south: '南', west: '西', mw: 'MW', forceSuffix: '级', unitSeparator: ' · ', searchPlaceholder: '搜索电站或国家…', dataSource: '数据来源：Global Energy Monitor 全球核电追踪（Global Nuclear Power Tracker）', units: '机组数', commissioned: '投产年份', plannedStart: '计划投产', operator: '运营商',
   },
   en: {
-    title: '☢ StrikeScope — Nuclear Scenario Explorer', statusTitle: 'Plant status', reactor: 'Reactor type', capacity: 'Installed capacity', selectPlant: 'Select plant', planning: 'Planning references', simulation: 'Simulation zones', core: 'All-direction near-field alert', downwind: ' (downwind)', scenario: 'Accident scenario', selectHint: 'Select a nuclear plant on the map first', release: 'Radioactive release scale', direction: 'Plume direction', wind: 'Wind force', rainfall: 'Rainfall', duration: 'Release duration (hours)', trigger: 'Run simulation', clear: 'Clear simulation', ongoing: 'Enter 0 for an ongoing release; the far field is a diluted reference only.', rainHint: 'Stronger rain shifts this illustration toward near-field wet deposition.', windHint: '0 calm · 3 gentle breeze · 6 strong breeze · 9 strong gale · 12 hurricane', directionHint: '0° N · 90° E · 180° S · 270° W', populationTitle: 'Estimated residents in simulation area', populationLoading: 'Calculating population…', populationError: 'Population estimate is currently unavailable', populationNote: 'Based on WorldPop population grids; this estimates resident population in the simulated area, not actual exposure or evacuation.', disclaimer: 'Visualization only: this illustrative plume uses capacity, duration, and wind. It is not a dose forecast or emergency instruction.', status: { operating: 'Operating', decommissioned: 'Closed', construction: 'Under construction' }, reference: { plume: 'Plume planning reference (16 km)', ingestion: 'Ingestion planning reference (80 km)' }, level: { low: 'Small release', medium: 'Moderate release', high: 'Large release' }, zone: { plume: 'Plume protection reference', monitoring: 'Monitoring reference' }, rain: { none: 'No rain', light: 'Light rain', moderate: 'Moderate rain', heavy: 'Heavy rain' }, unknown: 'Unknown', north: 'N', east: 'E', south: 'S', west: 'W', mw: 'MW', forceSuffix: '', unitSeparator: ' · ', searchPlaceholder: 'Search plant or country…', dataSource: 'Data: Global Energy Monitor Global Nuclear Power Tracker', units: 'Units', commissioned: 'Commissioned', plannedStart: 'Planned start', operator: 'Operator',
+    title: '☢ StrikeScope — Nuclear Scenario Explorer', statusTitle: 'Plant status', reactor: 'Reactor type', capacity: 'Installed capacity', selectPlant: 'Select plant', planning: 'Planning references', simulation: 'Simulation zones', core: 'All-direction near-field alert', downwind: ' (downwind)', scenario: 'Accident scenario', selectHint: 'Select a nuclear plant on the map first', release: 'Radioactive release scale', direction: 'Plume direction', wind: 'Wind force', rainfall: 'Rainfall', duration: 'Release duration (hours)', trigger: 'Run simulation', clear: 'Clear simulation', ongoing: 'Enter 0 for an ongoing release; the far field is a diluted reference only.', rainHint: 'Stronger rain shifts this illustration toward near-field wet deposition.', windHint: '0 calm · 3 gentle breeze · 6 strong breeze · 9 strong gale · 12 hurricane', directionHint: '0° N · 90° E · 180° S · 270° W', populationTitle: 'Estimated residents in simulation area', populationLoading: 'Calculating population…', populationError: 'Population estimate is currently unavailable', populationNote: 'Based on WorldPop population grids; this estimates resident population in the simulated area, not actual exposure or evacuation.', disclaimer: 'Visualization only: this illustrative plume uses capacity, duration, and wind. It is not a dose forecast or emergency instruction.', status: { operating: 'Operating', decommissioned: 'Closed', construction: 'Under construction', planned: 'Planned' }, reference: { plume: 'Plume planning reference (16 km)', ingestion: 'Ingestion planning reference (80 km)' }, level: { low: 'Small release', medium: 'Moderate release', high: 'Large release' }, zone: { plume: 'Plume protection reference', monitoring: 'Monitoring reference' }, rain: { none: 'No rain', light: 'Light rain', moderate: 'Moderate rain', heavy: 'Heavy rain' }, unknown: 'Unknown', north: 'N', east: 'E', south: 'S', west: 'W', mw: 'MW', forceSuffix: '', unitSeparator: ' · ', searchPlaceholder: 'Search plant or country…', dataSource: 'Data: Global Energy Monitor Global Nuclear Power Tracker', units: 'Units', commissioned: 'Commissioned', plannedStart: 'Planned start', operator: 'Operator',
   },
 }
 
 const COUNTRY_NAMES_ZH = {
   Argentina: '阿根廷', Armenia: '亚美尼亚', Bangladesh: '孟加拉国', Belarus: '白俄罗斯', Belgium: '比利时',
   Brazil: '巴西', Bulgaria: '保加利亚', Canada: '加拿大', China: '中国', 'Czech Republic': '捷克',
-  Egypt: '埃及', Finland: '芬兰', France: '法国', Germany: '德国', Hungary: '匈牙利', India: '印度',
-  Iran: '伊朗', Italy: '意大利', Japan: '日本', Kazakhstan: '哈萨克斯坦', Lithuania: '立陶宛', Mexico: '墨西哥',
-  Netherlands: '荷兰', 'North Korea': '朝鲜', Pakistan: '巴基斯坦', Panama: '巴拿马', Philippines: '菲律宾',
-  Poland: '波兰', 'Puerto Rico': '波多黎各', Romania: '罗马尼亚', Russia: '俄罗斯', Slovakia: '斯洛伐克',
-  Slovenia: '斯洛文尼亚', 'South Africa': '南非', 'South Korea': '韩国', Spain: '西班牙', Sweden: '瑞典',
-  Switzerland: '瑞士', Taiwan: '台湾', Türkiye: '土耳其', Ukraine: '乌克兰', 'United Arab Emirates': '阿联酋',
-  'United Kingdom': '英国', 'United States': '美国', Uzbekistan: '乌兹别克斯坦',
+  Egypt: '埃及', Estonia: '爱沙尼亚', Finland: '芬兰', France: '法国', Germany: '德国', Ghana: '加纳',
+  Hungary: '匈牙利', India: '印度', Indonesia: '印度尼西亚', Iran: '伊朗', Italy: '意大利', Japan: '日本',
+  Kazakhstan: '哈萨克斯坦', Kenya: '肯尼亚', Kyrgyzstan: '吉尔吉斯斯坦', Lithuania: '立陶宛', Mexico: '墨西哥',
+  Netherlands: '荷兰', Nigeria: '尼日利亚', Norway: '挪威', 'North Korea': '朝鲜', Pakistan: '巴基斯坦',
+  Panama: '巴拿马', Philippines: '菲律宾', Poland: '波兰', 'Puerto Rico': '波多黎各', Romania: '罗马尼亚',
+  Russia: '俄罗斯', 'Saudi Arabia': '沙特阿拉伯', Slovakia: '斯洛伐克', Slovenia: '斯洛文尼亚',
+  'South Africa': '南非', 'South Korea': '韩国', Spain: '西班牙', 'Sri Lanka': '斯里兰卡', Sweden: '瑞典',
+  Switzerland: '瑞士', Taiwan: '台湾', Thailand: '泰国', Türkiye: '土耳其', Uganda: '乌干达', Ukraine: '乌克兰',
+  'United Arab Emirates': '阿联酋', 'United Kingdom': '英国', 'United States': '美国', Uzbekistan: '乌兹别克斯坦',
+  Vietnam: '越南',
 }
 
 const plantName = (plant, locale) => locale === 'en' ? plant.nameEn || plant.name : plant.name
@@ -67,6 +83,17 @@ function plumeSector(center, radiusKm, direction, spreadDegrees) {
   const start = direction - spreadDegrees / 2
   return [center, ...Array.from({ length: 25 }, (_, index) => destination(center, start + spreadDegrees * index / 24, radiusKm))]
 }
+
+function wedgeGeometry(center, radiusKm, direction, spreadDegrees) {
+  const points = plumeSector(center, radiusKm, direction, spreadDegrees)
+  return { type: 'Polygon', coordinates: [[...points.map(([lat, lng]) => [lng, lat]), [center[1], center[0]]]] }
+}
+
+function circleGeometry(lng, lat, radiusKm) {
+  return turfCircle([lng, lat], radiusKm, { units: 'kilometers', steps: 48 }).geometry
+}
+
+const toFeature = geometry => ({ type: 'Feature', properties: {}, geometry })
 
 function simulationArea(plant, simulation) {
   const level = SCENARIO_LEVELS[simulation.level]
@@ -127,24 +154,9 @@ async function getPopulation(area) {
   }
 }
 
-function PlacementHandler({ active, onPlace }) {
-  useMapEvents({ click: event => { if (active) onPlace(event.latlng) } })
-  return null
-}
-
-function MapController({ onReady }) {
-  const map = useMap()
-  useEffect(() => { onReady(map) }, [map, onReady])
-  return null
-}
-
-function PlantMarker({ plant, selected, simulation, copy, locale, onClick, onMove }) {
+function PlantMarker({ plant, selected, simulation, onClick, onDragEnd }) {
   const color = STATUS_COLOR[plant.status] || '#6b7280'
-  const icon = L.divIcon({
-    className: '',
-    html: `<div style="width:${selected ? 16 : 12}px;height:${selected ? 16 : 12}px;border-radius:50%;background:${color};border:2px solid white;box-shadow:0 0 ${selected ? 8 : 4}px ${selected ? color : 'rgba(0,0,0,0.5)'};cursor:pointer"></div>`,
-    iconSize: selected ? [16, 16] : [12, 12], iconAnchor: selected ? [8, 8] : [6, 6],
-  })
+  const size = selected ? 16 : 12
   const simulationZones = simulation && selected ? (() => {
     const level = SCENARIO_LEVELS[simulation.level]
     // Electrical capacity is only a visual proxy for potential inventory, but
@@ -156,23 +168,33 @@ function PlantMarker({ plant, selected, simulation, copy, locale, onClick, onMov
     const spread = Math.max(30, 100 - simulation.windForce * 6)
     const rainfall = RAINFALL[simulation.rainfall]
     return <>
-      <Circle center={[plant.lat, plant.lng]} radius={level.coreRadius * capacityFactor * 1000} pathOptions={{ color: '#ef4444', fillColor: '#ef4444', fillOpacity: 0.18, weight: 1.5 }} />
-      {[...level.zones].reverse().map(zone => <Polygon key={zone.key} positions={plumeSector([plant.lat, plant.lng], zone.radius * capacityFactor * durationFactor * rainfall.distanceFactor, simulation.direction, spread)} pathOptions={{ color: zone.color, fillColor: zone.color, fillOpacity: rainfall.opacity, weight: 1.5 }} />)}
+      <Source id={`core-${plant.id}`} type="geojson" data={toFeature(circleGeometry(plant.lng, plant.lat, level.coreRadius * capacityFactor))}>
+        <Layer id={`core-${plant.id}-fill`} type="fill" paint={{ 'fill-color': '#ef4444', 'fill-opacity': 0.18 }} />
+        <Layer id={`core-${plant.id}-line`} type="line" paint={{ 'line-color': '#ef4444', 'line-width': 1.5 }} />
+      </Source>
+      {[...level.zones].reverse().map(zone => (
+        <Source key={zone.key} id={`zone-${plant.id}-${zone.key}`} type="geojson" data={toFeature(wedgeGeometry([plant.lat, plant.lng], zone.radius * capacityFactor * durationFactor * rainfall.distanceFactor, simulation.direction, spread))}>
+          <Layer id={`zone-${plant.id}-${zone.key}-fill`} type="fill" paint={{ 'fill-color': zone.color, 'fill-opacity': rainfall.opacity }} />
+          <Layer id={`zone-${plant.id}-${zone.key}-line`} type="line" paint={{ 'line-color': zone.color, 'line-width': 1.5 }} />
+        </Source>
+      ))}
     </>
   })() : null
 
   return <>
-    <Marker position={[plant.lat, plant.lng]} icon={icon} draggable={plant.custom} eventHandlers={{ click: () => onClick(plant), dragend: event => onMove?.(plant.id, event.target.getLatLng()) }}>
-      <Popup>
-        <div style={{ minWidth: 180 }}>
-          <strong>{plantName(plant, locale)}</strong>
-          <div style={{ color: '#6b7280', fontSize: 12, marginTop: 2 }}>{countryName(plant, locale)}</div>
-          <div style={{ marginTop: 6, fontSize: 13 }}>{copy.reactor}: {plant.reactorType}<br />{copy.statusTitle}: <span style={{ color }}>{copy.status[plant.status]}</span><br />{plant.capacity > 0 && <>{copy.capacity}: {plant.capacity} {copy.mw}</>}{plant.unitCount > 0 && <><br />{copy.units}: {plant.unitCount}</>}{plant.startYear && <><br />{plant.status === 'operating' ? copy.commissioned : copy.plannedStart}: {plant.startYear}</>}{plant.operator && <><br />{copy.operator}: {plant.operator}</>}</div>
-          <button onClick={() => onClick(plant)} style={{ marginTop: 8, padding: '4px 10px', fontSize: 12, background: '#ef4444', color: 'white', border: 'none', borderRadius: 4, cursor: 'pointer', width: '100%' }}>{copy.selectPlant}</button>
-        </div>
-      </Popup>
+    <Marker
+      longitude={plant.lng} latitude={plant.lat} draggable={plant.custom} anchor="center"
+      onClick={event => { event.originalEvent.stopPropagation(); onClick(plant) }}
+      onDragEnd={event => onDragEnd?.(plant.id, event.lngLat)}
+    >
+      <div style={{ width: size, height: size, borderRadius: '50%', background: color, border: '2px solid white', boxShadow: `0 0 ${selected ? 8 : 4}px ${selected ? color : 'rgba(0,0,0,0.5)'}`, cursor: 'pointer' }} />
     </Marker>
-    {selected && !simulation && REFERENCE_ZONES.map(zone => <Circle key={zone.radius} center={[plant.lat, plant.lng]} radius={zone.radius} pathOptions={{ color: zone.color, fillColor: zone.color, fillOpacity: 0.08, weight: 1.5, dashArray: '6,4' }} />)}
+    {selected && !simulation && REFERENCE_ZONES.map(zone => (
+      <Source key={zone.key} id={`ref-${plant.id}-${zone.key}`} type="geojson" data={toFeature(circleGeometry(plant.lng, plant.lat, zone.radiusKm))}>
+        <Layer id={`ref-${plant.id}-${zone.key}-fill`} type="fill" paint={{ 'fill-color': zone.color, 'fill-opacity': 0.08 }} />
+        <Layer id={`ref-${plant.id}-${zone.key}-line`} type="line" paint={{ 'line-color': zone.color, 'line-width': 1.5, 'line-dasharray': [3, 2] }} />
+      </Source>
+    ))}
     {simulationZones}
   </>
 }
@@ -192,8 +214,8 @@ export default function NuclearMap() {
   const [customPlants, setCustomPlants] = useState([])
   const [placingPlant, setPlacingPlant] = useState(false)
   const [newPlant, setNewPlant] = useState({ name: '', reactorType: 'PWR', capacity: 1000, status: 'operating' })
-  const [map, setMap] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
+  const mapRef = useRef(null)
   const selectPlant = plant => { setSelectedPlant(previous => previous?.id === plant.id ? null : plant); setSimulation(null); setPopulation({ status: 'idle', result: null }) }
   const update = (key, value) => setConditions(previous => ({ ...previous, [key]: value }))
   const updateNewPlant = (key, value) => setNewPlant(previous => ({ ...previous, [key]: value }))
@@ -234,6 +256,7 @@ export default function NuclearMap() {
     setSimulation(null)
     setPopulation({ status: 'idle', result: null })
   }
+  const handleMapClick = event => { if (placingPlant) placePlant(event.lngLat) }
   const searchMatches = (() => {
     const query = searchQuery.trim().toLowerCase()
     if (!query) return []
@@ -243,22 +266,42 @@ export default function NuclearMap() {
   })()
   const searchSelect = plant => {
     selectPlant(plant)
-    if (map) map.flyTo([plant.lat, plant.lng], Math.max(map.getZoom(), 6), { duration: 1 })
+    mapRef.current?.flyTo({ center: [plant.lng, plant.lat], zoom: Math.max(mapRef.current.getZoom(), 6), duration: 1000 })
     setSearchQuery('')
   }
 
   return <div style={{ position: 'relative', width: '100vw', height: '100vh' }}>
-    <MapContainer center={[30, 10]} zoom={3} minZoom={2} style={{ width: '100%', height: '100%' }} zoomControl>
-      <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>' noWrap />
-      <PlacementHandler active={placingPlant} onPlace={placePlant} />
-      <MapController onReady={setMap} />
-      {[...plants, ...customPlants].map(plant => <PlantMarker key={plant.id} plant={plant} selected={selectedPlant?.id === plant.id} simulation={simulation} copy={copy} locale={locale} onClick={selectPlant} onMove={movePlant} />)}
-    </MapContainer>
+    <style>{`
+      .maplibregl-popup-content { background: rgba(15,15,15,0.96); color: white; border-radius: 8px; padding: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+      .maplibregl-popup-anchor-bottom .maplibregl-popup-tip { border-top-color: rgba(15,15,15,0.96); }
+      .maplibregl-popup-anchor-top .maplibregl-popup-tip { border-bottom-color: rgba(15,15,15,0.96); }
+      .maplibregl-popup-close-button { color: white; font-size: 16px; padding: 4px 8px; }
+    `}</style>
+    <Map
+      ref={mapRef}
+      initialViewState={{ longitude: 10, latitude: 30, zoom: 2 }}
+      minZoom={1.2}
+      style={{ width: '100%', height: '100%' }}
+      mapStyle={MAP_STYLE}
+      onClick={handleMapClick}
+      cursor={placingPlant ? 'crosshair' : 'grab'}
+    >
+      <NavigationControl position="top-right" />
+      {[...plants, ...customPlants].map(plant => <PlantMarker key={plant.id} plant={plant} selected={selectedPlant?.id === plant.id} simulation={simulation} onClick={selectPlant} onDragEnd={movePlant} />)}
+      {selectedPlant && <Popup longitude={selectedPlant.lng} latitude={selectedPlant.lat} anchor="bottom" offset={14} closeOnClick={false} onClose={() => setSelectedPlant(null)}>
+        <div style={{ minWidth: 180 }}>
+          <strong>{plantName(selectedPlant, locale)}</strong>
+          <div style={{ color: '#9ca3af', fontSize: 12, marginTop: 2 }}>{countryName(selectedPlant, locale)}</div>
+          <div style={{ marginTop: 6, fontSize: 13 }}>{copy.reactor}: {selectedPlant.reactorType}<br />{copy.statusTitle}: <span style={{ color: STATUS_COLOR[selectedPlant.status] || '#6b7280' }}>{copy.status[selectedPlant.status]}</span><br />{selectedPlant.capacity > 0 && <>{copy.capacity}: {selectedPlant.capacity} {copy.mw}</>}{selectedPlant.unitCount > 0 && <><br />{copy.units}: {selectedPlant.unitCount}</>}{selectedPlant.startYear && <><br />{selectedPlant.status === 'operating' ? copy.commissioned : copy.plannedStart}: {selectedPlant.startYear}</>}{selectedPlant.operator && <><br />{copy.operator}: {selectedPlant.operator}</>}</div>
+          {selectedPlant.custom && <button type="button" onClick={() => removePlant(selectedPlant.id)} style={{ marginTop: 8, padding: '4px 10px', fontSize: 12, background: '#7f1d1d', color: 'white', border: '1px solid #ef4444', borderRadius: 4, cursor: 'pointer', width: '100%' }}>{customCopy.remove}</button>}
+        </div>
+      </Popup>}
+    </Map>
 
     <div style={{ position: 'absolute', bottom: 30, left: 16, zIndex: 1000, background: 'rgba(15,15,15,0.85)', color: 'white', padding: '12px 16px', borderRadius: 8, fontSize: 12, backdropFilter: 'blur(4px)' }}>
       <div style={{ fontWeight: 600, marginBottom: 8 }}>{copy.statusTitle}</div>
       {Object.entries(STATUS_COLOR).map(([key, color]) => <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}><div style={{ width: 10, height: 10, borderRadius: '50%', background: color }} /><span>{copy.status[key]}</span></div>)}
-      {selectedPlant && !simulation && <><div style={{ fontWeight: 600, margin: '12px 0 8px' }}>{copy.planning}</div>{REFERENCE_ZONES.map(zone => <div key={zone.radius} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}><div style={{ width: 20, height: 2, background: zone.color }} /><span>{copy.reference[zone.key]}</span></div>)}</>}
+      {selectedPlant && !simulation && <><div style={{ fontWeight: 600, margin: '12px 0 8px' }}>{copy.planning}</div>{REFERENCE_ZONES.map(zone => <div key={zone.key} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}><div style={{ width: 20, height: 2, background: zone.color }} /><span>{copy.reference[zone.key]}</span></div>)}</>}
       {simulation && <><div style={{ fontWeight: 600, margin: '12px 0 8px' }}>{copy.simulation}</div><div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}><div style={{ width: 10, height: 10, borderRadius: '50%', background: '#ef4444' }} /><span>{copy.core}</span></div>{SCENARIO_LEVELS[simulation.level].zones.map(zone => <div key={zone.key} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}><div style={{ width: 20, height: 2, background: zone.color }} /><span>{copy.zone[zone.key]}{copy.downwind}</span></div>)}</>}
       <div style={{ marginTop: 10, paddingTop: 8, borderTop: '1px solid #374151', color: '#9ca3af', fontSize: 10, lineHeight: 1.4 }}>{copy.dataSource}</div>
     </div>
@@ -273,7 +316,6 @@ export default function NuclearMap() {
       <label style={{ display: 'block', marginBottom: 12 }}><span style={{ display: 'block', color: '#d1d5db', marginBottom: 4 }}>{copy.duration}</span><input type="number" min="0" step="1" value={conditions.duration} onChange={event => update('duration', event.target.value)} style={fieldStyle} /><span style={{ color: '#9ca3af', fontSize: 11 }}>{copy.ongoing}</span></label>
       <button type="submit" disabled={!selectedPlant} style={{ width: '100%', padding: '8px 10px', fontSize: 13, fontWeight: 600, background: selectedPlant ? '#dc2626' : '#4b5563', color: 'white', border: 'none', borderRadius: 4, cursor: selectedPlant ? 'pointer' : 'not-allowed' }}>{copy.trigger}</button>
       {simulation && <button type="button" onClick={() => { setSimulation(null); setPopulation({ status: 'idle', result: null }) }} style={{ width: '100%', padding: '7px 10px', marginTop: 8, fontSize: 12, background: '#374151', color: 'white', border: 'none', borderRadius: 4, cursor: 'pointer' }}>{copy.clear}</button>}
-      {selectedPlant?.custom && <button type="button" onClick={() => removePlant(selectedPlant.id)} style={{ width: '100%', padding: '7px 10px', marginTop: 8, fontSize: 12, background: '#7f1d1d', color: 'white', border: '1px solid #ef4444', borderRadius: 4, cursor: 'pointer' }}>{customCopy.remove}</button>}
       {population.status !== 'idle' && <div style={{ marginTop: 12, paddingTop: 10, borderTop: '1px solid #374151' }}>
         <div style={{ fontWeight: 600, marginBottom: 4 }}>{copy.populationTitle}</div>
         {population.status === 'loading' && <div style={{ color: '#fbbf24' }}>{copy.populationLoading}</div>}

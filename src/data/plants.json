@@ -7,9 +7,9 @@
     "lat": -33.96701,
     "lng": -59.2095,
     "status": "operating",
-    "reactorType": "PHWR, PWR",
-    "capacity": 2257,
-    "unitCount": 3,
+    "reactorType": "PHWR, PWR, SMR",
+    "capacity": 3457,
+    "unitCount": 7,
     "startYear": 1974,
     "operator": "Nucleoelectrica Argentina"
   },
@@ -48,9 +48,9 @@
     "lat": 40.1817,
     "lng": 44.1423,
     "status": "operating",
-    "reactorType": "PWR",
-    "capacity": 856,
-    "unitCount": 2,
+    "reactorType": "PWR, unknown",
+    "capacity": 2056,
+    "unitCount": 3,
     "startYear": 1977,
     "operator": "Closed Joint Stock Company Armenian NPP"
   },
@@ -77,8 +77,8 @@
     "lng": 26.0937,
     "status": "operating",
     "reactorType": "PWR",
-    "capacity": 2388,
-    "unitCount": 2,
+    "capacity": 3588,
+    "unitCount": 3,
     "startYear": 2021,
     "operator": "Republican Unitary Enterprise \"Belarusian Nuclear Power Plant\""
   },
@@ -147,26 +147,39 @@
     "lng": 23.7685,
     "status": "operating",
     "reactorType": "PWR",
-    "capacity": 3840,
-    "unitCount": 6,
+    "capacity": 5840,
+    "unitCount": 8,
     "startYear": 1974
   },
   {
     "id": 12,
+    "name": "Alberta",
+    "nameEn": "Alberta",
+    "country": "Canada",
+    "lat": 53.534,
+    "lng": -113.489,
+    "status": "planned",
+    "reactorType": "SMR",
+    "capacity": 630,
+    "unitCount": 2,
+    "startYear": 2030
+  },
+  {
+    "id": 13,
     "name": "Bruce",
     "nameEn": "Bruce",
     "country": "Canada",
     "lat": 44.3391,
     "lng": -81.5747,
     "status": "operating",
-    "reactorType": "PHWR",
-    "capacity": 6944,
-    "unitCount": 8,
+    "reactorType": "PHWR, unknown",
+    "capacity": 10944,
+    "unitCount": 12,
     "startYear": 1977,
     "operator": "Bruce Power"
   },
   {
-    "id": 13,
+    "id": 14,
     "name": "Chalk River",
     "nameEn": "Chalk River",
     "country": "Canada",
@@ -179,7 +192,7 @@
     "operator": "Ultra Safe Nuclear CORP; Ontario Power Generation"
   },
   {
-    "id": 14,
+    "id": 15,
     "name": "Darlington New",
     "nameEn": "Darlington New",
     "country": "Canada",
@@ -187,13 +200,13 @@
     "lng": -78.7057,
     "status": "construction",
     "reactorType": "SMR",
-    "capacity": 300,
-    "unitCount": 1,
+    "capacity": 1200,
+    "unitCount": 4,
     "startYear": 2030,
     "operator": "Ontario Power Generation"
   },
   {
-    "id": 15,
+    "id": 16,
     "name": "Darlington",
     "nameEn": "Darlington",
     "country": "Canada",
@@ -207,7 +220,7 @@
     "operator": "Ontario Power Generation"
   },
   {
-    "id": 16,
+    "id": 17,
     "name": "Douglas Point (AECL)",
     "nameEn": "Douglas Point (AECL)",
     "country": "Canada",
@@ -221,7 +234,7 @@
     "operator": "Ontario Hydro"
   },
   {
-    "id": 17,
+    "id": 18,
     "name": "Gentilly",
     "nameEn": "Gentilly",
     "country": "Canada",
@@ -235,7 +248,7 @@
     "operator": "Hydro Quebec"
   },
   {
-    "id": 18,
+    "id": 19,
     "name": "Nuclear Power Demonstration (NPD)",
     "nameEn": "Nuclear Power Demonstration (NPD)",
     "country": "Canada",
@@ -249,7 +262,20 @@
     "operator": "Ontario Hydro"
   },
   {
-    "id": 19,
+    "id": 20,
+    "name": "Peace River",
+    "nameEn": "Peace River",
+    "country": "Canada",
+    "lat": 56.480095,
+    "lng": -117.216938,
+    "status": "planned",
+    "reactorType": "unknown",
+    "capacity": 4800,
+    "unitCount": 4,
+    "startYear": 2035
+  },
+  {
+    "id": 21,
     "name": "Pickering",
     "nameEn": "Pickering",
     "country": "Canada",
@@ -263,21 +289,59 @@
     "operator": "Ontario Power Generation"
   },
   {
-    "id": 20,
+    "id": 22,
     "name": "Point Lepreau",
     "nameEn": "Point Lepreau",
     "country": "Canada",
     "lat": 45.0686,
     "lng": -66.4543,
     "status": "operating",
-    "reactorType": "PHWR",
-    "capacity": 705,
-    "unitCount": 1,
+    "reactorType": "PHWR, SMR, molten salt reactor",
+    "capacity": 1105,
+    "unitCount": 3,
     "startYear": 1983,
-    "operator": "New Brunswick Electric Power Commission"
+    "operator": "New Brunswick Electric Power Commission / NB Power"
   },
   {
-    "id": 21,
+    "id": 23,
+    "name": "Prodigy",
+    "nameEn": "Prodigy",
+    "country": "Canada",
+    "lat": 45.559545,
+    "lng": -73.606824,
+    "status": "planned",
+    "reactorType": "Microreactor",
+    "capacity": 5,
+    "unitCount": 1
+  },
+  {
+    "id": 24,
+    "name": "Saskatchewan SMR",
+    "nameEn": "Saskatchewan SMR",
+    "country": "Canada",
+    "lat": 49.022398,
+    "lng": -102.987354,
+    "status": "planned",
+    "reactorType": "BWR",
+    "capacity": 300,
+    "unitCount": 1,
+    "startYear": 2035
+  },
+  {
+    "id": 25,
+    "name": "Wesleyville",
+    "nameEn": "Wesleyville",
+    "country": "Canada",
+    "lat": 43.924827,
+    "lng": -78.39685,
+    "status": "planned",
+    "reactorType": "unknown",
+    "capacity": 10000,
+    "unitCount": 10,
+    "startYear": 2040
+  },
+  {
+    "id": 26,
     "name": "白龙核电站",
     "nameEn": "Bailong",
     "country": "China",
@@ -285,13 +349,13 @@
     "lng": 108.224169,
     "status": "construction",
     "reactorType": "PWR",
-    "capacity": 1254,
-    "unitCount": 1,
+    "capacity": 8104,
+    "unitCount": 6,
     "startYear": 2030,
     "operator": "CPI Guangxi Nuclear Power"
   },
   {
-    "id": 22,
+    "id": 27,
     "name": "三澳核电站",
     "nameEn": "Cangnan San'ao",
     "country": "China",
@@ -299,13 +363,13 @@
     "lng": 120.515734,
     "status": "operating",
     "reactorType": "PWR",
-    "capacity": 3640,
-    "unitCount": 3,
+    "capacity": 7090,
+    "unitCount": 6,
     "startYear": 2026,
     "operator": "CGN Cangnan Nuclear Power"
   },
   {
-    "id": 23,
+    "id": 28,
     "name": "昌江核电站",
     "nameEn": "Changjiang",
     "country": "China",
@@ -319,7 +383,7 @@
     "operator": "Huaneng Hainan Changjiang Nuclear Power"
   },
   {
-    "id": 24,
+    "id": 29,
     "name": "大亚湾核电站",
     "nameEn": "Daya Bay",
     "country": "China",
@@ -333,7 +397,7 @@
     "operator": "Daya Bay Nuclear Power Operations And Management"
   },
   {
-    "id": 25,
+    "id": 30,
     "name": "防城港核电站",
     "nameEn": "Fangchenggang",
     "country": "China",
@@ -341,13 +405,13 @@
     "lng": 108.557081,
     "status": "operating",
     "reactorType": "PWR",
-    "capacity": 4532,
-    "unitCount": 4,
+    "capacity": 6832,
+    "unitCount": 6,
     "startYear": 2016,
     "operator": "Guangxi Fangchenggang Nuclear Power"
   },
   {
-    "id": 26,
+    "id": 31,
     "name": "方家山核电站",
     "nameEn": "Fangjiashan",
     "country": "China",
@@ -361,7 +425,7 @@
     "operator": "Qinshan Nuclear Power"
   },
   {
-    "id": 27,
+    "id": 32,
     "name": "福清核电站",
     "nameEn": "Fuqing",
     "country": "China",
@@ -375,7 +439,20 @@
     "operator": "Fujian Fuqing Nuclear Power"
   },
   {
-    "id": 28,
+    "id": 33,
+    "name": "海兴核电站",
+    "nameEn": "Haixing",
+    "country": "China",
+    "lat": 38.13483,
+    "lng": 117.722706,
+    "status": "planned",
+    "reactorType": "PWR",
+    "capacity": 7500,
+    "unitCount": 6,
+    "operator": "Zhonghe Huadian Hebei Nuclear Power"
+  },
+  {
+    "id": 34,
     "name": "海阳核电站",
     "nameEn": "Haiyang",
     "country": "China",
@@ -383,13 +460,13 @@
     "lng": 121.377983,
     "status": "operating",
     "reactorType": "PWR",
-    "capacity": 5006,
-    "unitCount": 4,
+    "capacity": 7506,
+    "unitCount": 6,
     "startYear": 2018,
     "operator": "Shandong Nuclear Power"
   },
   {
-    "id": 29,
+    "id": 35,
     "name": "红沿河核电站",
     "nameEn": "Hongyanhe",
     "country": "China",
@@ -403,20 +480,20 @@
     "operator": "Liaoning Hongyanhe Nuclear Power"
   },
   {
-    "id": 30,
+    "id": 36,
     "name": "江苏徐圩核能供热发电厂",
     "nameEn": "Jiangsu Xuwei",
     "country": "China",
     "lat": 34.625076,
     "lng": 119.508261,
     "status": "construction",
-    "reactorType": "PWR",
-    "capacity": 1208,
-    "unitCount": 1,
+    "reactorType": "PWR, HTGR",
+    "capacity": 6152,
+    "unitCount": 6,
     "operator": "CNNC Suneng Nuclear Power"
   },
   {
-    "id": 31,
+    "id": 37,
     "name": "浙江金七门核电厂",
     "nameEn": "Jinqimen",
     "country": "China",
@@ -424,13 +501,27 @@
     "lng": 121.949035,
     "status": "construction",
     "reactorType": "PWR",
-    "capacity": 2433,
-    "unitCount": 2,
+    "capacity": 7233,
+    "unitCount": 6,
     "startYear": 2030,
     "operator": "CNNC Zheneng Energy"
   },
   {
-    "id": 32,
+    "id": 38,
+    "name": "山东莱阳核电项目",
+    "nameEn": "Laiyang",
+    "country": "China",
+    "lat": 36.717052,
+    "lng": 120.700689,
+    "status": "planned",
+    "reactorType": "PWR",
+    "capacity": 3086,
+    "unitCount": 2,
+    "startYear": 2032,
+    "operator": "State Power Investment Laiyang Nuclear Energy"
+  },
+  {
+    "id": 39,
     "name": "廉江核电站",
     "nameEn": "Lianjiang",
     "country": "China",
@@ -438,12 +529,12 @@
     "lng": 109.815387,
     "status": "construction",
     "reactorType": "PWR",
-    "capacity": 2448,
-    "unitCount": 2,
+    "capacity": 7448,
+    "unitCount": 6,
     "operator": "State Nuclear Zhanjiang Nuclear Power"
   },
   {
-    "id": 33,
+    "id": 40,
     "name": "岭澳核电站",
     "nameEn": "Ling'ao",
     "country": "China",
@@ -457,7 +548,7 @@
     "operator": "Ling'ao Nuclear Power / Lingdong Nuclear Power"
   },
   {
-    "id": 34,
+    "id": 41,
     "name": "中核集团海南昌江多用途模块式小型堆科技示范工程“玲龙一号”",
     "nameEn": "Linglong",
     "country": "China",
@@ -471,7 +562,7 @@
     "operator": "CNNC Hainan Nuclear Power"
   },
   {
-    "id": 35,
+    "id": 42,
     "name": "陆丰核电站",
     "nameEn": "Lufeng",
     "country": "China",
@@ -479,13 +570,26 @@
     "lng": 115.809748,
     "status": "construction",
     "reactorType": "PWR",
-    "capacity": 4850,
-    "unitCount": 4,
+    "capacity": 7350,
+    "unitCount": 6,
     "startYear": 2028,
     "operator": "CGN Lufeng Nuclear Power"
   },
   {
-    "id": 36,
+    "id": 43,
+    "name": "茂名核电项目",
+    "nameEn": "Maoming",
+    "country": "China",
+    "lat": 21.5331,
+    "lng": 111.0337,
+    "status": "planned",
+    "reactorType": "HTGR",
+    "capacity": 600,
+    "unitCount": 3,
+    "operator": "CNNC Donghua Maoming Green Energy"
+  },
+  {
+    "id": 44,
     "name": "宁德核电厂",
     "nameEn": "Ningde",
     "country": "China",
@@ -499,7 +603,7 @@
     "operator": "Fujian Ningde Nuclear Power"
   },
   {
-    "id": 37,
+    "id": 45,
     "name": "秦山核电站",
     "nameEn": "Qinshan",
     "country": "China",
@@ -513,7 +617,7 @@
     "operator": "Qinshan Nuclear Power / Nuclear Power Qinshan Joint Venture / Third Qinshan Nuclear Power"
   },
   {
-    "id": 38,
+    "id": 46,
     "name": "三门核电厂",
     "nameEn": "Sanmen",
     "country": "China",
@@ -521,13 +625,13 @@
     "lng": 121.63896,
     "status": "operating",
     "reactorType": "PWR",
-    "capacity": 5004,
-    "unitCount": 4,
+    "capacity": 7404,
+    "unitCount": 6,
     "startYear": 2018,
     "operator": "Sanmen Nuclear Power"
   },
   {
-    "id": 39,
+    "id": 47,
     "name": "石岛湾核电厂",
     "nameEn": "Shidao Bay",
     "country": "China",
@@ -535,13 +639,13 @@
     "lng": 122.5317,
     "status": "operating",
     "reactorType": "HTGR, PWR",
-    "capacity": 5729,
-    "unitCount": 5,
+    "capacity": 8229,
+    "unitCount": 7,
     "startYear": 2023,
     "operator": "Huaneng Shandong Shidao Bay Nuclear Power / State Nuclear Power Demonstration Plant"
   },
   {
-    "id": 40,
+    "id": 48,
     "name": "太平岭核电站",
     "nameEn": "Taipingling",
     "country": "China",
@@ -549,13 +653,13 @@
     "lng": 114.984522,
     "status": "operating",
     "reactorType": "PWR",
-    "capacity": 4759,
-    "unitCount": 4,
+    "capacity": 7059,
+    "unitCount": 6,
     "startYear": 2026,
-    "operator": "CGN Huizhou Nuclear Power / CGN Huizhou Second Nuclear Power"
+    "operator": "CGN Huizhou Nuclear Power / CGN Huizhou Second Nuclear Power / CGN Huizhou Third Nuclear Power"
   },
   {
-    "id": 41,
+    "id": 49,
     "name": "台山核电站",
     "nameEn": "Taishan",
     "country": "China",
@@ -563,13 +667,13 @@
     "lng": 112.981793,
     "status": "operating",
     "reactorType": "PWR",
-    "capacity": 3500,
-    "unitCount": 2,
+    "capacity": 5800,
+    "unitCount": 4,
     "startYear": 2018,
     "operator": "Taishan Nuclear Power Joint Venture"
   },
   {
-    "id": 42,
+    "id": 50,
     "name": "田湾核电站",
     "nameEn": "Tianwan",
     "country": "China",
@@ -583,7 +687,33 @@
     "operator": "Jiangsu Nuclear Power"
   },
   {
-    "id": 43,
+    "id": 51,
+    "name": "霞浦核电站",
+    "nameEn": "Xiapu",
+    "country": "China",
+    "lat": 26.801942,
+    "lng": 120.151957,
+    "status": "planned",
+    "reactorType": "PWR, HTGR",
+    "capacity": 5200,
+    "unitCount": 5,
+    "operator": "Huaneng Xiapu Nuclear Power"
+  },
+  {
+    "id": 52,
+    "name": "山东海阳辛安核电项目",
+    "nameEn": "Xin'an",
+    "country": "China",
+    "lat": 36.6602,
+    "lng": 120.9928,
+    "status": "planned",
+    "reactorType": "HTGR",
+    "capacity": 1200,
+    "unitCount": 2,
+    "operator": "China Nuclear Power Engineering"
+  },
+  {
+    "id": 53,
     "name": "徐大堡核电站",
     "nameEn": "Xudapu",
     "country": "China",
@@ -591,13 +721,13 @@
     "lng": 120.548637,
     "status": "construction",
     "reactorType": "PWR",
-    "capacity": 5128,
-    "unitCount": 4,
+    "capacity": 7628,
+    "unitCount": 6,
     "startYear": 2027,
     "operator": "CNNC Liaoning Nuclear Power"
   },
   {
-    "id": 44,
+    "id": 54,
     "name": "阳江核电站",
     "nameEn": "Yangjiang",
     "country": "China",
@@ -611,7 +741,7 @@
     "operator": "Yangjiang Nuclear Power"
   },
   {
-    "id": 45,
+    "id": 55,
     "name": "漳州核电站",
     "nameEn": "Zhangzhou",
     "country": "China",
@@ -619,13 +749,13 @@
     "lng": 117.494944,
     "status": "operating",
     "reactorType": "PWR",
-    "capacity": 4852,
-    "unitCount": 4,
+    "capacity": 7152,
+    "unitCount": 6,
     "startYear": 2025,
     "operator": "CNNC Zhangzhou Energy"
   },
   {
-    "id": 46,
+    "id": 56,
     "name": "招远核电厂",
     "nameEn": "Zhaoyuan",
     "country": "China",
@@ -633,12 +763,37 @@
     "lng": 120.3453,
     "status": "construction",
     "reactorType": "PWR",
-    "capacity": 1214,
-    "unitCount": 1,
+    "capacity": 6964,
+    "unitCount": 6,
     "operator": "Shandong Zhaoyuan Nuclear Power"
   },
   {
-    "id": 47,
+    "id": 57,
+    "name": "庄河核电项目",
+    "nameEn": "Zhuanghe",
+    "country": "China",
+    "lat": 39.7144,
+    "lng": 123.1778,
+    "status": "planned",
+    "reactorType": "PWR",
+    "capacity": 6900,
+    "unitCount": 6,
+    "operator": "CNNC Datang Zhuanghe Nuclear Power"
+  },
+  {
+    "id": 58,
+    "name": "Dětmarovice",
+    "nameEn": "Dětmarovice",
+    "country": "Czech Republic",
+    "lat": 49.906541,
+    "lng": 18.470707,
+    "status": "planned",
+    "reactorType": "SMR",
+    "capacity": 300,
+    "unitCount": 1
+  },
+  {
+    "id": 59,
     "name": "Dukovany",
     "nameEn": "Dukovany",
     "country": "Czech Republic",
@@ -646,27 +801,52 @@
     "lng": 16.1479,
     "status": "operating",
     "reactorType": "PWR",
-    "capacity": 2000,
-    "unitCount": 4,
+    "capacity": 4400,
+    "unitCount": 6,
     "startYear": 1985,
     "operator": "CEZ"
   },
   {
-    "id": 48,
+    "id": 60,
+    "name": "Prunéřov",
+    "nameEn": "Prunéřov",
+    "country": "Czech Republic",
+    "lat": 50.419312,
+    "lng": 13.2553,
+    "status": "planned",
+    "reactorType": "SMR",
+    "capacity": 470,
+    "unitCount": 1
+  },
+  {
+    "id": 61,
     "name": "Temelin",
     "nameEn": "Temelin",
     "country": "Czech Republic",
     "lat": 49.1796,
     "lng": 14.3795,
     "status": "operating",
-    "reactorType": "PWR",
-    "capacity": 2164,
-    "unitCount": 2,
+    "reactorType": "PWR, SMR",
+    "capacity": 4864,
+    "unitCount": 5,
     "startYear": 2002,
     "operator": "CEZ"
   },
   {
-    "id": 49,
+    "id": 62,
+    "name": "Tušimice",
+    "nameEn": "Tušimice",
+    "country": "Czech Republic",
+    "lat": 50.38095,
+    "lng": 13.334738,
+    "status": "planned",
+    "reactorType": "SMR",
+    "capacity": 300,
+    "unitCount": 1,
+    "startYear": 2038
+  },
+  {
+    "id": 63,
     "name": "El Dabaa",
     "nameEn": "El Dabaa",
     "country": "Egypt",
@@ -680,7 +860,20 @@
     "operator": "Nuclear Power Plants Authority"
   },
   {
-    "id": 50,
+    "id": 64,
+    "name": "Fermi Energia",
+    "nameEn": "Fermi Energia",
+    "country": "Estonia",
+    "lat": 59.401481,
+    "lng": 27.117135,
+    "status": "planned",
+    "reactorType": "BWR",
+    "capacity": 600,
+    "unitCount": 2,
+    "startYear": 2035
+  },
+  {
+    "id": 65,
     "name": "Loviisa",
     "nameEn": "Loviisa",
     "country": "Finland",
@@ -694,7 +887,7 @@
     "operator": "Fortum Power and Heat"
   },
   {
-    "id": 51,
+    "id": 66,
     "name": "Olkiluoto",
     "nameEn": "Olkiluoto",
     "country": "Finland",
@@ -708,7 +901,7 @@
     "operator": "Teollisuuden Voima"
   },
   {
-    "id": 52,
+    "id": 67,
     "name": "Belleville",
     "nameEn": "Belleville",
     "country": "France",
@@ -722,7 +915,7 @@
     "operator": "Electricité de France"
   },
   {
-    "id": 53,
+    "id": 68,
     "name": "Blayais",
     "nameEn": "Blayais",
     "country": "France",
@@ -736,7 +929,7 @@
     "operator": "Electricité de France"
   },
   {
-    "id": 54,
+    "id": 69,
     "name": "Brennilis",
     "nameEn": "Brennilis",
     "country": "France",
@@ -750,7 +943,7 @@
     "operator": "Electricité de France"
   },
   {
-    "id": 55,
+    "id": 70,
     "name": "Bugey",
     "nameEn": "Bugey",
     "country": "France",
@@ -758,13 +951,13 @@
     "lng": 5.2706,
     "status": "operating",
     "reactorType": "GCR, PWR",
-    "capacity": 4279,
-    "unitCount": 5,
+    "capacity": 7579,
+    "unitCount": 7,
     "startYear": 1972,
     "operator": "Electricité de France"
   },
   {
-    "id": 56,
+    "id": 71,
     "name": "Cattenom",
     "nameEn": "Cattenom",
     "country": "France",
@@ -778,7 +971,7 @@
     "operator": "Electricité de France"
   },
   {
-    "id": 57,
+    "id": 72,
     "name": "Chinon",
     "nameEn": "Chinon",
     "country": "France",
@@ -792,7 +985,7 @@
     "operator": "Electricité de France"
   },
   {
-    "id": 58,
+    "id": 73,
     "name": "Chooz",
     "nameEn": "Chooz",
     "country": "France",
@@ -806,7 +999,7 @@
     "operator": "Societe D'Energie Nucleaire Franco-Belge Des Ardennes / Electricité de France"
   },
   {
-    "id": 59,
+    "id": 74,
     "name": "Civaux",
     "nameEn": "Civaux",
     "country": "France",
@@ -820,7 +1013,7 @@
     "operator": "Electricité de France"
   },
   {
-    "id": 60,
+    "id": 75,
     "name": "Cruas",
     "nameEn": "Cruas",
     "country": "France",
@@ -834,7 +1027,7 @@
     "operator": "Electricité de France"
   },
   {
-    "id": 61,
+    "id": 76,
     "name": "Dampierre",
     "nameEn": "Dampierre",
     "country": "France",
@@ -848,7 +1041,7 @@
     "operator": "Electricité de France"
   },
   {
-    "id": 62,
+    "id": 77,
     "name": "Fessenheim",
     "nameEn": "Fessenheim",
     "country": "France",
@@ -862,7 +1055,7 @@
     "operator": "Electricité de France"
   },
   {
-    "id": 63,
+    "id": 78,
     "name": "Flamanville",
     "nameEn": "Flamanville",
     "country": "France",
@@ -876,7 +1069,7 @@
     "operator": "Electricité de France"
   },
   {
-    "id": 64,
+    "id": 79,
     "name": "Golfech",
     "nameEn": "Golfech",
     "country": "France",
@@ -890,7 +1083,7 @@
     "operator": "Electricité de France"
   },
   {
-    "id": 65,
+    "id": 80,
     "name": "Gravelines",
     "nameEn": "Gravelines",
     "country": "France",
@@ -898,13 +1091,13 @@
     "lng": 2.1332,
     "status": "operating",
     "reactorType": "PWR",
-    "capacity": 5706,
-    "unitCount": 6,
+    "capacity": 9006,
+    "unitCount": 8,
     "startYear": 1980,
     "operator": "Electricité de France"
   },
   {
-    "id": 66,
+    "id": 81,
     "name": "Marcoule",
     "nameEn": "Marcoule",
     "country": "France",
@@ -918,7 +1111,7 @@
     "operator": "Compagnie Generale Des Matieres Nucleaires"
   },
   {
-    "id": 67,
+    "id": 82,
     "name": "Nogent",
     "nameEn": "Nogent",
     "country": "France",
@@ -932,7 +1125,7 @@
     "operator": "Electricité de France"
   },
   {
-    "id": 68,
+    "id": 83,
     "name": "Paluel",
     "nameEn": "Paluel",
     "country": "France",
@@ -946,7 +1139,7 @@
     "operator": "Electricité de France"
   },
   {
-    "id": 69,
+    "id": 84,
     "name": "Penly",
     "nameEn": "Penly",
     "country": "France",
@@ -954,13 +1147,13 @@
     "lng": 1.2107,
     "status": "operating",
     "reactorType": "PWR",
-    "capacity": 2764,
-    "unitCount": 2,
+    "capacity": 6064,
+    "unitCount": 4,
     "startYear": 1990,
     "operator": "Electricité de France"
   },
   {
-    "id": 70,
+    "id": 85,
     "name": "Phenix",
     "nameEn": "Phenix",
     "country": "France",
@@ -974,7 +1167,7 @@
     "operator": "Commissariat À L'Energie Atomique"
   },
   {
-    "id": 71,
+    "id": 86,
     "name": "Saint-Laurent",
     "nameEn": "Saint-Laurent",
     "country": "France",
@@ -988,7 +1181,7 @@
     "operator": "Electricité de France"
   },
   {
-    "id": 72,
+    "id": 87,
     "name": "St. Alban",
     "nameEn": "St. Alban",
     "country": "France",
@@ -1002,7 +1195,7 @@
     "operator": "Electricité de France"
   },
   {
-    "id": 73,
+    "id": 88,
     "name": "Superphénix",
     "nameEn": "Superphénix",
     "country": "France",
@@ -1016,7 +1209,7 @@
     "operator": "Electricité de France"
   },
   {
-    "id": 74,
+    "id": 89,
     "name": "Tricastin",
     "nameEn": "Tricastin",
     "country": "France",
@@ -1030,7 +1223,7 @@
     "operator": "Electricité de France"
   },
   {
-    "id": 75,
+    "id": 90,
     "name": "Arbeitsgemeinschaft Versuchsreaktor",
     "nameEn": "AVR Reactor",
     "country": "Germany",
@@ -1044,7 +1237,7 @@
     "operator": "Arbeitsgemeinschaft Versuchsreaktor"
   },
   {
-    "id": 76,
+    "id": 91,
     "name": "Biblis",
     "nameEn": "Biblis",
     "country": "Germany",
@@ -1058,7 +1251,7 @@
     "operator": "RWE Power"
   },
   {
-    "id": 77,
+    "id": 92,
     "name": "Brokdorf",
     "nameEn": "Brokdorf",
     "country": "Germany",
@@ -1072,7 +1265,7 @@
     "operator": "PreussenElektra"
   },
   {
-    "id": 78,
+    "id": 93,
     "name": "Brunsbuettel",
     "nameEn": "Brunsbuettel",
     "country": "Germany",
@@ -1086,7 +1279,7 @@
     "operator": "Kernkraftwerk Brunsbüttel"
   },
   {
-    "id": 79,
+    "id": 94,
     "name": "Emsland",
     "nameEn": "Emsland",
     "country": "Germany",
@@ -1100,7 +1293,7 @@
     "operator": "Kernkraftwerke Lippe-Ems"
   },
   {
-    "id": 80,
+    "id": 95,
     "name": "Grafenrheinfeld",
     "nameEn": "Grafenrheinfeld",
     "country": "Germany",
@@ -1114,7 +1307,7 @@
     "operator": "PreussenElektra"
   },
   {
-    "id": 81,
+    "id": 96,
     "name": "Greifswald",
     "nameEn": "Greifswald",
     "country": "Germany",
@@ -1128,7 +1321,7 @@
     "operator": "Energiewerke Nord"
   },
   {
-    "id": 82,
+    "id": 97,
     "name": "Grohnde",
     "nameEn": "Grohnde",
     "country": "Germany",
@@ -1142,7 +1335,7 @@
     "operator": "PreussenElektra"
   },
   {
-    "id": 83,
+    "id": 98,
     "name": "Großwelzheim",
     "nameEn": "Großwelzheim",
     "country": "Germany",
@@ -1156,7 +1349,7 @@
     "operator": "Heissdampfreaktor-Betriebsgesellschaft"
   },
   {
-    "id": 84,
+    "id": 99,
     "name": "Gundremmingen",
     "nameEn": "Gundremmingen",
     "country": "Germany",
@@ -1170,7 +1363,7 @@
     "operator": "Kernkraftwerke Gundremmingen Betriebsgesellschaft / Kernkraftwerk Gundremmingen"
   },
   {
-    "id": 85,
+    "id": 100,
     "name": "Isar",
     "nameEn": "Isar",
     "country": "Germany",
@@ -1184,7 +1377,7 @@
     "operator": "PreussenElektra"
   },
   {
-    "id": 86,
+    "id": 101,
     "name": "Kahl",
     "nameEn": "Kahl",
     "country": "Germany",
@@ -1198,7 +1391,7 @@
     "operator": "Versuchsatomkraftwerk Kahl"
   },
   {
-    "id": 87,
+    "id": 102,
     "name": "KNK II",
     "nameEn": "KNK II",
     "country": "Germany",
@@ -1212,7 +1405,7 @@
     "operator": "Kernkraftwerk-Betriebsgesellschaft"
   },
   {
-    "id": 88,
+    "id": 103,
     "name": "Kruemmel",
     "nameEn": "Kruemmel",
     "country": "Germany",
@@ -1226,7 +1419,7 @@
     "operator": "Kernkraftwerk Krümmel"
   },
   {
-    "id": 89,
+    "id": 104,
     "name": "Lingen",
     "nameEn": "Lingen",
     "country": "Germany",
@@ -1240,7 +1433,7 @@
     "operator": "Kernkraftwerk Lingen"
   },
   {
-    "id": 90,
+    "id": 105,
     "name": "Muelheim-Kaerlich",
     "nameEn": "Muelheim-Kaerlich",
     "country": "Germany",
@@ -1254,7 +1447,7 @@
     "operator": "Kernkraftwerk Gundremmingen"
   },
   {
-    "id": 91,
+    "id": 106,
     "name": "Mehrzweckforschungsreaktor Karlsruhe",
     "nameEn": "MZFR",
     "country": "Germany",
@@ -1268,7 +1461,7 @@
     "operator": "Kernkraftwerk-Betriebsgesellschaft"
   },
   {
-    "id": 92,
+    "id": 107,
     "name": "Neckarwestheim",
     "nameEn": "Neckarwestheim",
     "country": "Germany",
@@ -1282,7 +1475,7 @@
     "operator": "EnBW Kernkraft"
   },
   {
-    "id": 93,
+    "id": 108,
     "name": "Niederaichbach",
     "nameEn": "Niederaichbach",
     "country": "Germany",
@@ -1296,7 +1489,7 @@
     "operator": "Kernkraftwerk Niederaichbach"
   },
   {
-    "id": 94,
+    "id": 109,
     "name": "Obrigheim",
     "nameEn": "Obrigheim",
     "country": "Germany",
@@ -1310,7 +1503,7 @@
     "operator": "EnBW Kraftwerke"
   },
   {
-    "id": 95,
+    "id": 110,
     "name": "Philippsburg",
     "nameEn": "Philippsburg",
     "country": "Germany",
@@ -1324,7 +1517,7 @@
     "operator": "EnBW Kernkraft"
   },
   {
-    "id": 96,
+    "id": 111,
     "name": "Rheinsberg",
     "nameEn": "Rheinsberg",
     "country": "Germany",
@@ -1338,7 +1531,7 @@
     "operator": "Energiewerke Nord"
   },
   {
-    "id": 97,
+    "id": 112,
     "name": "Stade",
     "nameEn": "Stade",
     "country": "Germany",
@@ -1352,7 +1545,7 @@
     "operator": "PreussenElektra"
   },
   {
-    "id": 98,
+    "id": 113,
     "name": "THTR-300",
     "nameEn": "THTR-300",
     "country": "Germany",
@@ -1366,7 +1559,7 @@
     "operator": "Hochtemperatur-Kernkraftwerk"
   },
   {
-    "id": 99,
+    "id": 114,
     "name": "Unterweser",
     "nameEn": "Unterweser",
     "country": "Germany",
@@ -1380,7 +1573,7 @@
     "operator": "PreussenElektra"
   },
   {
-    "id": 100,
+    "id": 115,
     "name": "Wuergassen",
     "nameEn": "Wuergassen",
     "country": "Germany",
@@ -1394,7 +1587,19 @@
     "operator": "PreussenElektra"
   },
   {
-    "id": 101,
+    "id": 116,
+    "name": "Nsuban",
+    "nameEn": "Nsuban",
+    "country": "Ghana",
+    "lat": 5.629125,
+    "lng": -0.673349,
+    "status": "planned",
+    "reactorType": "unknown",
+    "capacity": 2124,
+    "unitCount": 13
+  },
+  {
+    "id": 117,
     "name": "Paks",
     "nameEn": "Paks",
     "country": "Hungary",
@@ -1408,7 +1613,60 @@
     "operator": "MVM Paks Nuclear Power Plant"
   },
   {
-    "id": 102,
+    "id": 118,
+    "name": "Bihar",
+    "nameEn": "Bihar",
+    "country": "India",
+    "lat": 24.888085,
+    "lng": 86.926684,
+    "status": "planned",
+    "reactorType": "unknown",
+    "capacity": 1400,
+    "unitCount": 2
+  },
+  {
+    "id": 119,
+    "name": "Chutka",
+    "nameEn": "Chutka",
+    "country": "India",
+    "lat": 22.7701,
+    "lng": 80.0933,
+    "status": "planned",
+    "reactorType": "PHWR",
+    "capacity": 1400,
+    "unitCount": 2,
+    "startYear": 2031,
+    "operator": "Nuclear Power Corporation Of India"
+  },
+  {
+    "id": 120,
+    "name": "Gorakhpur Haryana",
+    "nameEn": "Gorakhpur Haryana",
+    "country": "India",
+    "lat": 29.44139,
+    "lng": 75.6322,
+    "status": "planned",
+    "reactorType": "PHWR",
+    "capacity": 2800,
+    "unitCount": 4,
+    "startYear": 2031,
+    "operator": "Nuclear Power Corporation Of India"
+  },
+  {
+    "id": 121,
+    "name": "Jaitapur",
+    "nameEn": "Jaitapur",
+    "country": "India",
+    "lat": 16.5997,
+    "lng": 73.33001,
+    "status": "planned",
+    "reactorType": "PWR",
+    "capacity": 10380,
+    "unitCount": 6,
+    "operator": "Nuclear Power Corporation Of India"
+  },
+  {
+    "id": 122,
     "name": "Kaiga",
     "nameEn": "Kaiga",
     "country": "India",
@@ -1422,7 +1680,7 @@
     "operator": "Nuclear Power Corporation Of India"
   },
   {
-    "id": 103,
+    "id": 123,
     "name": "Kakrapar",
     "nameEn": "Kakrapar",
     "country": "India",
@@ -1436,7 +1694,7 @@
     "operator": "Nuclear Power Corporation Of India"
   },
   {
-    "id": 104,
+    "id": 124,
     "name": "Kalpakkam",
     "nameEn": "Kalpakkam",
     "country": "India",
@@ -1444,13 +1702,26 @@
     "lng": 80.1733,
     "status": "construction",
     "reactorType": "FBR",
-    "capacity": 500,
-    "unitCount": 1,
+    "capacity": 1700,
+    "unitCount": 3,
     "startYear": 2026,
     "operator": "Bharatiya Nabhikiya Vidyut Nigam"
   },
   {
-    "id": 105,
+    "id": 125,
+    "name": "Kovvada",
+    "nameEn": "Kovvada",
+    "country": "India",
+    "lat": 18.1136,
+    "lng": 83.7117,
+    "status": "planned",
+    "reactorType": "PWR",
+    "capacity": 7500,
+    "unitCount": 6,
+    "operator": "Nuclear Power Corporation Of India"
+  },
+  {
+    "id": 126,
     "name": "Kudankulam",
     "nameEn": "Kudankulam",
     "country": "India",
@@ -1458,13 +1729,13 @@
     "lng": 77.7126,
     "status": "operating",
     "reactorType": "PWR",
-    "capacity": 6000,
-    "unitCount": 6,
+    "capacity": 8400,
+    "unitCount": 8,
     "startYear": 2014,
     "operator": "Nuclear Power Corporation Of India"
   },
   {
-    "id": 106,
+    "id": 127,
     "name": "Madras",
     "nameEn": "Madras",
     "country": "India",
@@ -1478,7 +1749,33 @@
     "operator": "Nuclear Power Corporation Of India"
   },
   {
-    "id": 107,
+    "id": 128,
+    "name": "Maharashtra thorium-based",
+    "nameEn": "Maharashtra thorium-based",
+    "country": "India",
+    "lat": 19.676707,
+    "lng": 75.510085,
+    "status": "planned",
+    "reactorType": "unknown",
+    "capacity": 1980,
+    "unitCount": 2
+  },
+  {
+    "id": 129,
+    "name": "Mahi Banswara",
+    "nameEn": "Mahi Banswara",
+    "country": "India",
+    "lat": 23.5294,
+    "lng": 74.5906,
+    "status": "planned",
+    "reactorType": "PHWR",
+    "capacity": 2800,
+    "unitCount": 4,
+    "startYear": 2029,
+    "operator": "Anushakti Vidhyut Nigam Ltd"
+  },
+  {
+    "id": 130,
     "name": "Narora",
     "nameEn": "Narora",
     "country": "India",
@@ -1492,7 +1789,7 @@
     "operator": "Nuclear Power Corporation Of India"
   },
   {
-    "id": 108,
+    "id": 131,
     "name": "Rajasthan",
     "nameEn": "Rajasthan",
     "country": "India",
@@ -1506,21 +1803,100 @@
     "operator": "Nuclear Power Corporation Of India"
   },
   {
-    "id": 109,
+    "id": 132,
     "name": "Tarapur",
     "nameEn": "Tarapur",
     "country": "India",
     "lat": 19.8294,
     "lng": 72.6617,
     "status": "operating",
-    "reactorType": "BWR, PHWR",
-    "capacity": 1400,
-    "unitCount": 4,
+    "reactorType": "BWR, PHWR, SMR",
+    "capacity": 1655,
+    "unitCount": 6,
     "startYear": 1969,
     "operator": "Nuclear Power Corporation Of India"
   },
   {
-    "id": 110,
+    "id": 133,
+    "name": "Bangka Belitung Islands",
+    "nameEn": "Bangka Belitung Islands",
+    "country": "Indonesia",
+    "lat": -2.414352,
+    "lng": 107.07602,
+    "status": "planned",
+    "reactorType": "molten salt reactor",
+    "capacity": 500,
+    "unitCount": 2,
+    "startYear": 2032,
+    "operator": "PT ThorCon Power Indonesia"
+  },
+  {
+    "id": 134,
+    "name": "Kalimantan",
+    "nameEn": "Kalimantan",
+    "country": "Indonesia",
+    "lat": 0.778065,
+    "lng": 108.972879,
+    "status": "planned",
+    "reactorType": "unknown",
+    "capacity": 250,
+    "unitCount": 1,
+    "startYear": 2033
+  },
+  {
+    "id": 135,
+    "name": "Kalimantan NuScale",
+    "nameEn": "Kalimantan NuScale",
+    "country": "Indonesia",
+    "lat": -0.428743,
+    "lng": 110.410418,
+    "status": "planned",
+    "reactorType": "SMR",
+    "capacity": 70,
+    "unitCount": 1,
+    "startYear": 2029
+  },
+  {
+    "id": 136,
+    "name": "Sumatra",
+    "nameEn": "Sumatra",
+    "country": "Indonesia",
+    "lat": -0.280509,
+    "lng": 101.557641,
+    "status": "planned",
+    "reactorType": "unknown",
+    "capacity": 250,
+    "unitCount": 1,
+    "startYear": 2032
+  },
+  {
+    "id": 137,
+    "name": "West Kalimantan Floating SMR",
+    "nameEn": "West Kalimantan Floating SMR",
+    "country": "Indonesia",
+    "lat": -0.37976,
+    "lng": 110.488219,
+    "status": "planned",
+    "reactorType": "SMR",
+    "capacity": 220,
+    "unitCount": 2,
+    "startYear": 2030
+  },
+  {
+    "id": 138,
+    "name": "West Kalimantan Land Based SMR",
+    "nameEn": "West Kalimantan Land Based SMR",
+    "country": "Indonesia",
+    "lat": 0.711379,
+    "lng": 108.87119,
+    "status": "planned",
+    "reactorType": "SMR",
+    "capacity": 900,
+    "unitCount": 3,
+    "startYear": 2032
+  },
+  {
+    "id": 139,
     "name": "Bushehr",
     "nameEn": "Bushehr",
     "country": "Iran",
@@ -1528,13 +1904,40 @@
     "lng": 50.88601,
     "status": "operating",
     "reactorType": "PWR",
-    "capacity": 2057,
-    "unitCount": 2,
+    "capacity": 3114,
+    "unitCount": 3,
     "startYear": 2013,
     "operator": "Nuclear Power Production And Development CO Of Iran"
   },
   {
-    "id": 111,
+    "id": 140,
+    "name": "Darkhovain",
+    "nameEn": "Darkhovain",
+    "country": "Iran",
+    "lat": 30.70759,
+    "lng": 48.3641,
+    "status": "planned",
+    "reactorType": "PWR",
+    "capacity": 300,
+    "unitCount": 1,
+    "startYear": 2030,
+    "operator": "Nuclear Power Production And Development CO Of Iran"
+  },
+  {
+    "id": 141,
+    "name": "Iran-Hormoz",
+    "nameEn": "Iran-Hormoz",
+    "country": "Iran",
+    "lat": 26.498559,
+    "lng": 57.082747,
+    "status": "planned",
+    "reactorType": "unknown",
+    "capacity": 5000,
+    "unitCount": 4,
+    "startYear": 2031
+  },
+  {
+    "id": 142,
     "name": "Caorso",
     "nameEn": "Caorso",
     "country": "Italy",
@@ -1548,7 +1951,7 @@
     "operator": "Societa Gestione Impanti Nucleari"
   },
   {
-    "id": 112,
+    "id": 143,
     "name": "Enrico Fermi",
     "nameEn": "Enrico Fermi",
     "country": "Italy",
@@ -1562,7 +1965,7 @@
     "operator": "Societa Gestione Impanti Nucleari"
   },
   {
-    "id": 113,
+    "id": 144,
     "name": "Garigliano",
     "nameEn": "Garigliano",
     "country": "Italy",
@@ -1576,7 +1979,7 @@
     "operator": "Societa Gestione Impanti Nucleari"
   },
   {
-    "id": 114,
+    "id": 145,
     "name": "Latina",
     "nameEn": "Latina",
     "country": "Italy",
@@ -1590,7 +1993,7 @@
     "operator": "Societa Gestione Impanti Nucleari"
   },
   {
-    "id": 115,
+    "id": 146,
     "name": "Fugen",
     "nameEn": "Fugen",
     "country": "Japan",
@@ -1604,7 +2007,7 @@
     "operator": "Japan Atomic Energy Agency"
   },
   {
-    "id": 116,
+    "id": 147,
     "name": "Fukushima Daiichi",
     "nameEn": "Fukushima Daiichi",
     "country": "Japan",
@@ -1618,7 +2021,7 @@
     "operator": "Tokyo Electric Power"
   },
   {
-    "id": 117,
+    "id": 148,
     "name": "Fukushima Daini",
     "nameEn": "Fukushima Daini",
     "country": "Japan",
@@ -1632,7 +2035,7 @@
     "operator": "Tokyo Electric Power"
   },
   {
-    "id": 118,
+    "id": 149,
     "name": "Genkai",
     "nameEn": "Genkai",
     "country": "Japan",
@@ -1646,7 +2049,7 @@
     "operator": "Kyushu Electric Power"
   },
   {
-    "id": 119,
+    "id": 150,
     "name": "Hamaoka",
     "nameEn": "Hamaoka",
     "country": "Japan",
@@ -1660,7 +2063,7 @@
     "operator": "Chubu Electric Power"
   },
   {
-    "id": 120,
+    "id": 151,
     "name": "Higashidori (Tepco)",
     "nameEn": "Higashidori (Tepco)",
     "country": "Japan",
@@ -1673,7 +2076,7 @@
     "operator": "Tokyo Electric Power"
   },
   {
-    "id": 121,
+    "id": 152,
     "name": "Higashidori (Tohoku)",
     "nameEn": "Higashidori (Tohoku)",
     "country": "Japan",
@@ -1687,7 +2090,7 @@
     "operator": "Tohoku Electric Power"
   },
   {
-    "id": 122,
+    "id": 153,
     "name": "Ikata",
     "nameEn": "Ikata",
     "country": "Japan",
@@ -1701,7 +2104,7 @@
     "operator": "Shikoku Electric Power"
   },
   {
-    "id": 123,
+    "id": 154,
     "name": "Japan Power Demonstration Reactor",
     "nameEn": "Japan Power Demonstration Reactor",
     "country": "Japan",
@@ -1715,7 +2118,7 @@
     "operator": "Japan Atomic Energy Agency"
   },
   {
-    "id": 124,
+    "id": 155,
     "name": "Kaminoseki",
     "nameEn": "Kaminoseki",
     "country": "Japan",
@@ -1728,7 +2131,7 @@
     "operator": "The Chugoku Electric Power"
   },
   {
-    "id": 125,
+    "id": 156,
     "name": "Kashiwazaki Kariwa",
     "nameEn": "Kashiwazaki Kariwa",
     "country": "Japan",
@@ -1742,7 +2145,7 @@
     "operator": "Tokyo Electric Power"
   },
   {
-    "id": 126,
+    "id": 157,
     "name": "Mihama",
     "nameEn": "Mihama",
     "country": "Japan",
@@ -1756,7 +2159,7 @@
     "operator": "Kansai Electric Power"
   },
   {
-    "id": 127,
+    "id": 158,
     "name": "Monju",
     "nameEn": "Monju",
     "country": "Japan",
@@ -1770,7 +2173,7 @@
     "operator": "Japan Atomic Energy Agency"
   },
   {
-    "id": 128,
+    "id": 159,
     "name": "Ohi",
     "nameEn": "Ohi",
     "country": "Japan",
@@ -1784,7 +2187,7 @@
     "operator": "Kansai Electric Power"
   },
   {
-    "id": 129,
+    "id": 160,
     "name": "Ohma",
     "nameEn": "Ohma",
     "country": "Japan",
@@ -1798,7 +2201,7 @@
     "operator": "Electric Power Development"
   },
   {
-    "id": 130,
+    "id": 161,
     "name": "Onagawa",
     "nameEn": "Onagawa",
     "country": "Japan",
@@ -1812,7 +2215,7 @@
     "operator": "Tohoku Electric Power"
   },
   {
-    "id": 131,
+    "id": 162,
     "name": "Sendai",
     "nameEn": "Sendai",
     "country": "Japan",
@@ -1826,7 +2229,7 @@
     "operator": "Kyushu Electric Power"
   },
   {
-    "id": 132,
+    "id": 163,
     "name": "Shika",
     "nameEn": "Shika",
     "country": "Japan",
@@ -1840,7 +2243,7 @@
     "operator": "Hokuriku Electric Power"
   },
   {
-    "id": 133,
+    "id": 164,
     "name": "Shimane",
     "nameEn": "Shimane",
     "country": "Japan",
@@ -1854,7 +2257,7 @@
     "operator": "The Chugoku Electric Power"
   },
   {
-    "id": 134,
+    "id": 165,
     "name": "Takahama",
     "nameEn": "Takahama",
     "country": "Japan",
@@ -1868,7 +2271,7 @@
     "operator": "Kansai Electric Power"
   },
   {
-    "id": 135,
+    "id": 166,
     "name": "Tokai",
     "nameEn": "Tokai",
     "country": "Japan",
@@ -1882,7 +2285,7 @@
     "operator": "Japan Atomic Power"
   },
   {
-    "id": 136,
+    "id": 167,
     "name": "Tomari",
     "nameEn": "Tomari",
     "country": "Japan",
@@ -1896,7 +2299,7 @@
     "operator": "Hokkaido Electric Power"
   },
   {
-    "id": 137,
+    "id": 168,
     "name": "Tsuruga",
     "nameEn": "Tsuruga",
     "country": "Japan",
@@ -1910,7 +2313,7 @@
     "operator": "Japan Atomic Power"
   },
   {
-    "id": 138,
+    "id": 169,
     "name": "Aktau",
     "nameEn": "Aktau",
     "country": "Kazakhstan",
@@ -1924,7 +2327,70 @@
     "operator": "Mangistau Atomic Energy Complex; Kazatomprom"
   },
   {
-    "id": 139,
+    "id": 170,
+    "name": "Kurchatov",
+    "nameEn": "Kurchatov",
+    "country": "Kazakhstan",
+    "lat": 48.981942,
+    "lng": 84.754909,
+    "status": "planned",
+    "reactorType": "PWR",
+    "capacity": 2400,
+    "unitCount": 2
+  },
+  {
+    "id": 171,
+    "name": "Ulken",
+    "nameEn": "Ulken",
+    "country": "Kazakhstan",
+    "lat": 45.21359,
+    "lng": 73.98576,
+    "status": "planned",
+    "reactorType": "PWR",
+    "capacity": 2400,
+    "unitCount": 2,
+    "startYear": 2035
+  },
+  {
+    "id": 172,
+    "name": "Siaya",
+    "nameEn": "Siaya",
+    "country": "Kenya",
+    "lat": -0.384989,
+    "lng": 34.28406,
+    "status": "planned",
+    "reactorType": "unknown",
+    "capacity": 1000,
+    "unitCount": 1,
+    "startYear": 2034
+  },
+  {
+    "id": 173,
+    "name": "Tana River",
+    "nameEn": "Tana River",
+    "country": "Kenya",
+    "lat": -4.180339,
+    "lng": 39.462783,
+    "status": "planned",
+    "reactorType": "unknown",
+    "capacity": 4000,
+    "unitCount": 4,
+    "startYear": 2034
+  },
+  {
+    "id": 174,
+    "name": "Kyrgyzstan",
+    "nameEn": "Kyrgyzstan",
+    "country": "Kyrgyzstan",
+    "lat": 42.879828,
+    "lng": 74.847746,
+    "status": "planned",
+    "reactorType": "SMR",
+    "capacity": 110,
+    "unitCount": 2
+  },
+  {
+    "id": 175,
     "name": "Ignalina",
     "nameEn": "Ignalina",
     "country": "Lithuania",
@@ -1938,7 +2404,7 @@
     "operator": "Ignalina Nuclear Power Plant"
   },
   {
-    "id": 140,
+    "id": 176,
     "name": "Laguna Verde",
     "nameEn": "Laguna Verde",
     "country": "Mexico",
@@ -1952,7 +2418,7 @@
     "operator": "Comision Federal De Electricidad"
   },
   {
-    "id": 141,
+    "id": 177,
     "name": "Borssele",
     "nameEn": "Borssele",
     "country": "Netherlands",
@@ -1960,13 +2426,13 @@
     "lng": 3.7174,
     "status": "operating",
     "reactorType": "PWR",
-    "capacity": 515,
-    "unitCount": 1,
+    "capacity": 3815,
+    "unitCount": 3,
     "startYear": 1973,
     "operator": "N.V. Elektriciteits-Produktiemaatschappij Zuid-Nederland"
   },
   {
-    "id": 142,
+    "id": 178,
     "name": "Dodewaard",
     "nameEn": "Dodewaard",
     "country": "Netherlands",
@@ -1980,7 +2446,19 @@
     "operator": "BV Gemeenschappelijke Kernenergiecentrale Nederland (BV GKN)"
   },
   {
-    "id": 143,
+    "id": 179,
+    "name": "Geregu",
+    "nameEn": "Geregu",
+    "country": "Nigeria",
+    "lat": 7.5649,
+    "lng": 6.6847,
+    "status": "planned",
+    "reactorType": "unknown",
+    "capacity": 2400,
+    "unitCount": 2
+  },
+  {
+    "id": 180,
     "name": "Nyongbyon",
     "nameEn": "Nyongbyon",
     "country": "North Korea",
@@ -1993,7 +2471,31 @@
     "startYear": 1985
   },
   {
-    "id": 144,
+    "id": 181,
+    "name": "Dalane Kjernekraft AS",
+    "nameEn": "Dalane",
+    "country": "Norway",
+    "lat": 58.54066,
+    "lng": 6.217553,
+    "status": "planned",
+    "reactorType": "SMR",
+    "capacity": 1200,
+    "unitCount": 4
+  },
+  {
+    "id": 182,
+    "name": "Norsk Kjernekraft",
+    "nameEn": "Norsk Kjernekraft",
+    "country": "Norway",
+    "lat": 59.122087,
+    "lng": 11.362218,
+    "status": "planned",
+    "reactorType": "SMR",
+    "capacity": 1200,
+    "unitCount": 4
+  },
+  {
+    "id": 183,
     "name": "Chashma",
     "nameEn": "Chashma",
     "country": "Pakistan",
@@ -2007,7 +2509,7 @@
     "operator": "Pakistan Atomic Energy Commission"
   },
   {
-    "id": 145,
+    "id": 184,
     "name": "Karachi",
     "nameEn": "Karachi",
     "country": "Pakistan",
@@ -2021,7 +2523,7 @@
     "operator": "Pakistan Atomic Energy Commission"
   },
   {
-    "id": 146,
+    "id": 185,
     "name": "MH-1A",
     "nameEn": "MH-1A",
     "country": "Panama",
@@ -2034,19 +2536,155 @@
     "startYear": 1968
   },
   {
-    "id": 147,
+    "id": 186,
     "name": "Bataan",
     "nameEn": "Bataan",
     "country": "Philippines",
     "lat": 14.6294,
     "lng": 120.3138,
-    "status": "decommissioned",
-    "reactorType": "PWR",
-    "capacity": 621,
-    "unitCount": 1
+    "status": "planned",
+    "reactorType": "PWR, unknown",
+    "capacity": 1821,
+    "unitCount": 3,
+    "startYear": 2032
   },
   {
-    "id": 148,
+    "id": 187,
+    "name": "Dąbrowa Górnicza",
+    "nameEn": "Dąbrowa Górnicza",
+    "country": "Poland",
+    "lat": 50.386904,
+    "lng": 19.336934,
+    "status": "planned",
+    "reactorType": "SMR",
+    "capacity": 1200,
+    "unitCount": 4
+  },
+  {
+    "id": 188,
+    "name": "Elektrownia Jądrowa Pątnów",
+    "nameEn": "Elektrownia Jądrowa Pątnów",
+    "country": "Poland",
+    "lat": 52.302803,
+    "lng": 18.241427,
+    "status": "planned",
+    "reactorType": "BWR",
+    "capacity": 1200,
+    "unitCount": 4
+  },
+  {
+    "id": 189,
+    "name": "Katowice",
+    "nameEn": "Katowice",
+    "country": "Poland",
+    "lat": 50.2649,
+    "lng": 19.0238,
+    "status": "planned",
+    "reactorType": "SMR",
+    "capacity": 200,
+    "unitCount": 10,
+    "startYear": 2036
+  },
+  {
+    "id": 190,
+    "name": "KGHM NuScale VOYGR modular",
+    "nameEn": "KGHM NuScale VOYGR modular",
+    "country": "Poland",
+    "lat": 52.321038,
+    "lng": 17.278625,
+    "status": "planned",
+    "reactorType": "SMR",
+    "capacity": 462,
+    "unitCount": 6
+  },
+  {
+    "id": 191,
+    "name": "Lubiatowo-Kopalino",
+    "nameEn": "Lubiatowo-Kopalino",
+    "country": "Poland",
+    "lat": 54.8036,
+    "lng": 17.7881,
+    "status": "planned",
+    "reactorType": "PWR",
+    "capacity": 3750,
+    "unitCount": 3,
+    "startYear": 2036
+  },
+  {
+    "id": 192,
+    "name": "Nowa Huta",
+    "nameEn": "Nowa Huta",
+    "country": "Poland",
+    "lat": 50.065675,
+    "lng": 20.036582,
+    "status": "planned",
+    "reactorType": "SMR",
+    "capacity": 1200,
+    "unitCount": 4
+  },
+  {
+    "id": 193,
+    "name": "Ostrołęka",
+    "nameEn": "Ostrołęka",
+    "country": "Poland",
+    "lat": 53.067401,
+    "lng": 21.561033,
+    "status": "planned",
+    "reactorType": "SMR",
+    "capacity": 1200,
+    "unitCount": 4
+  },
+  {
+    "id": 194,
+    "name": "Pątnów",
+    "nameEn": "Pątnów",
+    "country": "Poland",
+    "lat": 51.1465,
+    "lng": 18.6072,
+    "status": "planned",
+    "reactorType": "PWR",
+    "capacity": 2800,
+    "unitCount": 2,
+    "startYear": 2035
+  },
+  {
+    "id": 195,
+    "name": "Stawy Monowskie",
+    "nameEn": "Stawy Monowskie",
+    "country": "Poland",
+    "lat": 50.024621,
+    "lng": 19.333971,
+    "status": "planned",
+    "reactorType": "SMR",
+    "capacity": 1200,
+    "unitCount": 4
+  },
+  {
+    "id": 196,
+    "name": "Tarnobrzeg Special Economic Zone",
+    "nameEn": "Tarnobrzeg Special Economic Zone",
+    "country": "Poland",
+    "lat": 50.524347,
+    "lng": 21.625443,
+    "status": "planned",
+    "reactorType": "SMR",
+    "capacity": 1200,
+    "unitCount": 4
+  },
+  {
+    "id": 197,
+    "name": "Włocławek",
+    "nameEn": "Włocławek",
+    "country": "Poland",
+    "lat": 52.671809,
+    "lng": 19.053763,
+    "status": "planned",
+    "reactorType": "SMR",
+    "capacity": 1200,
+    "unitCount": 4
+  },
+  {
+    "id": 198,
     "name": "Zarnowiec",
     "nameEn": "Zarnowiec",
     "country": "Poland",
@@ -2058,7 +2696,7 @@
     "unitCount": 3
   },
   {
-    "id": 149,
+    "id": 199,
     "name": "Boiling Nuclear Superheater (BONUS)",
     "nameEn": "Boiling Nuclear Superheater (BONUS)",
     "country": "Puerto Rico",
@@ -2072,7 +2710,7 @@
     "operator": "US Department of Energy; Puerto Rico Water Resources"
   },
   {
-    "id": 150,
+    "id": 200,
     "name": "Cernavodă",
     "nameEn": "Cernavodă",
     "country": "Romania",
@@ -2080,13 +2718,27 @@
     "lng": 28.0598,
     "status": "operating",
     "reactorType": "PHWR",
-    "capacity": 1411,
-    "unitCount": 2,
+    "capacity": 2851,
+    "unitCount": 4,
     "startYear": 1996,
     "operator": "Societatea Nationala Nuclearelectrica"
   },
   {
-    "id": 151,
+    "id": 201,
+    "name": "Doicești",
+    "nameEn": "Doicești",
+    "country": "Romania",
+    "lat": 44.9967,
+    "lng": 25.3672,
+    "status": "planned",
+    "reactorType": "SMR",
+    "capacity": 462,
+    "unitCount": 6,
+    "startYear": 2030,
+    "operator": "Societatea Nationala Nuclearelectrica"
+  },
+  {
+    "id": 202,
     "name": "Akademik Lomonosov",
     "nameEn": "Akademik Lomonosov",
     "country": "Russia",
@@ -2100,7 +2752,7 @@
     "operator": "Rosenergoatom"
   },
   {
-    "id": 152,
+    "id": 203,
     "name": "Atomic Power Station 1 Obninsk",
     "nameEn": "Atomic Power Station 1 Obninsk",
     "country": "Russia",
@@ -2114,7 +2766,7 @@
     "operator": "Ministry Of Medium Machine Building Of The USSR (Minsredmash)"
   },
   {
-    "id": 153,
+    "id": 204,
     "name": "Balakovo",
     "nameEn": "Balakovo",
     "country": "Russia",
@@ -2128,7 +2780,7 @@
     "operator": "Rosenergoatom"
   },
   {
-    "id": 154,
+    "id": 205,
     "name": "Beloyarsk",
     "nameEn": "Beloyarsk",
     "country": "Russia",
@@ -2136,13 +2788,13 @@
     "lng": 61.3225,
     "status": "operating",
     "reactorType": "LWGR, FBR",
-    "capacity": 1753,
-    "unitCount": 4,
+    "capacity": 2953,
+    "unitCount": 5,
     "startYear": 1964,
     "operator": "Rosenergoatom"
   },
   {
-    "id": 155,
+    "id": 206,
     "name": "Bilibino",
     "nameEn": "Bilibino",
     "country": "Russia",
@@ -2156,7 +2808,7 @@
     "operator": "Rosenergoatom"
   },
   {
-    "id": 156,
+    "id": 207,
     "name": "Cape Nagloynyn floating",
     "nameEn": "Cape Nagloynyn floating",
     "country": "Russia",
@@ -2164,13 +2816,13 @@
     "lng": 169.4137,
     "status": "construction",
     "reactorType": "PWR",
-    "capacity": 212,
-    "unitCount": 2,
+    "capacity": 424,
+    "unitCount": 4,
     "startYear": 2028,
     "operator": "Atomflot; Rosenergoatom"
   },
   {
-    "id": 157,
+    "id": 208,
     "name": "Kalinin",
     "nameEn": "Kalinin",
     "country": "Russia",
@@ -2184,7 +2836,20 @@
     "operator": "Rosenergoatom"
   },
   {
-    "id": 158,
+    "id": 209,
+    "name": "Khabarovsk",
+    "nameEn": "Khabarovsk",
+    "country": "Russia",
+    "lat": 48.467449,
+    "lng": 135.079984,
+    "status": "planned",
+    "reactorType": "PWR",
+    "capacity": 1200,
+    "unitCount": 2,
+    "startYear": 2036
+  },
+  {
+    "id": 210,
     "name": "Kola",
     "nameEn": "Kola",
     "country": "Russia",
@@ -2192,13 +2857,26 @@
     "lng": 32.4821,
     "status": "operating",
     "reactorType": "PWR",
-    "capacity": 1760,
-    "unitCount": 4,
+    "capacity": 3560,
+    "unitCount": 7,
     "startYear": 1973,
     "operator": "Rosenergoatom"
   },
   {
-    "id": 159,
+    "id": 211,
+    "name": "Krasnoyarsk",
+    "nameEn": "Krasnoyarsk",
+    "country": "Russia",
+    "lat": 56.003212,
+    "lng": 92.839889,
+    "status": "planned",
+    "reactorType": "PWR",
+    "capacity": 5020,
+    "unitCount": 4,
+    "startYear": 2037
+  },
+  {
+    "id": 212,
     "name": "Kursk",
     "nameEn": "Kursk",
     "country": "Russia",
@@ -2206,13 +2884,13 @@
     "lng": 35.6064,
     "status": "operating",
     "reactorType": "LWGR, PWR",
-    "capacity": 7765,
-    "unitCount": 7,
+    "capacity": 9020,
+    "unitCount": 8,
     "startYear": 1977,
     "operator": "Rosenergoatom"
   },
   {
-    "id": 160,
+    "id": 213,
     "name": "Leningrad",
     "nameEn": "Leningrad",
     "country": "Russia",
@@ -2226,7 +2904,46 @@
     "operator": "Rosenergoatom"
   },
   {
-    "id": 161,
+    "id": 214,
+    "name": "Nizhny Novgorod",
+    "nameEn": "Nizhny Novgorod",
+    "country": "Russia",
+    "lat": 55.73474,
+    "lng": 42.3443,
+    "status": "planned",
+    "reactorType": "PWR",
+    "capacity": 2510,
+    "unitCount": 2,
+    "startYear": 2030,
+    "operator": "Rosenergoatom"
+  },
+  {
+    "id": 215,
+    "name": "Norilsk",
+    "nameEn": "Norilsk",
+    "country": "Russia",
+    "lat": 69.350802,
+    "lng": 88.18026,
+    "status": "planned",
+    "reactorType": "PWR",
+    "capacity": 320,
+    "unitCount": 4
+  },
+  {
+    "id": 216,
+    "name": "Novocherkassk",
+    "nameEn": "Novocherkassk",
+    "country": "Russia",
+    "lat": 47.41396,
+    "lng": 40.092747,
+    "status": "planned",
+    "reactorType": "PWR",
+    "capacity": 2400,
+    "unitCount": 2,
+    "startYear": 2036
+  },
+  {
+    "id": 217,
     "name": "Novovoronezh",
     "nameEn": "Novovoronezh",
     "country": "Russia",
@@ -2234,13 +2951,26 @@
     "lng": 39.2151,
     "status": "operating",
     "reactorType": "PWR",
-    "capacity": 4770,
-    "unitCount": 7,
+    "capacity": 7170,
+    "unitCount": 9,
     "startYear": 1964,
     "operator": "Rosenergoatom"
   },
   {
-    "id": 162,
+    "id": 218,
+    "name": "Primorsk",
+    "nameEn": "Primorsk",
+    "country": "Russia",
+    "lat": 43.4845,
+    "lng": 132.4955,
+    "status": "planned",
+    "reactorType": "PWR",
+    "capacity": 2100,
+    "unitCount": 6,
+    "startYear": 2033
+  },
+  {
+    "id": 219,
     "name": "Rostov",
     "nameEn": "Rostov",
     "country": "Russia",
@@ -2254,7 +2984,7 @@
     "operator": "Rosenergoatom"
   },
   {
-    "id": 163,
+    "id": 220,
     "name": "Seversk",
     "nameEn": "Seversk",
     "country": "Russia",
@@ -2268,7 +2998,7 @@
     "operator": "Rosenergoatom"
   },
   {
-    "id": 164,
+    "id": 221,
     "name": "Siberian",
     "nameEn": "Siberian",
     "country": "Russia",
@@ -2281,21 +3011,47 @@
     "startYear": 1955
   },
   {
-    "id": 165,
+    "id": 222,
     "name": "Smolensk",
     "nameEn": "Smolensk",
     "country": "Russia",
     "lat": 54.1658,
     "lng": 33.2358,
     "status": "operating",
-    "reactorType": "LWGR",
-    "capacity": 3000,
-    "unitCount": 3,
+    "reactorType": "LWGR, PWR",
+    "capacity": 5500,
+    "unitCount": 5,
     "startYear": 1983,
     "operator": "Rosenergoatom"
   },
   {
-    "id": 166,
+    "id": 223,
+    "name": "Ust-Kuyga",
+    "nameEn": "Ust-Kuyga",
+    "country": "Russia",
+    "lat": 69.99634,
+    "lng": 135.5713,
+    "status": "planned",
+    "reactorType": "PWR",
+    "capacity": 110,
+    "unitCount": 2,
+    "startYear": 2028,
+    "operator": "Rosenergoatom"
+  },
+  {
+    "id": 224,
+    "name": "Duwaiheen",
+    "nameEn": "Duwaiheen",
+    "country": "Saudi Arabia",
+    "lat": 24.30501,
+    "lng": 51.37807,
+    "status": "planned",
+    "reactorType": "PWR",
+    "capacity": 2800,
+    "unitCount": 2
+  },
+  {
+    "id": 225,
     "name": "Bohunice",
     "nameEn": "Bohunice",
     "country": "Slovakia",
@@ -2303,13 +3059,13 @@
     "lng": 17.6907,
     "status": "operating",
     "reactorType": "PWR, HWGCR",
-    "capacity": 2023,
-    "unitCount": 5,
+    "capacity": 3223,
+    "unitCount": 6,
     "startYear": 1972,
     "operator": "Jadrova A Vyradovacia Spolocnost (Nuclear And Decommissioning Company PLC) / Slovenské Elektrárne"
   },
   {
-    "id": 167,
+    "id": 226,
     "name": "Mochovce",
     "nameEn": "Mochovce",
     "country": "Slovakia",
@@ -2323,7 +3079,7 @@
     "operator": "Slovenské Elektrárne"
   },
   {
-    "id": 168,
+    "id": 227,
     "name": "Krško",
     "nameEn": "Krško",
     "country": "Slovenia",
@@ -2331,13 +3087,13 @@
     "lng": 15.51601,
     "status": "operating",
     "reactorType": "PWR",
-    "capacity": 727,
-    "unitCount": 1,
+    "capacity": 1827,
+    "unitCount": 2,
     "startYear": 1983,
     "operator": "Nuklearna Elektrarna Krško"
   },
   {
-    "id": 169,
+    "id": 228,
     "name": "Koeberg",
     "nameEn": "Koeberg",
     "country": "South Africa",
@@ -2351,7 +3107,7 @@
     "operator": "Eskom"
   },
   {
-    "id": 170,
+    "id": 229,
     "name": "Hanbit",
     "nameEn": "Hanbit",
     "country": "South Korea",
@@ -2365,7 +3121,7 @@
     "operator": "Korea Hydro & Nuclear Power"
   },
   {
-    "id": 171,
+    "id": 230,
     "name": "Hanul",
     "nameEn": "Hanul",
     "country": "South Korea",
@@ -2379,7 +3135,7 @@
     "operator": "Korea Hydro & Nuclear Power"
   },
   {
-    "id": 172,
+    "id": 231,
     "name": "Kori",
     "nameEn": "Kori",
     "country": "South Korea",
@@ -2393,7 +3149,7 @@
     "operator": "Korea Hydro & Nuclear Power"
   },
   {
-    "id": 173,
+    "id": 232,
     "name": "Saeul",
     "nameEn": "Saeul",
     "country": "South Korea",
@@ -2407,7 +3163,7 @@
     "operator": "Korea Hydro & Nuclear Power"
   },
   {
-    "id": 174,
+    "id": 233,
     "name": "Shin-Hanul",
     "nameEn": "Shin-Hanul",
     "country": "South Korea",
@@ -2421,7 +3177,7 @@
     "operator": "Korea Hydro & Nuclear Power"
   },
   {
-    "id": 175,
+    "id": 234,
     "name": "Shin-Kori",
     "nameEn": "Shin-Kori",
     "country": "South Korea",
@@ -2435,7 +3191,7 @@
     "operator": "Korea Hydro & Nuclear Power"
   },
   {
-    "id": 176,
+    "id": 235,
     "name": "Shin-Wolsong",
     "nameEn": "Shin-Wolsong",
     "country": "South Korea",
@@ -2449,7 +3205,7 @@
     "operator": "Korea Hydro & Nuclear Power"
   },
   {
-    "id": 177,
+    "id": 236,
     "name": "Wolsong",
     "nameEn": "Wolsong",
     "country": "South Korea",
@@ -2463,7 +3219,7 @@
     "operator": "Korea Hydro & Nuclear Power"
   },
   {
-    "id": 178,
+    "id": 237,
     "name": "Almaraz",
     "nameEn": "Almaraz",
     "country": "Spain",
@@ -2477,7 +3233,7 @@
     "operator": "Centrales Nucleares Almaraz-Trillo"
   },
   {
-    "id": 179,
+    "id": 238,
     "name": "Ascó",
     "nameEn": "Ascó",
     "country": "Spain",
@@ -2491,7 +3247,7 @@
     "operator": "Asociación Nuclear Ascó-Vandellós AIE"
   },
   {
-    "id": 180,
+    "id": 239,
     "name": "Cofrentes",
     "nameEn": "Cofrentes",
     "country": "Spain",
@@ -2505,7 +3261,7 @@
     "operator": "Iberdrola"
   },
   {
-    "id": 181,
+    "id": 240,
     "name": "Jose Cabrera",
     "nameEn": "Jose Cabrera",
     "country": "Spain",
@@ -2519,7 +3275,7 @@
     "operator": "Union Fenosa Generation"
   },
   {
-    "id": 182,
+    "id": 241,
     "name": "Santa Maria De Garona",
     "nameEn": "Santa Maria De Garona",
     "country": "Spain",
@@ -2533,7 +3289,7 @@
     "operator": "Nuclenor"
   },
   {
-    "id": 183,
+    "id": 242,
     "name": "Trillo",
     "nameEn": "Trillo",
     "country": "Spain",
@@ -2547,7 +3303,7 @@
     "operator": "Centrales Nucleares Almaraz-Trillo"
   },
   {
-    "id": 184,
+    "id": 243,
     "name": "Vandellos",
     "nameEn": "Vandellos",
     "country": "Spain",
@@ -2561,7 +3317,20 @@
     "operator": "Hispano-Francesa De Energia Nuclear / Asociación Nuclear Ascó-Vandellós AIE"
   },
   {
-    "id": 185,
+    "id": 244,
+    "name": "Sri Lanka",
+    "nameEn": "Sri Lanka",
+    "country": "Sri Lanka",
+    "lat": 8.948265,
+    "lng": 80.978204,
+    "status": "planned",
+    "reactorType": "unknown",
+    "capacity": 300,
+    "unitCount": 2,
+    "startYear": 2034
+  },
+  {
+    "id": 245,
     "name": "Agesta",
     "nameEn": "Agesta",
     "country": "Sweden",
@@ -2575,7 +3344,7 @@
     "operator": "Svafo"
   },
   {
-    "id": 186,
+    "id": 246,
     "name": "Barseback",
     "nameEn": "Barseback",
     "country": "Sweden",
@@ -2589,7 +3358,19 @@
     "operator": "Barsebäck Kraft"
   },
   {
-    "id": 187,
+    "id": 247,
+    "name": "Blykalla Avancerade Kärnreaktorpark",
+    "nameEn": "Blykalla",
+    "country": "Sweden",
+    "lat": 60.938033,
+    "lng": 17.135873,
+    "status": "planned",
+    "reactorType": "LMFR",
+    "capacity": 330,
+    "unitCount": 6
+  },
+  {
+    "id": 248,
     "name": "Forsmark",
     "nameEn": "Forsmark",
     "country": "Sweden",
@@ -2603,7 +3384,7 @@
     "operator": "Forsmark Kraftgrupp"
   },
   {
-    "id": 188,
+    "id": 249,
     "name": "Oskarshamn",
     "nameEn": "Oskarshamn",
     "country": "Sweden",
@@ -2617,7 +3398,7 @@
     "operator": "Oskarshamns Kraftgrupp"
   },
   {
-    "id": 189,
+    "id": 250,
     "name": "Ringhals",
     "nameEn": "Ringhals",
     "country": "Sweden",
@@ -2631,7 +3412,19 @@
     "operator": "Ringhals"
   },
   {
-    "id": 190,
+    "id": 251,
+    "name": "Värö Peninsula",
+    "nameEn": "Värö Peninsula",
+    "country": "Sweden",
+    "lat": 57.232748,
+    "lng": 12.117376,
+    "status": "planned",
+    "reactorType": "SMR",
+    "capacity": 1410,
+    "unitCount": 3
+  },
+  {
+    "id": 252,
     "name": "Beznau",
     "nameEn": "Beznau",
     "country": "Switzerland",
@@ -2645,7 +3438,7 @@
     "operator": "Kernkraftwerk Beznau Ch-5312 Döttingen"
   },
   {
-    "id": 191,
+    "id": 253,
     "name": "Goesgen",
     "nameEn": "Goesgen",
     "country": "Switzerland",
@@ -2659,7 +3452,7 @@
     "operator": "Kernkraftwerk Gösgen-Däniken"
   },
   {
-    "id": 192,
+    "id": 254,
     "name": "Leibstadt",
     "nameEn": "Leibstadt",
     "country": "Switzerland",
@@ -2673,7 +3466,7 @@
     "operator": "Kernkraftwerk Leibstadt"
   },
   {
-    "id": 193,
+    "id": 255,
     "name": "Lucens",
     "nameEn": "Lucens",
     "country": "Switzerland",
@@ -2687,7 +3480,7 @@
     "operator": "Energie De L'Ouest Suisse"
   },
   {
-    "id": 194,
+    "id": 256,
     "name": "Muehleberg",
     "nameEn": "Muehleberg",
     "country": "Switzerland",
@@ -2701,7 +3494,7 @@
     "operator": "BKW Energie"
   },
   {
-    "id": 195,
+    "id": 257,
     "name": "第一核能发电厂",
     "nameEn": "Jinshan",
     "country": "Taiwan",
@@ -2715,7 +3508,7 @@
     "operator": "Taiwan Power"
   },
   {
-    "id": 196,
+    "id": 258,
     "name": "第二核能发电厂",
     "nameEn": "Kuosheng",
     "country": "Taiwan",
@@ -2729,7 +3522,7 @@
     "operator": "Taiwan Power"
   },
   {
-    "id": 197,
+    "id": 259,
     "name": "第三核能发电厂",
     "nameEn": "Maanshan",
     "country": "Taiwan",
@@ -2743,7 +3536,20 @@
     "operator": "Taiwan Power"
   },
   {
-    "id": 198,
+    "id": 260,
+    "name": "EGAT",
+    "nameEn": "EGAT",
+    "country": "Thailand",
+    "lat": 15.874161,
+    "lng": 101.009248,
+    "status": "planned",
+    "reactorType": "SMR",
+    "capacity": 600,
+    "unitCount": 2,
+    "startYear": 2037
+  },
+  {
+    "id": 261,
     "name": "Akkuyu",
     "nameEn": "Akkuyu",
     "country": "Türkiye",
@@ -2757,7 +3563,80 @@
     "operator": "Akkuyu Nuclear"
   },
   {
-    "id": 199,
+    "id": 262,
+    "name": "İğneada",
+    "nameEn": "İğneada",
+    "country": "Türkiye",
+    "lat": 41.8803,
+    "lng": 27.9877,
+    "status": "planned",
+    "reactorType": "PWR",
+    "capacity": 5300,
+    "unitCount": 4
+  },
+  {
+    "id": 263,
+    "name": "Sinop",
+    "nameEn": "Sinop",
+    "country": "Türkiye",
+    "lat": 42.0141,
+    "lng": 35.0949,
+    "status": "planned",
+    "reactorType": "unknown",
+    "capacity": 4600,
+    "unitCount": 4
+  },
+  {
+    "id": 264,
+    "name": "Buyende",
+    "nameEn": "Buyende",
+    "country": "Uganda",
+    "lat": 1.243964,
+    "lng": 33.114454,
+    "status": "planned",
+    "reactorType": "PWR",
+    "capacity": 2000,
+    "unitCount": 2,
+    "startYear": 2031
+  },
+  {
+    "id": 265,
+    "name": "Kiruhura",
+    "nameEn": "Kiruhura",
+    "country": "Uganda",
+    "lat": -0.19711,
+    "lng": 30.843677,
+    "status": "planned",
+    "reactorType": "unknown",
+    "capacity": 4800,
+    "unitCount": 4
+  },
+  {
+    "id": 266,
+    "name": "Lamwo",
+    "nameEn": "Lamwo",
+    "country": "Uganda",
+    "lat": 3.499393,
+    "lng": 32.796721,
+    "status": "planned",
+    "reactorType": "unknown",
+    "capacity": 4000,
+    "unitCount": 4
+  },
+  {
+    "id": 267,
+    "name": "Nakasongola",
+    "nameEn": "Nakasongola",
+    "country": "Uganda",
+    "lat": 1.313748,
+    "lng": 32.462563,
+    "status": "planned",
+    "reactorType": "unknown",
+    "capacity": 7200,
+    "unitCount": 6
+  },
+  {
+    "id": 268,
     "name": "Chernobyl",
     "nameEn": "Chernobyl",
     "country": "Ukraine",
@@ -2771,7 +3650,7 @@
     "operator": "Mintopenergo Of Ukraine"
   },
   {
-    "id": 200,
+    "id": 269,
     "name": "Khmelnitski",
     "nameEn": "Khmelnitski",
     "country": "Ukraine",
@@ -2779,13 +3658,13 @@
     "lng": 26.6473,
     "status": "operating",
     "reactorType": "PWR",
-    "capacity": 2000,
-    "unitCount": 2,
+    "capacity": 6678,
+    "unitCount": 6,
     "startYear": 1988,
     "operator": "SE NNEGC \"Energoatom\""
   },
   {
-    "id": 201,
+    "id": 270,
     "name": "Rivne",
     "nameEn": "Rivne",
     "country": "Ukraine",
@@ -2799,7 +3678,7 @@
     "operator": "SE NNEGC \"Energoatom\""
   },
   {
-    "id": 202,
+    "id": 271,
     "name": "South Ukraine",
     "nameEn": "South Ukraine",
     "country": "Ukraine",
@@ -2813,7 +3692,7 @@
     "operator": "SE NNEGC \"Energoatom\""
   },
   {
-    "id": 203,
+    "id": 272,
     "name": "Zaporizhzhia",
     "nameEn": "Zaporizhzhia",
     "country": "Ukraine",
@@ -2827,7 +3706,7 @@
     "operator": "SE NNEGC \"Energoatom\""
   },
   {
-    "id": 204,
+    "id": 273,
     "name": "Barakah",
     "nameEn": "Barakah",
     "country": "United Arab Emirates",
@@ -2841,7 +3720,7 @@
     "operator": "Nawah Energy"
   },
   {
-    "id": 205,
+    "id": 274,
     "name": "Berkeley",
     "nameEn": "Berkeley",
     "country": "United Kingdom",
@@ -2855,7 +3734,7 @@
     "operator": "Magnox"
   },
   {
-    "id": 206,
+    "id": 275,
     "name": "Bradwell",
     "nameEn": "Bradwell",
     "country": "United Kingdom",
@@ -2869,7 +3748,7 @@
     "operator": "Magnox"
   },
   {
-    "id": 207,
+    "id": 276,
     "name": "Calder Hall",
     "nameEn": "Calder Hall",
     "country": "United Kingdom",
@@ -2883,7 +3762,7 @@
     "operator": "Sellafield"
   },
   {
-    "id": 208,
+    "id": 277,
     "name": "Chapelcross",
     "nameEn": "Chapelcross",
     "country": "United Kingdom",
@@ -2897,7 +3776,19 @@
     "operator": "Magnox"
   },
   {
-    "id": 209,
+    "id": 278,
+    "name": "Cumbria",
+    "nameEn": "Cumbria",
+    "country": "United Kingdom",
+    "lat": 54.4296,
+    "lng": -3.5109,
+    "status": "planned",
+    "reactorType": "PHWR",
+    "capacity": 940,
+    "unitCount": 2
+  },
+  {
+    "id": 279,
     "name": "Dounreay",
     "nameEn": "Dounreay",
     "country": "United Kingdom",
@@ -2911,7 +3802,7 @@
     "operator": "United Kingdom Atomic Energy Authority"
   },
   {
-    "id": 210,
+    "id": 280,
     "name": "Dungeness",
     "nameEn": "Dungeness",
     "country": "United Kingdom",
@@ -2925,7 +3816,7 @@
     "operator": "Magnox / EDF Energy"
   },
   {
-    "id": 211,
+    "id": 281,
     "name": "Hartlepool",
     "nameEn": "Hartlepool",
     "country": "United Kingdom",
@@ -2939,7 +3830,7 @@
     "operator": "EDF Energy"
   },
   {
-    "id": 212,
+    "id": 282,
     "name": "Heysham",
     "nameEn": "Heysham",
     "country": "United Kingdom",
@@ -2953,7 +3844,7 @@
     "operator": "EDF Energy"
   },
   {
-    "id": 213,
+    "id": 283,
     "name": "Hinkley Point",
     "nameEn": "Hinkley Point",
     "country": "United Kingdom",
@@ -2967,7 +3858,7 @@
     "operator": "Magnox / EDF Energy / EDF Energy; China General Nuclear"
   },
   {
-    "id": 214,
+    "id": 284,
     "name": "Hunterston",
     "nameEn": "Hunterston",
     "country": "United Kingdom",
@@ -2981,7 +3872,32 @@
     "operator": "Magnox / EDF Energy"
   },
   {
-    "id": 215,
+    "id": 285,
+    "name": "Llynfi",
+    "nameEn": "Llynfi",
+    "country": "United Kingdom",
+    "lat": 51.5707,
+    "lng": -3.612581,
+    "status": "planned",
+    "reactorType": "PWR",
+    "capacity": 80,
+    "unitCount": 4
+  },
+  {
+    "id": 286,
+    "name": "North Teeside",
+    "nameEn": "North Teeside",
+    "country": "United Kingdom",
+    "lat": 54.588889,
+    "lng": -1.1875,
+    "status": "planned",
+    "reactorType": "SMR",
+    "capacity": 1200,
+    "unitCount": 4,
+    "startYear": 2030
+  },
+  {
+    "id": 287,
     "name": "Oldbury",
     "nameEn": "Oldbury",
     "country": "United Kingdom",
@@ -2995,21 +3911,21 @@
     "operator": "Magnox"
   },
   {
-    "id": 216,
+    "id": 288,
     "name": "Sizewell",
     "nameEn": "Sizewell",
     "country": "United Kingdom",
     "lat": 52.2123,
     "lng": 1.6195,
     "status": "operating",
-    "reactorType": "GCR, PWR",
-    "capacity": 1740,
-    "unitCount": 3,
+    "reactorType": "GCR, PWR, PHWR",
+    "capacity": 4940,
+    "unitCount": 5,
     "startYear": 1966,
     "operator": "Magnox / EDF Energy"
   },
   {
-    "id": 217,
+    "id": 289,
     "name": "Torness",
     "nameEn": "Torness",
     "country": "United Kingdom",
@@ -3023,7 +3939,7 @@
     "operator": "EDF Energy"
   },
   {
-    "id": 218,
+    "id": 290,
     "name": "Trawsfynydd",
     "nameEn": "Trawsfynydd",
     "country": "United Kingdom",
@@ -3037,7 +3953,7 @@
     "operator": "Magnox"
   },
   {
-    "id": 219,
+    "id": 291,
     "name": "Windscale AGR",
     "nameEn": "Windscale AGR",
     "country": "United Kingdom",
@@ -3051,7 +3967,7 @@
     "operator": "United Kingdom Atomic Energy Authority"
   },
   {
-    "id": 220,
+    "id": 292,
     "name": "Winfrith SGHWR",
     "nameEn": "Winfrith SGHWR",
     "country": "United Kingdom",
@@ -3065,7 +3981,7 @@
     "operator": "United Kingdom Atomic Energy Authority"
   },
   {
-    "id": 221,
+    "id": 293,
     "name": "Wylfa",
     "nameEn": "Wylfa",
     "country": "United Kingdom",
@@ -3079,7 +3995,45 @@
     "operator": "Magnox"
   },
   {
-    "id": 222,
+    "id": 294,
+    "name": "Wylfa Rolls Royce SMR",
+    "nameEn": "Wylfa Rolls Royce SMR",
+    "country": "United Kingdom",
+    "lat": 53.416818,
+    "lng": -4.483733,
+    "status": "planned",
+    "reactorType": "SMR",
+    "capacity": 3760,
+    "unitCount": 8,
+    "startYear": 2035
+  },
+  {
+    "id": 295,
+    "name": "Aalo Atomics Idaho",
+    "nameEn": "Aalo Atomics Idaho",
+    "country": "United States",
+    "lat": 43.519485,
+    "lng": -112.045965,
+    "status": "planned",
+    "reactorType": "Microreactor",
+    "capacity": 70,
+    "unitCount": 7,
+    "startYear": 2030
+  },
+  {
+    "id": 296,
+    "name": "Aalo Atomics Texas A&M",
+    "nameEn": "Aalo Atomics Texas A&M",
+    "country": "United States",
+    "lat": 30.642075,
+    "lng": -96.468275,
+    "status": "planned",
+    "reactorType": "Microreactor",
+    "capacity": 50,
+    "unitCount": 5
+  },
+  {
+    "id": 297,
     "name": "Alvin W Vogtle",
     "nameEn": "Alvin W Vogtle",
     "country": "United States",
@@ -3093,7 +4047,7 @@
     "operator": "Southern Nuclear Operating Company"
   },
   {
-    "id": 223,
+    "id": 298,
     "name": "Arkansas Nuclear One",
     "nameEn": "Arkansas Nuclear One",
     "country": "United States",
@@ -3107,7 +4061,20 @@
     "operator": "Entergy Nuclear Operations"
   },
   {
-    "id": 224,
+    "id": 299,
+    "name": "Aurora",
+    "nameEn": "Aurora",
+    "country": "United States",
+    "lat": 43.519461,
+    "lng": -112.045958,
+    "status": "planned",
+    "reactorType": "LMFR",
+    "capacity": 75,
+    "unitCount": 1,
+    "startYear": 2027
+  },
+  {
+    "id": 300,
     "name": "Beaver Valley",
     "nameEn": "Beaver Valley",
     "country": "United States",
@@ -3121,7 +4088,20 @@
     "operator": "First Energy Nuclear Operating"
   },
   {
-    "id": 225,
+    "id": 301,
+    "name": "Belews Creek",
+    "nameEn": "Belews Creek",
+    "country": "United States",
+    "lat": 36.293008,
+    "lng": -80.079629,
+    "status": "planned",
+    "reactorType": "SMR",
+    "capacity": 600,
+    "unitCount": 2,
+    "startYear": 2036
+  },
+  {
+    "id": 302,
     "name": "Big Rock Point",
     "nameEn": "Big Rock Point",
     "country": "United States",
@@ -3135,7 +4115,19 @@
     "operator": "Consumers Power"
   },
   {
-    "id": 226,
+    "id": 303,
+    "name": "Blue Castle",
+    "nameEn": "Blue Castle",
+    "country": "United States",
+    "lat": 39.0141,
+    "lng": -110.24101,
+    "status": "planned",
+    "reactorType": "SMR",
+    "capacity": 1200,
+    "unitCount": 4
+  },
+  {
+    "id": 304,
     "name": "Braidwood",
     "nameEn": "Braidwood",
     "country": "United States",
@@ -3149,7 +4141,7 @@
     "operator": "Exelon Generation"
   },
   {
-    "id": 227,
+    "id": 305,
     "name": "Browns Ferry",
     "nameEn": "Browns Ferry",
     "country": "United States",
@@ -3163,7 +4155,7 @@
     "operator": "Tennessee Valley Authority"
   },
   {
-    "id": 228,
+    "id": 306,
     "name": "Brunswick",
     "nameEn": "Brunswick",
     "country": "United States",
@@ -3177,7 +4169,7 @@
     "operator": "Progress Energy"
   },
   {
-    "id": 229,
+    "id": 307,
     "name": "Byron",
     "nameEn": "Byron",
     "country": "United States",
@@ -3191,7 +4183,7 @@
     "operator": "Exelon Generation"
   },
   {
-    "id": 230,
+    "id": 308,
     "name": "Callaway",
     "nameEn": "Callaway",
     "country": "United States",
@@ -3205,7 +4197,7 @@
     "operator": "Ameren UE; Union Electric"
   },
   {
-    "id": 231,
+    "id": 309,
     "name": "Calvert Cliffs",
     "nameEn": "Calvert Cliffs",
     "country": "United States",
@@ -3219,7 +4211,7 @@
     "operator": "Exelon Generation"
   },
   {
-    "id": 232,
+    "id": 310,
     "name": "Carolinas-Virginia Tube Reactor",
     "nameEn": "Carolinas-Virginia Tube Reactor",
     "country": "United States",
@@ -3233,7 +4225,20 @@
     "operator": "Carolinas-Virginia Nuclear Power Association"
   },
   {
-    "id": 233,
+    "id": 311,
+    "name": "Cascade SMR",
+    "nameEn": "Cascade SMR",
+    "country": "United States",
+    "lat": 46.4569,
+    "lng": -119.3287,
+    "status": "planned",
+    "reactorType": "HTGR",
+    "capacity": 960,
+    "unitCount": 12,
+    "startYear": 2032
+  },
+  {
+    "id": 312,
     "name": "Catawba",
     "nameEn": "Catawba",
     "country": "United States",
@@ -3247,7 +4252,21 @@
     "operator": "Duke Energy"
   },
   {
-    "id": 234,
+    "id": 313,
+    "name": "Clinch River SMR",
+    "nameEn": "Clinch River SMR",
+    "country": "United States",
+    "lat": 35.88944,
+    "lng": -84.3793,
+    "status": "planned",
+    "reactorType": "BWR",
+    "capacity": 1200,
+    "unitCount": 4,
+    "startYear": 2033,
+    "operator": "Tennessee Valley Authority"
+  },
+  {
+    "id": 314,
     "name": "Clinton",
     "nameEn": "Clinton",
     "country": "United States",
@@ -3261,7 +4280,7 @@
     "operator": "Exelon Generation"
   },
   {
-    "id": 235,
+    "id": 315,
     "name": "Columbia",
     "nameEn": "Columbia",
     "country": "United States",
@@ -3269,13 +4288,13 @@
     "lng": -119.3339,
     "status": "operating",
     "reactorType": "BWR",
-    "capacity": 1190,
-    "unitCount": 1,
+    "capacity": 1352,
+    "unitCount": 2,
     "startYear": 1984,
     "operator": "Energy Northwest"
   },
   {
-    "id": 236,
+    "id": 316,
     "name": "Comanche Peak",
     "nameEn": "Comanche Peak",
     "country": "United States",
@@ -3289,7 +4308,7 @@
     "operator": "Luminant Generation Company"
   },
   {
-    "id": 237,
+    "id": 317,
     "name": "Connecticut Yankee",
     "nameEn": "Connecticut Yankee",
     "country": "United States",
@@ -3303,7 +4322,7 @@
     "operator": "Connecticut Yankee Atomic Power"
   },
   {
-    "id": 238,
+    "id": 318,
     "name": "Cooper",
     "nameEn": "Cooper",
     "country": "United States",
@@ -3317,7 +4336,7 @@
     "operator": "Entergy Nuclear Operations"
   },
   {
-    "id": 239,
+    "id": 319,
     "name": "Crystal River",
     "nameEn": "Crystal River",
     "country": "United States",
@@ -3331,7 +4350,7 @@
     "operator": "Progress Energy"
   },
   {
-    "id": 240,
+    "id": 320,
     "name": "Davis Besse",
     "nameEn": "Davis Besse",
     "country": "United States",
@@ -3345,7 +4364,7 @@
     "operator": "First Energy Nuclear Operating"
   },
   {
-    "id": 241,
+    "id": 321,
     "name": "Diablo Canyon",
     "nameEn": "Diablo Canyon",
     "country": "United States",
@@ -3359,7 +4378,7 @@
     "operator": "Pacific Gas and Electric"
   },
   {
-    "id": 242,
+    "id": 322,
     "name": "Donald C Cook",
     "nameEn": "Donald C Cook",
     "country": "United States",
@@ -3373,7 +4392,7 @@
     "operator": "American Electric Power Company"
   },
   {
-    "id": 243,
+    "id": 323,
     "name": "Dresden",
     "nameEn": "Dresden",
     "country": "United States",
@@ -3387,21 +4406,21 @@
     "operator": "Exelon Generation"
   },
   {
-    "id": 244,
+    "id": 324,
     "name": "Duane Arnold",
     "nameEn": "Duane Arnold",
     "country": "United States",
     "lat": 42.1011,
     "lng": -91.7781,
-    "status": "decommissioned",
+    "status": "planned",
     "reactorType": "BWR",
-    "capacity": 624,
-    "unitCount": 1,
+    "capacity": 1248,
+    "unitCount": 2,
     "startYear": 1975,
     "operator": "Nextera Energy Resources"
   },
   {
-    "id": 245,
+    "id": 325,
     "name": "Edwin I Hatch",
     "nameEn": "Edwin I Hatch",
     "country": "United States",
@@ -3415,7 +4434,20 @@
     "operator": "Southern Nuclear Operating Company"
   },
   {
-    "id": 246,
+    "id": 326,
+    "name": "Eielson Air Force Base",
+    "nameEn": "Eielson Air Force Base",
+    "country": "United States",
+    "lat": 64.669936,
+    "lng": -147.06157,
+    "status": "planned",
+    "reactorType": "LMFR",
+    "capacity": 5,
+    "unitCount": 1,
+    "startYear": 2030
+  },
+  {
+    "id": 327,
     "name": "Elk River",
     "nameEn": "Elk River",
     "country": "United States",
@@ -3429,7 +4461,7 @@
     "operator": "Rural Cooperative Power Association"
   },
   {
-    "id": 247,
+    "id": 328,
     "name": "Experimental Boiling Water Reactor",
     "nameEn": "Experimental Boiling Water Reactor",
     "country": "United States",
@@ -3443,7 +4475,7 @@
     "operator": "Argonne National Laboratory-West"
   },
   {
-    "id": 248,
+    "id": 329,
     "name": "Experimental Breeder Reactor",
     "nameEn": "Experimental Breeder Reactor",
     "country": "United States",
@@ -3457,7 +4489,20 @@
     "operator": "Argonne National Laboratory-West"
   },
   {
-    "id": 249,
+    "id": 330,
+    "name": "Fall Line fusion",
+    "nameEn": "Fall Line fusion",
+    "country": "United States",
+    "lat": 37.392341,
+    "lng": -77.627434,
+    "status": "planned",
+    "reactorType": "fusion",
+    "capacity": 400,
+    "unitCount": 1,
+    "startYear": 2033
+  },
+  {
+    "id": 331,
     "name": "Fermi",
     "nameEn": "Fermi",
     "country": "United States",
@@ -3471,7 +4516,7 @@
     "operator": "Detroit Edison"
   },
   {
-    "id": 250,
+    "id": 332,
     "name": "Fort Calhoun",
     "nameEn": "Fort Calhoun",
     "country": "United States",
@@ -3485,7 +4530,7 @@
     "operator": "Exelon Generation"
   },
   {
-    "id": 251,
+    "id": 333,
     "name": "Fort St. Vrain",
     "nameEn": "Fort St. Vrain",
     "country": "United States",
@@ -3499,7 +4544,7 @@
     "operator": "Public Service Company of Colorado"
   },
   {
-    "id": 252,
+    "id": 334,
     "name": "Grand Gulf",
     "nameEn": "Grand Gulf",
     "country": "United States",
@@ -3513,7 +4558,19 @@
     "operator": "Entergy Nuclear Operations"
   },
   {
-    "id": 253,
+    "id": 335,
+    "name": "Green River",
+    "nameEn": "Green River",
+    "country": "United States",
+    "lat": 41.591581,
+    "lng": -109.754952,
+    "status": "planned",
+    "reactorType": "Microreactor",
+    "capacity": 40,
+    "unitCount": 8
+  },
+  {
+    "id": 336,
     "name": "H. B. Robinson",
     "nameEn": "H. B. Robinson",
     "country": "United States",
@@ -3527,7 +4584,7 @@
     "operator": "Progress Energy"
   },
   {
-    "id": 254,
+    "id": 337,
     "name": "Hallam",
     "nameEn": "Hallam",
     "country": "United States",
@@ -3541,7 +4598,19 @@
     "operator": "Atomic Energy Commission And Nebraska Public Power District"
   },
   {
-    "id": 255,
+    "id": 338,
+    "name": "Haskell County Last Energy",
+    "nameEn": "Haskell County Last Energy",
+    "country": "United States",
+    "lat": 33.178011,
+    "lng": -99.740906,
+    "status": "planned",
+    "reactorType": "Microreactor",
+    "capacity": 20,
+    "unitCount": 1
+  },
+  {
+    "id": 339,
     "name": "Hermes",
     "nameEn": "Hermes",
     "country": "United States",
@@ -3549,12 +4618,12 @@
     "lng": -84.40328,
     "status": "construction",
     "reactorType": "SMR",
-    "capacity": 50,
-    "unitCount": 1,
+    "capacity": 100,
+    "unitCount": 3,
     "startYear": 2027
   },
   {
-    "id": 256,
+    "id": 340,
     "name": "Hope Creek",
     "nameEn": "Hope Creek",
     "country": "United States",
@@ -3568,7 +4637,7 @@
     "operator": "PSEG Nuclear"
   },
   {
-    "id": 257,
+    "id": 341,
     "name": "Humboldt Bay",
     "nameEn": "Humboldt Bay",
     "country": "United States",
@@ -3582,7 +4651,7 @@
     "operator": "Pacific Gas and Electric"
   },
   {
-    "id": 258,
+    "id": 342,
     "name": "Indian Point",
     "nameEn": "Indian Point",
     "country": "United States",
@@ -3596,7 +4665,21 @@
     "operator": "Entergy Nuclear Operations"
   },
   {
-    "id": 259,
+    "id": 343,
+    "name": "Infinity Two fusion",
+    "nameEn": "Infinity Two fusion",
+    "country": "United States",
+    "lat": 36.02084,
+    "lng": -84.154569,
+    "status": "planned",
+    "reactorType": "fusion",
+    "capacity": 350,
+    "unitCount": 1,
+    "startYear": 2035,
+    "operator": "Type One Energy"
+  },
+  {
+    "id": 344,
     "name": "James A Fitzpatrick",
     "nameEn": "James A Fitzpatrick",
     "country": "United States",
@@ -3610,7 +4693,7 @@
     "operator": "Exelon Generation"
   },
   {
-    "id": 260,
+    "id": 345,
     "name": "Joseph M Farley",
     "nameEn": "Joseph M Farley",
     "country": "United States",
@@ -3624,7 +4707,33 @@
     "operator": "Southern Nuclear Operating Company"
   },
   {
-    "id": 261,
+    "id": 346,
+    "name": "Joshua Falls",
+    "nameEn": "Joshua Falls",
+    "country": "United States",
+    "lat": 37.429182,
+    "lng": -79.039934,
+    "status": "planned",
+    "reactorType": "SMR",
+    "capacity": 275,
+    "unitCount": 1,
+    "operator": "Appalachian Power"
+  },
+  {
+    "id": 347,
+    "name": "Kairos Power Texas A&M",
+    "nameEn": "Kairos Power Texas A&M",
+    "country": "United States",
+    "lat": 30.643967,
+    "lng": -96.469096,
+    "status": "planned",
+    "reactorType": "SMR",
+    "capacity": 150,
+    "unitCount": 2,
+    "startYear": 2029
+  },
+  {
+    "id": 348,
     "name": "Kemmerer",
     "nameEn": "Kemmerer",
     "country": "United States",
@@ -3638,7 +4747,7 @@
     "operator": "Terrapower"
   },
   {
-    "id": 262,
+    "id": 349,
     "name": "Kewaunee",
     "nameEn": "Kewaunee",
     "country": "United States",
@@ -3652,7 +4761,7 @@
     "operator": "Dominion Energy"
   },
   {
-    "id": 263,
+    "id": 350,
     "name": "Lacrosse",
     "nameEn": "Lacrosse",
     "country": "United States",
@@ -3666,7 +4775,7 @@
     "operator": "Dairyland Power"
   },
   {
-    "id": 264,
+    "id": 351,
     "name": "LaSalle",
     "nameEn": "LaSalle",
     "country": "United States",
@@ -3680,7 +4789,20 @@
     "operator": "Exelon Generation"
   },
   {
-    "id": 265,
+    "id": 352,
+    "name": "Letart",
+    "nameEn": "Letart",
+    "country": "United States",
+    "lat": 38.894411,
+    "lng": -81.896277,
+    "status": "planned",
+    "reactorType": "SMR",
+    "capacity": 1500,
+    "unitCount": 5,
+    "startYear": 2034
+  },
+  {
+    "id": 353,
     "name": "Limerick",
     "nameEn": "Limerick",
     "country": "United States",
@@ -3694,7 +4816,20 @@
     "operator": "Exelon Generation"
   },
   {
-    "id": 266,
+    "id": 354,
+    "name": "Long Mott",
+    "nameEn": "Long Mott",
+    "country": "United States",
+    "lat": 28.5033,
+    "lng": -96.7745,
+    "status": "planned",
+    "reactorType": "HTGR",
+    "capacity": 320,
+    "unitCount": 4,
+    "startYear": 2033
+  },
+  {
+    "id": 355,
     "name": "Maine Yankee",
     "nameEn": "Maine Yankee",
     "country": "United States",
@@ -3708,7 +4843,7 @@
     "operator": "Maine Yankee Atomic Power"
   },
   {
-    "id": 267,
+    "id": 356,
     "name": "McGuire",
     "nameEn": "McGuire",
     "country": "United States",
@@ -3722,7 +4857,19 @@
     "operator": "Duke Energy"
   },
   {
-    "id": 268,
+    "id": 357,
+    "name": "Midpoint SMR",
+    "nameEn": "Midpoint SMR",
+    "country": "United States",
+    "lat": 42.81786,
+    "lng": -114.37406,
+    "status": "planned",
+    "reactorType": "PWR",
+    "capacity": 462,
+    "unitCount": 6
+  },
+  {
+    "id": 358,
     "name": "Millstone",
     "nameEn": "Millstone",
     "country": "United States",
@@ -3736,7 +4883,7 @@
     "operator": "Dominion Energy"
   },
   {
-    "id": 269,
+    "id": 359,
     "name": "Monticello",
     "nameEn": "Monticello",
     "country": "United States",
@@ -3750,35 +4897,61 @@
     "operator": "Northern States Power"
   },
   {
-    "id": 270,
+    "id": 360,
+    "name": "Natura Permian Basin",
+    "nameEn": "Natura Permian Basin",
+    "country": "United States",
+    "lat": 31.254252,
+    "lng": -103.699199,
+    "status": "planned",
+    "reactorType": "molten salt reactor",
+    "capacity": 100,
+    "unitCount": 1,
+    "startYear": 2029
+  },
+  {
+    "id": 361,
+    "name": "Natura Resources Texas A&M",
+    "nameEn": "Natura Resources Texas A&M",
+    "country": "United States",
+    "lat": 30.643764,
+    "lng": -96.468275,
+    "status": "planned",
+    "reactorType": "SMR",
+    "capacity": 100,
+    "unitCount": 1,
+    "startYear": 2030
+  },
+  {
+    "id": 362,
     "name": "Nine Mile Point",
     "nameEn": "Nine Mile Point",
     "country": "United States",
     "lat": 43.5205,
     "lng": -76.4068,
     "status": "operating",
-    "reactorType": "BWR",
-    "capacity": 1962,
-    "unitCount": 2,
+    "reactorType": "BWR, SMR",
+    "capacity": 2262,
+    "unitCount": 3,
     "startYear": 1969,
     "operator": "Exelon Generation"
   },
   {
-    "id": 271,
+    "id": 363,
     "name": "North Anna",
     "nameEn": "North Anna",
     "country": "United States",
     "lat": 38.0601,
     "lng": -77.7897,
     "status": "operating",
-    "reactorType": "PWR",
-    "capacity": 2001,
-    "unitCount": 2,
+    "reactorType": "PWR, SMR",
+    "capacity": 2301,
+    "unitCount": 3,
     "startYear": 1978,
     "operator": "Dominion Energy"
   },
   {
-    "id": 272,
+    "id": 364,
     "name": "Oconee",
     "nameEn": "Oconee",
     "country": "United States",
@@ -3792,35 +4965,48 @@
     "operator": "Duke Energy"
   },
   {
-    "id": 273,
+    "id": 365,
+    "name": "Oklo",
+    "nameEn": "Oklo",
+    "country": "United States",
+    "lat": 39.01272,
+    "lng": -83.00084,
+    "status": "planned",
+    "reactorType": "LMFR",
+    "capacity": 150,
+    "unitCount": 2,
+    "startYear": 2030
+  },
+  {
+    "id": 366,
     "name": "Oyster Creek",
     "nameEn": "Oyster Creek",
     "country": "United States",
     "lat": 39.8144,
     "lng": -74.2058,
-    "status": "decommissioned",
-    "reactorType": "BWR",
-    "capacity": 652,
-    "unitCount": 1,
+    "status": "planned",
+    "reactorType": "BWR, SMR",
+    "capacity": 1852,
+    "unitCount": 5,
     "startYear": 1969,
     "operator": "Exelon Generation"
   },
   {
-    "id": 274,
+    "id": 367,
     "name": "Palisades",
     "nameEn": "Palisades",
     "country": "United States",
     "lat": 42.323,
     "lng": -86.3146,
     "status": "construction",
-    "reactorType": "PWR",
-    "capacity": 1650,
-    "unitCount": 2,
+    "reactorType": "PWR, SMR",
+    "capacity": 2250,
+    "unitCount": 4,
     "startYear": 1971,
     "operator": "Entergy Nuclear Operations"
   },
   {
-    "id": 275,
+    "id": 368,
     "name": "Palo Verde",
     "nameEn": "Palo Verde",
     "country": "United States",
@@ -3834,7 +5020,7 @@
     "operator": "Arizona Public Service"
   },
   {
-    "id": 276,
+    "id": 369,
     "name": "Pathfinder",
     "nameEn": "Pathfinder",
     "country": "United States",
@@ -3848,7 +5034,7 @@
     "operator": "Nuclear Management"
   },
   {
-    "id": 277,
+    "id": 370,
     "name": "Peach Bottom",
     "nameEn": "Peach Bottom",
     "country": "United States",
@@ -3862,7 +5048,7 @@
     "operator": "Exelon Generation"
   },
   {
-    "id": 278,
+    "id": 371,
     "name": "Perry",
     "nameEn": "Perry",
     "country": "United States",
@@ -3876,7 +5062,7 @@
     "operator": "First Energy Nuclear Operating"
   },
   {
-    "id": 279,
+    "id": 372,
     "name": "Pilgrim",
     "nameEn": "Pilgrim",
     "country": "United States",
@@ -3890,7 +5076,7 @@
     "operator": "Entergy Nuclear Operations"
   },
   {
-    "id": 280,
+    "id": 373,
     "name": "Piqua",
     "nameEn": "Piqua",
     "country": "United States",
@@ -3904,7 +5090,7 @@
     "operator": "City Of Piqua Government"
   },
   {
-    "id": 281,
+    "id": 374,
     "name": "Point Beach",
     "nameEn": "Point Beach",
     "country": "United States",
@@ -3918,7 +5104,7 @@
     "operator": "Nextera Energy Resources"
   },
   {
-    "id": 282,
+    "id": 375,
     "name": "Prairie Island",
     "nameEn": "Prairie Island",
     "country": "United States",
@@ -3932,7 +5118,21 @@
     "operator": "Northern States Power"
   },
   {
-    "id": 283,
+    "id": 376,
+    "name": "Project Matador",
+    "nameEn": "Project Matador",
+    "country": "United States",
+    "lat": 35.30462,
+    "lng": -101.598731,
+    "status": "planned",
+    "reactorType": "PWR",
+    "capacity": 4400,
+    "unitCount": 4,
+    "startYear": 2032,
+    "operator": "Fermi America"
+  },
+  {
+    "id": 377,
     "name": "Project Pele",
     "nameEn": "Project Pele",
     "country": "United States",
@@ -3945,7 +5145,7 @@
     "startYear": 2028
   },
   {
-    "id": 284,
+    "id": 378,
     "name": "Quad Cities",
     "nameEn": "Quad Cities",
     "country": "United States",
@@ -3959,7 +5159,7 @@
     "operator": "Exelon Generation"
   },
   {
-    "id": 285,
+    "id": 379,
     "name": "Rancho Seco",
     "nameEn": "Rancho Seco",
     "country": "United States",
@@ -3973,7 +5173,7 @@
     "operator": "Sacramento Municipal Utility District"
   },
   {
-    "id": 286,
+    "id": 380,
     "name": "River Bend",
     "nameEn": "River Bend",
     "country": "United States",
@@ -3987,7 +5187,7 @@
     "operator": "Entergy Nuclear Operations"
   },
   {
-    "id": 287,
+    "id": 381,
     "name": "Robert Emmett Ginna",
     "nameEn": "Robert Emmett Ginna",
     "country": "United States",
@@ -4001,7 +5201,20 @@
     "operator": "Exelon Generation"
   },
   {
-    "id": 288,
+    "id": 382,
+    "name": "Rockport",
+    "nameEn": "Rockport",
+    "country": "United States",
+    "lat": 37.927292,
+    "lng": -87.038436,
+    "status": "planned",
+    "reactorType": "SMR",
+    "capacity": 300,
+    "unitCount": 1,
+    "operator": "Indiana Michigan Power"
+  },
+  {
+    "id": 383,
     "name": "Salem",
     "nameEn": "Salem",
     "country": "United States",
@@ -4015,7 +5228,7 @@
     "operator": "PSEG Nuclear"
   },
   {
-    "id": 289,
+    "id": 384,
     "name": "San Onofre",
     "nameEn": "San Onofre",
     "country": "United States",
@@ -4029,7 +5242,7 @@
     "operator": "Southern California Edison"
   },
   {
-    "id": 290,
+    "id": 385,
     "name": "Saxton",
     "nameEn": "Saxton",
     "country": "United States",
@@ -4043,7 +5256,7 @@
     "operator": "Saxton Nuclear Experimental Reactor"
   },
   {
-    "id": 291,
+    "id": 386,
     "name": "Seabrook",
     "nameEn": "Seabrook",
     "country": "United States",
@@ -4057,7 +5270,7 @@
     "operator": "Nextera Energy Resources"
   },
   {
-    "id": 292,
+    "id": 387,
     "name": "Sequoyah",
     "nameEn": "Sequoyah",
     "country": "United States",
@@ -4071,7 +5284,7 @@
     "operator": "Tennessee Valley Authority"
   },
   {
-    "id": 293,
+    "id": 388,
     "name": "Shearon Harris",
     "nameEn": "Shearon Harris",
     "country": "United States",
@@ -4085,7 +5298,7 @@
     "operator": "Progress Energy"
   },
   {
-    "id": 294,
+    "id": 389,
     "name": "Shippingport",
     "nameEn": "Shippingport",
     "country": "United States",
@@ -4099,7 +5312,7 @@
     "operator": "Department Of Energy And Duquesne Light"
   },
   {
-    "id": 295,
+    "id": 390,
     "name": "Shoreham",
     "nameEn": "Shoreham",
     "country": "United States",
@@ -4112,7 +5325,7 @@
     "operator": "Long Island Power Authority"
   },
   {
-    "id": 296,
+    "id": 391,
     "name": "SM-1",
     "nameEn": "SM-1",
     "country": "United States",
@@ -4126,7 +5339,7 @@
     "operator": "United States Army"
   },
   {
-    "id": 297,
+    "id": 392,
     "name": "SM-1A",
     "nameEn": "SM-1A",
     "country": "United States",
@@ -4140,7 +5353,7 @@
     "operator": "United States Army"
   },
   {
-    "id": 298,
+    "id": 393,
     "name": "South Texas",
     "nameEn": "South Texas",
     "country": "United States",
@@ -4154,7 +5367,20 @@
     "operator": "STP Nuclear Operating"
   },
   {
-    "id": 299,
+    "id": 394,
+    "name": "Southern Ohio Diversification Initiative",
+    "nameEn": "Southern Ohio Diversification Initiative",
+    "country": "United States",
+    "lat": 39.0128,
+    "lng": -83.0007,
+    "status": "planned",
+    "reactorType": "fast neutron reactor",
+    "capacity": 30,
+    "unitCount": 2,
+    "startYear": 2030
+  },
+  {
+    "id": 395,
     "name": "St. Lucie",
     "nameEn": "St. Lucie",
     "country": "United States",
@@ -4168,7 +5394,7 @@
     "operator": "Florida Power & Light"
   },
   {
-    "id": 300,
+    "id": 396,
     "name": "Surry",
     "nameEn": "Surry",
     "country": "United States",
@@ -4182,7 +5408,7 @@
     "operator": "Dominion Energy"
   },
   {
-    "id": 301,
+    "id": 397,
     "name": "Susquehanna",
     "nameEn": "Susquehanna",
     "country": "United States",
@@ -4196,21 +5422,34 @@
     "operator": "PPL Susquehanna"
   },
   {
-    "id": 302,
+    "id": 398,
+    "name": "Texas A&M University IMSR",
+    "nameEn": "Texas A&M University IMSR",
+    "country": "United States",
+    "lat": 30.643007,
+    "lng": -96.469241,
+    "status": "planned",
+    "reactorType": "SMR",
+    "capacity": 390,
+    "unitCount": 2,
+    "startYear": 2029
+  },
+  {
+    "id": 399,
     "name": "Three Mile Island",
     "nameEn": "Three Mile Island",
     "country": "United States",
     "lat": 40.1539,
     "lng": -76.7248,
-    "status": "decommissioned",
+    "status": "planned",
     "reactorType": "PWR",
-    "capacity": 1839,
-    "unitCount": 2,
+    "capacity": 2719,
+    "unitCount": 3,
     "startYear": 1974,
     "operator": "Exelon Generation / General Public Utilities"
   },
   {
-    "id": 303,
+    "id": 400,
     "name": "Trojan",
     "nameEn": "Trojan",
     "country": "United States",
@@ -4224,7 +5463,7 @@
     "operator": "Portland General Electric"
   },
   {
-    "id": 304,
+    "id": 401,
     "name": "Turkey Point",
     "nameEn": "Turkey Point",
     "country": "United States",
@@ -4232,13 +5471,13 @@
     "lng": -80.3324,
     "status": "operating",
     "reactorType": "PWR",
-    "capacity": 1658,
-    "unitCount": 2,
+    "capacity": 4158,
+    "unitCount": 4,
     "startYear": 1972,
     "operator": "Florida Power & Light"
   },
   {
-    "id": 305,
+    "id": 402,
     "name": "Vallecitos",
     "nameEn": "Vallecitos",
     "country": "United States",
@@ -4252,7 +5491,7 @@
     "operator": "General Electric"
   },
   {
-    "id": 306,
+    "id": 403,
     "name": "Vermont Yankee",
     "nameEn": "Vermont Yankee",
     "country": "United States",
@@ -4266,7 +5505,7 @@
     "operator": "Entergy Nuclear Operations"
   },
   {
-    "id": 307,
+    "id": 404,
     "name": "Virgil C Summer",
     "nameEn": "Virgil C Summer",
     "country": "United States",
@@ -4280,7 +5519,7 @@
     "operator": "South Carolina Electric & Gas"
   },
   {
-    "id": 308,
+    "id": 405,
     "name": "Waterford",
     "nameEn": "Waterford",
     "country": "United States",
@@ -4294,7 +5533,7 @@
     "operator": "Entergy Nuclear Operations"
   },
   {
-    "id": 309,
+    "id": 406,
     "name": "Watts Bar",
     "nameEn": "Watts Bar",
     "country": "United States",
@@ -4308,7 +5547,7 @@
     "operator": "Tennessee Valley Authority"
   },
   {
-    "id": 310,
+    "id": 407,
     "name": "Wolf Creek",
     "nameEn": "Wolf Creek",
     "country": "United States",
@@ -4322,7 +5561,7 @@
     "operator": "Wolf Creek Nuclear Operating"
   },
   {
-    "id": 311,
+    "id": 408,
     "name": "Yankee Rowe",
     "nameEn": "Yankee Rowe",
     "country": "United States",
@@ -4336,7 +5575,7 @@
     "operator": "Yankee Atomic Electric"
   },
   {
-    "id": 312,
+    "id": 409,
     "name": "Zion",
     "nameEn": "Zion",
     "country": "United States",
@@ -4350,16 +5589,55 @@
     "operator": "Exelon Generation"
   },
   {
-    "id": 313,
+    "id": 410,
     "name": "Jizzakh",
     "nameEn": "Jizzakh",
     "country": "Uzbekistan",
     "lat": 40.708423,
     "lng": 67.158426,
     "status": "construction",
-    "reactorType": "SMR",
-    "capacity": 110,
-    "unitCount": 2,
+    "reactorType": "SMR, PWR",
+    "capacity": 2110,
+    "unitCount": 4,
     "startYear": 2029
+  },
+  {
+    "id": 411,
+    "name": "Navoi",
+    "nameEn": "Navoi",
+    "country": "Uzbekistan",
+    "lat": 40.51701,
+    "lng": 67.4255,
+    "status": "planned",
+    "reactorType": "PWR",
+    "capacity": 2400,
+    "unitCount": 2,
+    "startYear": 2028
+  },
+  {
+    "id": 412,
+    "name": "Ninh Thuận 1",
+    "nameEn": "Ninh Thuận 1",
+    "country": "Vietnam",
+    "lat": 11.4109,
+    "lng": 108.9743,
+    "status": "planned",
+    "reactorType": "PWR",
+    "capacity": 4800,
+    "unitCount": 4,
+    "startYear": 2030
+  },
+  {
+    "id": 413,
+    "name": "Ninh Thuận 2",
+    "nameEn": "Ninh Thuận 2",
+    "country": "Vietnam",
+    "lat": 11.6903,
+    "lng": 109.1751,
+    "status": "planned",
+    "reactorType": "PWR",
+    "capacity": 4400,
+    "unitCount": 4,
+    "startYear": 2030
   }
 ]

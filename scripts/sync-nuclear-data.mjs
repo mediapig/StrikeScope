@@ -87,6 +87,7 @@ function statusOf(value) {
   if (['operating', 'operational'].includes(valueLower)) return 'operating'
   if (['construction', 'under construction'].includes(valueLower)) return 'construction'
   if (['retired', 'permanent shutdown', 'mothballed', 'shelved'].includes(valueLower)) return 'decommissioned'
+  if (['pre-construction', 'announced'].includes(valueLower)) return 'planned'
   return null
 }
 
@@ -148,7 +149,7 @@ try {
       if (operator) previous.operators.add(operator)
       if (startYear > 1900) previous.startYears.push(startYear)
       if (!previous.localName && localName) previous.localName = localName
-      const rank = { operating: 3, construction: 2, decommissioned: 1 }
+      const rank = { operating: 4, construction: 3, planned: 2, decommissioned: 1 }
       if (rank[status] > rank[previous.status]) previous.status = status
     }
   }
