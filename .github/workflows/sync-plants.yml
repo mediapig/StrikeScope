@@ -1,0 +1,59 @@
+name: Sync nuclear plant data
+
+on:
+  schedule:
+    # Once a year. GEM's tracker updates roughly monthly in practice, but
+    # this project only needs a periodic refresh, not the latest release.
+    - cron: '0 4 15 9 *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: node scripts/download-gnpt-xlsx.mjs --output /tmp/gnpt-nuclear.xlsx
+        env:
+          # Global Energy Monitor's Nuclear Power Tracker download is gated
+          # behind a lead-capture form (no anonymous or stable API) - this
+          # submits it as one consistent, real project identity, not a
+          # fabricated one per run. Set these once under repo Settings ->
+          # Secrets and variables -> Actions (email as a secret so it isn't
+          # sitting in plaintext in a public repo's workflow history).
+          GNPT_REQUESTER_NAME: ${{ vars.GNPT_REQUESTER_NAME }}
+          GNPT_REQUESTER_EMAIL: ${{ secrets.GNPT_REQUESTER_EMAIL }}
+          GNPT_REQUESTER_ORG: ${{ vars.GNPT_REQUESTER_ORG }}
+      - run: npm run data:sync -- --input /tmp/gnpt-nuclear.xlsx
+      - id: diff
+        run: |
+          if git diff --quiet -- src/data/plants.json; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+      - if: steps.diff.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          commit-message: 'Sync nuclear plant data from Global Energy Monitor'
+          title: 'Sync nuclear plant data from Global Energy Monitor'
+          body: |
+            Automated annual refresh via `npm run data:sync`, sourced from
+            GEM's Global Nuclear Power Tracker
+            (`scripts/download-gnpt-xlsx.mjs`).
+
+            Check before merging: facility/unit counts in the sync log
+            (see the job output) are in a plausible range compared to the
+            previous sync, not a big unexplained jump or drop.
+          branch: sync-plants-data
+          add-paths: |
+            src/data/plants.json
