@@ -210,7 +210,7 @@ function subsolarPoint(date) {
 // deep on the night side where many thin rings stack up looking like
 // radar circles. A raster tile source doesn't have this: there's no
 // polygon edge anywhere, just pixels.)
-const LIGHT_TILE_SIZE = 128
+const LIGHT_TILE_SIZE = 64
 const LIGHT_DAY_PEAK_ALPHA = 0.14
 const LIGHT_NIGHT_PEAK_ALPHA = 0.5
 let currentSubsolarPoint = subsolarPoint(new Date())
@@ -248,11 +248,22 @@ function renderLightingTile(z, x, y) {
   ctx.putImageData(image, 0, 0)
   return new Promise(resolve => canvas.toBlob(resolve, 'image/png'))
 }
+// Caches generated tiles by their full URL (which embeds the current
+// minute, so it self-invalidates) - avoids regenerating a tile MapLibre
+// re-requests after panning back over already-seen ground.
+let lightingTileCache = {}
+let lightingTileCacheCount = 0
 addProtocol('lighting', async params => {
+  const cached = lightingTileCache[params.url]
+  if (cached) return { data: cached }
   const match = params.url.match(/^lighting:\/\/(\d+)\/(\d+)\/(\d+)/)
   const [, z, x, y] = match
   const blob = await renderLightingTile(Number(z), Number(x), Number(y))
-  return { data: await blob.arrayBuffer() }
+  const data = await blob.arrayBuffer()
+  if (lightingTileCacheCount > 300) { lightingTileCache = {}; lightingTileCacheCount = 0 }
+  lightingTileCache[params.url] = data
+  lightingTileCacheCount += 1
+  return { data }
 })
 
 // Midpoint wind speed (m/s) for each Beaufort force 0-12.
@@ -643,7 +654,7 @@ export default function NuclearMap() {
       cursor={placingPlant || measuring ? 'crosshair' : 'grab'}
     >
       <NavigationControl position="top-right" />
-      <Source id="lighting" type="raster" tiles={lightingTiles} tileSize={LIGHT_TILE_SIZE} maxzoom={5}>
+      <Source id="lighting" type="raster" tiles={lightingTiles} tileSize={LIGHT_TILE_SIZE} maxzoom={3}>
         <Layer id="lighting-raster" type="raster" paint={{ 'raster-opacity': 1 }} />
       </Source>
       {visiblePlants.map(plant => <PlantMarker key={plant.id} plant={plant} selected={selectedPlant?.id === plant.id} simulation={simulation} onClick={handlePlantClick} onDragEnd={movePlant} />)}
