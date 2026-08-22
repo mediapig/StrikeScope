@@ -279,9 +279,14 @@ export default function NuclearMap() {
     setSimulation(null)
     setPopulation({ status: 'idle', result: null })
   }
+  const addMeasurePoint = point => setMeasurePoints(previous => previous.length >= 2 ? [point] : [...previous, point])
   const handleMapClick = event => {
     if (placingPlant) { placePlant(event.lngLat); return }
-    if (measuring) setMeasurePoints(previous => previous.length >= 2 ? [event.lngLat] : [...previous, event.lngLat])
+    if (measuring) addMeasurePoint(event.lngLat)
+  }
+  const handlePlantClick = plant => {
+    if (measuring) { addMeasurePoint({ lng: plant.lng, lat: plant.lat }); return }
+    selectPlant(plant)
   }
   const toggleMeasuring = () => {
     setMeasuring(previous => !previous)
@@ -325,7 +330,7 @@ export default function NuclearMap() {
       cursor={placingPlant || measuring ? 'crosshair' : 'grab'}
     >
       <NavigationControl position="top-right" />
-      {visiblePlants.map(plant => <PlantMarker key={plant.id} plant={plant} selected={selectedPlant?.id === plant.id} simulation={simulation} onClick={selectPlant} onDragEnd={movePlant} />)}
+      {visiblePlants.map(plant => <PlantMarker key={plant.id} plant={plant} selected={selectedPlant?.id === plant.id} simulation={simulation} onClick={handlePlantClick} onDragEnd={movePlant} />)}
       {measurePoints.map((point, index) => (
         <Marker key={index} longitude={point.lng} latitude={point.lat} anchor="center">
           <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#facc15', border: '2px solid white', boxShadow: '0 0 4px rgba(0,0,0,0.6)' }} />
