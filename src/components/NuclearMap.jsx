@@ -152,28 +152,31 @@ function subsolarPoint(date) {
   return { lat: declination, lng }
 }
 // Approximates real Lambertian sun lighting (brightness ~ cos of the angle
-// from the subsolar point, zero past the terminator) as a set of concentric,
-// non-overlapping rings rather than a true per-pixel shader: each ring gets
-// the cosine-falloff opacity for its own radius, so there's no dependence on
-// draw order or alpha-compositing between layers - every point on the globe
-// is covered by exactly one ring. (A first attempt stacked overlapping
-// semi-transparent circles and relied on their alpha compounding toward the
-// center, which rendered inconsistently under globe projection - likely a
-// depth-test/z-fighting interaction with coplanar 3D fills rather than the
-// flat-2D painter's-algorithm compositing that approach assumes. An earlier
-// attempt before that used one polygon shaped exactly like the terminator;
-// at radius = a quarter of Earth's circumference that polygon is
-// topologically a full great circle with no simple non-self-overlapping
-// representation in flat lng/lat space, and MapLibre's 2D fill couldn't
-// triangulate it correctly either. Disjoint rings well short of that radius
-// have neither problem.)
-const KM_PER_DEGREE = (2 * Math.PI * 6371) / 360
-const LIGHT_BANDS = 6
+// from the subsolar point) as a large number of thin, non-overlapping
+// concentric rings, each carrying the cosine-falloff opacity for its own
+// radius - with enough rings the discrete steps are well under what the
+// eye can distinguish, reading as a smooth gradient.
+// (Three earlier attempts each had real problems, all found by direct
+// inspection rather than assumption: overlapping semi-transparent circles
+// relying on alpha compounding toward the center rendered inconsistently
+// under globe projection, likely a depth-test/z-fighting interaction with
+// coplanar 3D fills; a single terminator-shaped polygon closing through a
+// pole is topologically a full great circle that MapLibre's 2D fill can't
+// triangulate; and a MapLibre `image` source stretched over the whole
+// globe rendered as a distorted, sharp-edged mess - `image` sources are a
+// simple 4-corner quad meant for small local overlays, and linearly
+// interpolating between 4 points spanning the entire sphere doesn't
+// follow its curvature at all. Non-overlapping rings, well short of
+// hemisphere-spanning radius, hit none of these.)
+const LIGHT_BANDS = 30
 const LIGHT_MAX_RADIUS_DEG = 85
+const LIGHT_DAY_PEAK_OPACITY = 0.12
+const LIGHT_NIGHT_PEAK_OPACITY = 0.5
+const KM_PER_DEGREE = (2 * Math.PI * 6371) / 360
 function lightingRings(center, peakOpacity) {
   const rad = Math.PI / 180
   const boundaries = Array.from({ length: LIGHT_BANDS + 1 }, (_, index) => LIGHT_MAX_RADIUS_DEG * index / LIGHT_BANDS)
-  const circle = radiusDeg => turfCircle([center.lng, center.lat], radiusDeg * KM_PER_DEGREE, { units: 'kilometers', steps: 96 })
+  const circle = radiusDeg => turfCircle([center.lng, center.lat], radiusDeg * KM_PER_DEGREE, { units: 'kilometers', steps: 64 })
   return Array.from({ length: LIGHT_BANDS }, (_, index) => {
     const inner = boundaries[index]
     const outer = boundaries[index + 1]
@@ -186,7 +189,7 @@ function lightingRings(center, peakOpacity) {
 function lightingGradient(date) {
   const sun = subsolarPoint(date)
   const antisolar = { lat: -sun.lat, lng: ((sun.lng + 180 + 540) % 360) - 180 }
-  return { sun, day: lightingRings(sun, 0.4), night: lightingRings(antisolar, 0.6) }
+  return { sun, day: lightingRings(sun, LIGHT_DAY_PEAK_OPACITY), night: lightingRings(antisolar, LIGHT_NIGHT_PEAK_OPACITY) }
 }
 
 // Midpoint wind speed (m/s) for each Beaufort force 0-12.
