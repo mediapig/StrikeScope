@@ -95,15 +95,34 @@ function circleGeometry(lng, lat, radiusKm) {
 
 const toFeature = geometry => ({ type: 'Feature', properties: {}, geometry })
 
-function simulationArea(plant, simulation) {
+// Midpoint wind speed (m/s) for each Beaufort force 0-12.
+const BEAUFORT_MS = [0, 0.8, 2.4, 4.4, 6.7, 9.4, 12.3, 15.5, 18.9, 22.6, 26.4, 30.5, 34]
+const windSpeedMs = force => BEAUFORT_MS[Math.min(12, Math.max(0, Math.round(force)))]
+
+// How far the plume's leading edge has plausibly advected: wind speed times
+// release duration, capped at 72h since a real plume dilutes to background
+// well before that regardless of how long the release continues. An ongoing
+// release (duration 0) uses a fixed 12h precautionary window rather than
+// growing without bound.
+function transportFactor(windForce, duration) {
+  const hours = duration === 0 ? 12 : Math.min(duration, 72)
+  return 1 + (windSpeedMs(windForce) / 10) * Math.log1p(hours) * 0.25
+}
+
+function scenarioGeometry(plant, simulation) {
   const level = SCENARIO_LEVELS[simulation.level]
   const capacityFactor = Math.max(0.65, 0.65 + (plant.capacity || 1000) / 4000)
-  const durationFactor = simulation.duration === 0 ? 2.2 : 1 + Math.log1p(simulation.duration) * 0.16
+  const transport = transportFactor(simulation.windForce, simulation.duration)
   const spread = Math.max(30, 100 - simulation.windForce * 6)
   const rainfall = RAINFALL[simulation.rainfall]
+  return { level, capacityFactor, transport, spread, rainfall }
+}
+
+function simulationArea(plant, simulation) {
+  const { level, capacityFactor, transport, spread, rainfall } = scenarioGeometry(plant, simulation)
   const core = turfCircle([plant.lng, plant.lat], level.coreRadius * capacityFactor, { units: 'kilometers', steps: 48 })
   const outerZone = level.zones.at(-1)
-  const sectorPoints = plumeSector([plant.lat, plant.lng], outerZone.radius * capacityFactor * durationFactor * rainfall.distanceFactor, simulation.direction, spread)
+  const sectorPoints = plumeSector([plant.lat, plant.lng], outerZone.radius * capacityFactor * transport * rainfall.distanceFactor, simulation.direction, spread)
   const sector = turfPolygon([[...sectorPoints.map(([lat, lng]) => [lng, lat]), [plant.lng, plant.lat]]])
   return union(featureCollection([core, sector])).geometry
 }
@@ -135,7 +154,7 @@ function splitPopulationArea(area) {
   const areas = []
   for (let lng = Math.floor(west); lng < Math.ceil(east); lng += 1) {
     for (let lat = Math.floor(south); lat < Math.ceil(north); lat += 1) {
-      const clipped = intersect(featureCollection([area, bboxPolygon([lng, lat, Math.min(lng + 1, east), Math.min(lat + 1, north)])]))
+      const clipped = intersect(featureCollection([toFeature(area), bboxPolygon([lng, lat, Math.min(lng + 1, east), Math.min(lat + 1, north)])]))
       if (clipped) areas.push(clipped.geometry)
     }
   }
@@ -168,22 +187,14 @@ function PlantMarker({ plant, selected, simulation, onClick, onDragEnd }) {
   const color = STATUS_COLOR[plant.status] || '#6b7280'
   const size = capacityMarkerSize(plant.capacity || 0) + (selected ? 5 : 0)
   const simulationZones = simulation && selected ? (() => {
-    const level = SCENARIO_LEVELS[simulation.level]
-    // Electrical capacity is only a visual proxy for potential inventory, but
-    // keep the scale distinct enough for different-sized stations to compare.
-    const capacityFactor = Math.max(0.65, 0.65 + (plant.capacity || 1000) / 4000)
-    // 0 represents an ongoing release. Its finite visual extent is a diluted
-    // far-field reference, not a claim that the plume stops at that boundary.
-    const durationFactor = simulation.duration === 0 ? 2.2 : 1 + Math.log1p(simulation.duration) * 0.16
-    const spread = Math.max(30, 100 - simulation.windForce * 6)
-    const rainfall = RAINFALL[simulation.rainfall]
+    const { level, capacityFactor, transport, spread, rainfall } = scenarioGeometry(plant, simulation)
     return <>
       <Source id={`core-${plant.id}`} type="geojson" data={toFeature(circleGeometry(plant.lng, plant.lat, level.coreRadius * capacityFactor))}>
         <Layer id={`core-${plant.id}-fill`} type="fill" paint={{ 'fill-color': '#ef4444', 'fill-opacity': 0.18 }} />
         <Layer id={`core-${plant.id}-line`} type="line" paint={{ 'line-color': '#ef4444', 'line-width': 1.5 }} />
       </Source>
       {[...level.zones].reverse().map(zone => (
-        <Source key={zone.key} id={`zone-${plant.id}-${zone.key}`} type="geojson" data={toFeature(wedgeGeometry([plant.lat, plant.lng], zone.radius * capacityFactor * durationFactor * rainfall.distanceFactor, simulation.direction, spread))}>
+        <Source key={zone.key} id={`zone-${plant.id}-${zone.key}`} type="geojson" data={toFeature(wedgeGeometry([plant.lat, plant.lng], zone.radius * capacityFactor * transport * rainfall.distanceFactor, simulation.direction, spread))}>
           <Layer id={`zone-${plant.id}-${zone.key}-fill`} type="fill" paint={{ 'fill-color': zone.color, 'fill-opacity': rainfall.opacity }} />
           <Layer id={`zone-${plant.id}-${zone.key}-line`} type="line" paint={{ 'line-color': zone.color, 'line-width': 1.5 }} />
         </Source>
