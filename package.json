@@ -8,10 +8,12 @@
     "build": "vite build",
     "lint": "oxlint",
     "preview": "vite preview",
-    "data:sync": "node scripts/sync-nuclear-data.mjs"
+    "data:sync": "node scripts/sync-nuclear-data.mjs",
+    "data:population": "node scripts/build-population-grid.mjs"
   },
   "dependencies": {
     "@turf/turf": "^7.4.0",
+    "geotiff": "^3.0.5",
     "maplibre-gl": "^6.5.0",
     "qrcode": "^1.5.4",
     "react": "^19.2.8",
