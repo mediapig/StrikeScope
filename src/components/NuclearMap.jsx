@@ -44,10 +44,10 @@ const RAINFALL = {
 
 const COPY = {
   zh: {
-    title: '☢ StrikeScope — 全球核电站场景推演', statusTitle: '核电站状态', reactor: '堆型', capacity: '装机容量', selectPlant: '选择电站', planning: '规划参考区', simulation: '模拟范围', core: '全向近场警戒', downwind: '（顺风）', scenario: '事故场景推演', selectHint: '请先点击地图上的核电站', release: '放射性释放规模', direction: '扩散方向', wind: '风力', rainfall: '降雨强度', duration: '释放持续时间（小时）', trigger: '触发模拟', clear: '清除模拟', ongoing: '输入 0 代表持续释放；远场仅表示稀释后的参考影响。', rainHint: '降雨越强，模拟越偏向近场湿沉降。', windHint: '0级无风 · 3级微风 · 6级强风 · 9级烈风 · 12级飓风', directionHint: '0° 北 · 90° 东 · 180° 南 · 270° 西', populationTitle: '模拟区域估算人口', populationLoading: '正在计算人口…', populationError: '暂时无法取得人口估算', populationNote: '基于 WorldPop 人口栅格；为模拟区域内常住人口估算，不代表实际暴露或撤离人数。', disclaimer: '仅为可视化推演：结合装机容量、释放时间与风向生成示意羽流；不是剂量预测或应急指令。', status: { operating: '运营中', decommissioned: '已关闭', construction: '建设中', planned: '计划中' }, reference: { plume: '羽流应急规划参考区 (16km)', ingestion: '摄入途径规划参考区 (80km)' }, level: { low: '小规模释放', medium: '中等规模释放', high: '大规模释放' }, zone: { plume: '羽流防护参考', monitoring: '监测参考' }, rain: { none: '无雨', light: '小雨', moderate: '中雨', heavy: '大雨' }, unknown: '未知', north: '北', east: '东', south: '南', west: '西', mw: 'MW', forceSuffix: '级', unitSeparator: ' · ', searchPlaceholder: '搜索电站或国家…', dataSource: '数据来源：Global Energy Monitor 全球核电追踪（Global Nuclear Power Tracker）', units: '机组数', commissioned: '投产年份', plannedStart: '计划投产', operator: '运营商', statusFilterHint: '点击可在地图上显示/隐藏该类电站', measure: '测量距离', measureHint: '在地图上点击两个点测量距离', measureClear: '清除测距', km: '公里',
+    title: '☢ StrikeScope — 全球核电站场景推演', statusTitle: '核电站状态', reactor: '堆型', capacity: '装机容量', selectPlant: '选择电站', planning: '规划参考区', simulation: '模拟范围', core: '全向近场警戒', downwind: '（顺风）', scenario: '事故场景推演', selectHint: '请先点击地图上的核电站', release: '放射性释放规模', direction: '扩散方向', wind: '风力', rainfall: '降雨强度', duration: '释放持续时间（小时）', trigger: '触发模拟', clear: '清除模拟', ongoing: '输入 0 代表持续释放；远场仅表示稀释后的参考影响。', rainHint: '降雨越强，模拟越偏向近场湿沉降。', windHint: '0级无风 · 3级微风 · 6级强风 · 9级烈风 · 12级飓风', directionHint: '0° 北 · 90° 东 · 180° 南 · 270° 西', populationTitle: '模拟区域估算人口', populationLoading: '正在计算人口…', populationError: '暂时无法取得人口估算', populationNote: '基于 WorldPop 人口栅格；为模拟区域内常住人口估算，不代表实际暴露或撤离人数。', disclaimer: '仅为可视化推演：结合装机容量、释放时间与风向生成示意羽流；不是剂量预测或应急指令。', status: { operating: '运营中', decommissioned: '已关闭', construction: '建设中', planned: '计划中' }, reference: { plume: '羽流应急规划参考区 (16km)', ingestion: '摄入途径规划参考区 (80km)' }, level: { low: '小规模释放', medium: '中等规模释放', high: '大规模释放' }, zone: { plume: '羽流防护参考', monitoring: '监测参考' }, rain: { none: '无雨', light: '小雨', moderate: '中雨', heavy: '大雨' }, unknown: '未知', north: '北', east: '东', south: '南', west: '西', mw: 'MW', forceSuffix: '级', unitSeparator: ' · ', searchPlaceholder: '搜索电站或国家…', dataSource: '数据来源：Global Energy Monitor 全球核电追踪（Global Nuclear Power Tracker）', units: '机组数', commissioned: '投产年份', plannedStart: '计划投产', operator: '运营商', statusFilterHint: '点击可在地图上显示/隐藏该类电站', measure: '测量距离', measureHint: '在地图或核电站上依次点击多个点，测量折线总距离', measureClear: '清除测距', measureReset: '重新开始', measureTotal: '总距离', km: '公里',
   },
   en: {
-    title: '☢ StrikeScope — Nuclear Scenario Explorer', statusTitle: 'Plant status', reactor: 'Reactor type', capacity: 'Installed capacity', selectPlant: 'Select plant', planning: 'Planning references', simulation: 'Simulation zones', core: 'All-direction near-field alert', downwind: ' (downwind)', scenario: 'Accident scenario', selectHint: 'Select a nuclear plant on the map first', release: 'Radioactive release scale', direction: 'Plume direction', wind: 'Wind force', rainfall: 'Rainfall', duration: 'Release duration (hours)', trigger: 'Run simulation', clear: 'Clear simulation', ongoing: 'Enter 0 for an ongoing release; the far field is a diluted reference only.', rainHint: 'Stronger rain shifts this illustration toward near-field wet deposition.', windHint: '0 calm · 3 gentle breeze · 6 strong breeze · 9 strong gale · 12 hurricane', directionHint: '0° N · 90° E · 180° S · 270° W', populationTitle: 'Estimated residents in simulation area', populationLoading: 'Calculating population…', populationError: 'Population estimate is currently unavailable', populationNote: 'Based on WorldPop population grids; this estimates resident population in the simulated area, not actual exposure or evacuation.', disclaimer: 'Visualization only: this illustrative plume uses capacity, duration, and wind. It is not a dose forecast or emergency instruction.', status: { operating: 'Operating', decommissioned: 'Closed', construction: 'Under construction', planned: 'Planned' }, reference: { plume: 'Plume planning reference (16 km)', ingestion: 'Ingestion planning reference (80 km)' }, level: { low: 'Small release', medium: 'Moderate release', high: 'Large release' }, zone: { plume: 'Plume protection reference', monitoring: 'Monitoring reference' }, rain: { none: 'No rain', light: 'Light rain', moderate: 'Moderate rain', heavy: 'Heavy rain' }, unknown: 'Unknown', north: 'N', east: 'E', south: 'S', west: 'W', mw: 'MW', forceSuffix: '', unitSeparator: ' · ', searchPlaceholder: 'Search plant or country…', dataSource: 'Data: Global Energy Monitor Global Nuclear Power Tracker', units: 'Units', commissioned: 'Commissioned', plannedStart: 'Planned start', operator: 'Operator', statusFilterHint: 'Click to show/hide this status on the map', measure: 'Measure distance', measureHint: 'Click two points on the map to measure the distance', measureClear: 'Clear measurement', km: 'km',
+    title: '☢ StrikeScope — Nuclear Scenario Explorer', statusTitle: 'Plant status', reactor: 'Reactor type', capacity: 'Installed capacity', selectPlant: 'Select plant', planning: 'Planning references', simulation: 'Simulation zones', core: 'All-direction near-field alert', downwind: ' (downwind)', scenario: 'Accident scenario', selectHint: 'Select a nuclear plant on the map first', release: 'Radioactive release scale', direction: 'Plume direction', wind: 'Wind force', rainfall: 'Rainfall', duration: 'Release duration (hours)', trigger: 'Run simulation', clear: 'Clear simulation', ongoing: 'Enter 0 for an ongoing release; the far field is a diluted reference only.', rainHint: 'Stronger rain shifts this illustration toward near-field wet deposition.', windHint: '0 calm · 3 gentle breeze · 6 strong breeze · 9 strong gale · 12 hurricane', directionHint: '0° N · 90° E · 180° S · 270° W', populationTitle: 'Estimated residents in simulation area', populationLoading: 'Calculating population…', populationError: 'Population estimate is currently unavailable', populationNote: 'Based on WorldPop population grids; this estimates resident population in the simulated area, not actual exposure or evacuation.', disclaimer: 'Visualization only: this illustrative plume uses capacity, duration, and wind. It is not a dose forecast or emergency instruction.', status: { operating: 'Operating', decommissioned: 'Closed', construction: 'Under construction', planned: 'Planned' }, reference: { plume: 'Plume planning reference (16 km)', ingestion: 'Ingestion planning reference (80 km)' }, level: { low: 'Small release', medium: 'Moderate release', high: 'Large release' }, zone: { plume: 'Plume protection reference', monitoring: 'Monitoring reference' }, rain: { none: 'No rain', light: 'Light rain', moderate: 'Moderate rain', heavy: 'Heavy rain' }, unknown: 'Unknown', north: 'N', east: 'E', south: 'S', west: 'W', mw: 'MW', forceSuffix: '', unitSeparator: ' · ', searchPlaceholder: 'Search plant or country…', dataSource: 'Data: Global Energy Monitor Global Nuclear Power Tracker', units: 'Units', commissioned: 'Commissioned', plannedStart: 'Planned start', operator: 'Operator', statusFilterHint: 'Click to show/hide this status on the map', measure: 'Measure distance', measureHint: 'Click multiple points on the map or on plants to measure the total path distance', measureClear: 'Clear measurement', measureReset: 'Restart', measureTotal: 'Total distance', km: 'km',
   },
 }
 
@@ -279,7 +279,7 @@ export default function NuclearMap() {
     setSimulation(null)
     setPopulation({ status: 'idle', result: null })
   }
-  const addMeasurePoint = point => setMeasurePoints(previous => previous.length >= 2 ? [point] : [...previous, point])
+  const addMeasurePoint = point => setMeasurePoints(previous => [...previous, point])
   const handleMapClick = event => {
     if (placingPlant) { placePlant(event.lngLat); return }
     if (measuring) addMeasurePoint(event.lngLat)
@@ -306,11 +306,12 @@ export default function NuclearMap() {
     mapRef.current?.flyTo({ center: [plant.lng, plant.lat], zoom: Math.max(mapRef.current.getZoom(), 6), duration: 1000 })
     setSearchQuery('')
   }
-  const measureLine = measurePoints.length === 2 ? (() => {
-    const from = [measurePoints[0].lng, measurePoints[0].lat]
-    const to = [measurePoints[1].lng, measurePoints[1].lat]
-    return { distanceKm: turfDistance(from, to, { units: 'kilometers' }), midpoint: turfMidpoint(from, to).geometry.coordinates }
-  })() : null
+  const measureSegments = measurePoints.slice(1).map((point, index) => {
+    const from = [measurePoints[index].lng, measurePoints[index].lat]
+    const to = [point.lng, point.lat]
+    return { key: index, distanceKm: turfDistance(from, to, { units: 'kilometers' }), midpoint: turfMidpoint(from, to).geometry.coordinates }
+  })
+  const measureTotalKm = measureSegments.reduce((total, segment) => total + segment.distanceKm, 0)
 
   return <div style={{ position: 'relative', width: '100vw', height: '100vh' }}>
     <style>{`
@@ -336,15 +337,17 @@ export default function NuclearMap() {
           <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#facc15', border: '2px solid white', boxShadow: '0 0 4px rgba(0,0,0,0.6)' }} />
         </Marker>
       ))}
-      {measureLine && <>
+      {measurePoints.length >= 2 && <>
         <Source id="measure-line" type="geojson" data={{ type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: measurePoints.map(point => [point.lng, point.lat]) } }}>
           <Layer id="measure-line-layer" type="line" paint={{ 'line-color': '#facc15', 'line-width': 2, 'line-dasharray': [2, 2] }} />
         </Source>
-        <Marker longitude={measureLine.midpoint[0]} latitude={measureLine.midpoint[1]} anchor="bottom" offset={[0, -8]}>
-          <div style={{ background: 'rgba(15,15,15,0.9)', color: '#facc15', padding: '3px 8px', borderRadius: 4, fontSize: 12, fontWeight: 600, whiteSpace: 'nowrap', border: '1px solid #facc15' }}>
-            {Math.round(measureLine.distanceKm).toLocaleString(locale === 'zh' ? 'zh-CN' : 'en-US')} {copy.km}
-          </div>
-        </Marker>
+        {measureSegments.map(segment => (
+          <Marker key={segment.key} longitude={segment.midpoint[0]} latitude={segment.midpoint[1]} anchor="bottom" offset={[0, -8]}>
+            <div style={{ background: 'rgba(15,15,15,0.9)', color: '#facc15', padding: '3px 8px', borderRadius: 4, fontSize: 12, fontWeight: 600, whiteSpace: 'nowrap', border: '1px solid #facc15' }}>
+              {Math.round(segment.distanceKm).toLocaleString(locale === 'zh' ? 'zh-CN' : 'en-US')} {copy.km}
+            </div>
+          </Marker>
+        ))}
       </>}
       {selectedPlant && <Popup longitude={selectedPlant.lng} latitude={selectedPlant.lat} anchor="bottom" offset={14} closeOnClick={false} onClose={() => setSelectedPlant(null)}>
         <div style={{ minWidth: 180 }}>
@@ -422,7 +425,11 @@ export default function NuclearMap() {
         onClick={toggleMeasuring}
         style={{ width: '100%', padding: '7px 10px', borderRadius: 6, border: '1px solid #6b7280', background: measuring ? '#f59e0b' : 'rgba(15,15,15,0.88)', color: 'white', cursor: 'pointer', fontSize: 12, fontWeight: measuring ? 700 : 400, boxShadow: '0 1px 4px rgba(0,0,0,0.45)' }}
       >{measuring ? copy.measureClear : copy.measure}</button>
-      {measuring && <div style={{ color: '#d1d5db', fontSize: 11, background: 'rgba(15,15,15,0.85)', padding: '6px 8px', borderRadius: 6 }}>{copy.measureHint}</div>}
+      {measuring && <div style={{ color: '#d1d5db', fontSize: 11, background: 'rgba(15,15,15,0.85)', padding: '6px 8px', borderRadius: 6 }}>
+        {measureSegments.length > 0
+          ? <><span style={{ color: '#facc15', fontWeight: 700 }}>{copy.measureTotal}: {Math.round(measureTotalKm).toLocaleString(locale === 'zh' ? 'zh-CN' : 'en-US')} {copy.km}</span>{' · '}<button type="button" onClick={() => setMeasurePoints([])} style={{ background: 'none', border: 'none', padding: 0, color: '#93c5fd', textDecoration: 'underline', cursor: 'pointer', font: 'inherit' }}>{copy.measureReset}</button></>
+          : copy.measureHint}
+      </div>}
     </div>
   </div>
 }
