@@ -95,6 +95,47 @@ function circleGeometry(lng, lat, radiusKm) {
 
 const toFeature = geometry => ({ type: 'Feature', properties: {}, geometry })
 
+// Subsolar point (the point on Earth directly under the sun) via the
+// standard low-precision solar-position formulas (NOAA/Meeus).
+function subsolarPoint(date) {
+  const rad = Math.PI / 180
+  const julianDate = date.getTime() / 86400000 + 2440587.5
+  const daysSinceJ2000 = julianDate - 2451545
+  const meanLongitude = (280.460 + 0.9856474 * daysSinceJ2000) % 360
+  const meanAnomaly = (357.528 + 0.9856003 * daysSinceJ2000) % 360
+  const eclipticLongitude = meanLongitude + 1.915 * Math.sin(meanAnomaly * rad) + 0.02 * Math.sin(2 * meanAnomaly * rad)
+  const obliquity = 23.439 - 0.0000004 * daysSinceJ2000
+  const rightAscension = Math.atan2(Math.cos(obliquity * rad) * Math.sin(eclipticLongitude * rad), Math.cos(eclipticLongitude * rad)) / rad
+  const declination = Math.asin(Math.sin(obliquity * rad) * Math.sin(eclipticLongitude * rad)) / rad
+  const greenwichMeanSiderealTime = (280.46061837 + 360.98564736629 * daysSinceJ2000) % 360
+  const lng = (((rightAscension - greenwichMeanSiderealTime) % 360) + 540) % 360 - 180
+  return { lat: declination, lng }
+}
+// The night region as an explicit terminator curve (one latitude per
+// longitude, standard sun-angle formula) rather than a geodesic circle: a
+// circle of quarter-Earth radius is topologically a full great circle, which
+// has no simple non-self-overlapping representation in flat lng/lat space
+// (any fix for the antimeridian jump still leaves a ring that spans a full
+// 360 degrees of longitude, which MapLibre's flat 2D polygon fill can't
+// triangulate correctly - it ends up filling the whole tile). Sampling the
+// terminator as a function of longitude and closing the ring through the
+// pole that's in permanent darkness keeps every coordinate within the
+// normal -180..180 range, so it's a simple polygon by construction.
+function nightHemisphere(date) {
+  const sun = subsolarPoint(date)
+  const rad = Math.PI / 180
+  const declinationRad = sun.lat * rad
+  const steps = 180
+  const curve = Array.from({ length: steps + 1 }, (_, index) => {
+    const lng = -180 + (360 * index) / steps
+    const hourAngle = (lng - sun.lng) * rad
+    const lat = Math.atan(-Math.cos(hourAngle) / Math.tan(declinationRad)) / rad
+    return [lng, lat]
+  })
+  const nightPoleLat = sun.lat > 0 ? -90 : 90
+  return toFeature({ type: 'Polygon', coordinates: [[...curve, [180, nightPoleLat], [-180, nightPoleLat], curve[0]]] })
+}
+
 // Midpoint wind speed (m/s) for each Beaufort force 0-12.
 const BEAUFORT_MS = [0, 0.8, 2.4, 4.4, 6.7, 9.4, 12.3, 15.5, 18.9, 22.6, 26.4, 30.5, 34]
 const windSpeedMs = force => BEAUFORT_MS[Math.min(12, Math.max(0, Math.round(force)))]
@@ -246,6 +287,7 @@ export default function NuclearMap() {
   const [measuring, setMeasuring] = useState(false)
   const [measurePoints, setMeasurePoints] = useState([])
   const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.matchMedia('(max-width: 640px)').matches)
+  const [now, setNow] = useState(() => new Date())
   const [mobileCreateOpen, setMobileCreateOpen] = useState(false)
   const [scenarioOpen, setScenarioOpen] = useState(false)
   const [shareStatus, setShareStatus] = useState('idle')
@@ -274,6 +316,10 @@ export default function NuclearMap() {
     document.documentElement.lang = locale === 'zh' ? 'zh-CN' : 'en'
     localStorage.setItem('strikescope-locale', locale)
   }, [locale])
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 60000)
+    return () => clearInterval(timer)
+  }, [])
   useEffect(() => {
     const query = window.matchMedia('(max-width: 640px)')
     const handleChange = event => setIsMobile(event.matches)
@@ -446,6 +492,9 @@ export default function NuclearMap() {
       cursor={placingPlant || measuring ? 'crosshair' : 'grab'}
     >
       <NavigationControl position="top-right" />
+      <Source id="night" type="geojson" data={nightHemisphere(now)}>
+        <Layer id="night-fill" type="fill" paint={{ 'fill-color': '#000000', 'fill-opacity': 0.55 }} />
+      </Source>
       {visiblePlants.map(plant => <PlantMarker key={plant.id} plant={plant} selected={selectedPlant?.id === plant.id} simulation={simulation} onClick={handlePlantClick} onDragEnd={movePlant} />)}
       {measurePoints.map((point, index) => (
         <Marker key={index} longitude={point.lng} latitude={point.lat} anchor="center">
