@@ -215,6 +215,7 @@ export default function NuclearMap() {
   const [placingPlant, setPlacingPlant] = useState(false)
   const [newPlant, setNewPlant] = useState({ name: '', reactorType: 'PWR', capacity: 1000, status: 'operating' })
   const [searchQuery, setSearchQuery] = useState('')
+  const [zoom, setZoom] = useState(2)
   const mapRef = useRef(null)
   const selectPlant = plant => { setSelectedPlant(previous => previous?.id === plant.id ? null : plant); setSimulation(null); setPopulation({ status: 'idle', result: null }) }
   const update = (key, value) => setConditions(previous => ({ ...previous, [key]: value }))
@@ -284,6 +285,7 @@ export default function NuclearMap() {
       style={{ width: '100%', height: '100%' }}
       mapStyle={MAP_STYLE}
       onClick={handleMapClick}
+      onMove={event => setZoom(event.viewState.zoom)}
       cursor={placingPlant ? 'crosshair' : 'grab'}
     >
       <NavigationControl position="top-right" />
@@ -297,6 +299,7 @@ export default function NuclearMap() {
         </div>
       </Popup>}
     </Map>
+    <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', mixBlendMode: 'overlay', opacity: Math.max(0, Math.min(1, (6 - zoom) / 3)), background: 'radial-gradient(ellipse 55% 55% at 46% 44%, rgba(255,244,214,0.95) 0%, rgba(255,244,214,0.4) 30%, rgba(255,244,214,0) 55%)' }} />
 
     <div style={{ position: 'absolute', bottom: 30, left: 16, zIndex: 1000, background: 'rgba(15,15,15,0.85)', color: 'white', padding: '12px 16px', borderRadius: 8, fontSize: 12, backdropFilter: 'blur(4px)' }}>
       <div style={{ fontWeight: 600, marginBottom: 8 }}>{copy.statusTitle}</div>
