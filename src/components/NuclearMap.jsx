@@ -293,12 +293,15 @@ export default function NuclearMap() {
       .then(result => setPopulation({ status: 'success', result }))
       .catch(() => setPopulation({ status: 'error', result: null }))
   }
-  const shareResult = async () => {
-    if (!selectedPlant || !simulation) return
+  const buildShareText = () => {
     const populationText = population.status === 'success' ? Math.round(population.result.total_population).toLocaleString(locale === 'zh' ? 'zh-CN' : 'en-US') : copy.unknown
-    const text = locale === 'zh'
+    return locale === 'zh'
       ? `${plantName(selectedPlant, locale)} · ${copy.level[simulation.level]}事故场景推演\n模拟区域估算人口：${populationText}\n${copy.disclaimer}`
       : `${plantName(selectedPlant, locale)} · ${copy.level[simulation.level]} accident scenario\nEstimated residents in simulation area: ${populationText}\n${copy.disclaimer}`
+  }
+  const shareResult = async () => {
+    if (!selectedPlant || !simulation) return
+    const text = buildShareText()
     const url = window.location.href
     const canvas = mapRef.current?.getMap()?.getCanvas()
     try {
@@ -392,8 +395,8 @@ export default function NuclearMap() {
       <button type="submit" disabled={!selectedPlant} style={{ width: '100%', padding: '8px 10px', fontSize: 13, fontWeight: 600, background: selectedPlant ? '#dc2626' : '#4b5563', color: 'white', border: 'none', borderRadius: 4, cursor: selectedPlant ? 'pointer' : 'not-allowed' }}>{copy.trigger}</button>
       {simulation && <button type="button" onClick={() => { setSimulation(null); setPopulation({ status: 'idle', result: null }) }} style={{ width: '100%', padding: '7px 10px', marginTop: 8, fontSize: 12, background: '#374151', color: 'white', border: 'none', borderRadius: 4, cursor: 'pointer' }}>{copy.clear}</button>}
       {simulation && <button type="button" onClick={shareResult} style={{ width: '100%', padding: '7px 10px', marginTop: 8, fontSize: 12, background: '#0f766e', color: 'white', border: 'none', borderRadius: 4, cursor: 'pointer' }}>{copy.share}</button>}
-      {shareStatus === 'copied' && <div style={{ marginTop: 8, padding: '6px 8px', fontSize: 11, color: '#5eead4', background: 'rgba(15,118,110,0.15)', border: '1px solid #0f766e', borderRadius: 4 }}>
-        {copy.shareCopied}{' · '}<a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(window.location.href)}`} target="_blank" rel="noopener noreferrer" style={{ color: '#5eead4' }}>{copy.shareX}</a>
+      {shareStatus === 'copied' && simulation && <div style={{ marginTop: 8, padding: '6px 8px', fontSize: 11, color: '#5eead4', background: 'rgba(15,118,110,0.15)', border: '1px solid #0f766e', borderRadius: 4 }}>
+        {copy.shareCopied}{' · '}<a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(buildShareText())}&url=${encodeURIComponent(window.location.href)}`} target="_blank" rel="noopener noreferrer" style={{ color: '#5eead4' }}>{copy.shareX}</a>
       </div>}
       {population.status !== 'idle' && <div style={{ marginTop: 12, paddingTop: 10, borderTop: '1px solid #374151' }}>
         <div style={{ fontWeight: 600, marginBottom: 4 }}>{copy.populationTitle}</div>
