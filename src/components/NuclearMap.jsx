@@ -323,6 +323,30 @@ function simulationArea(plant, simulation) {
   return union(featureCollection([core, sector])).geometry
 }
 
+// Fallout plume for a detonation: reuses the exact same wind/rain transport
+// model as the reactor plume above, just scaled from yield instead of
+// reactor capacity. Blast and thermal effects are instantaneous and
+// omnidirectional (the DETONATION_ZONE rings), but fallout genuinely does
+// depend on wind, duration, and rain the same way a reactor release does -
+// this is a rough order-of-magnitude illustration of that, not a fallout
+// prediction (real fallout extent varies enormously with burst height,
+// weather, and terrain).
+const FALLOUT_RADIUS_FACTOR = 8
+function detonationFalloutGeometry(detonation, simulation) {
+  const kt = DETONATION_YIELDS[detonation.yieldKey]
+  const transport = transportFactor(simulation.windForce, simulation.duration)
+  const spread = Math.max(30, 100 - simulation.windForce * 6)
+  const rainfall = RAINFALL[simulation.rainfall]
+  const radius = FALLOUT_RADIUS_FACTOR * Math.cbrt(kt) * transport * rainfall.distanceFactor
+  return wedgeGeometry([detonation.lat, detonation.lng], radius, simulation.direction, spread)
+}
+function detonationSimulationArea(detonation, simulation) {
+  const outerRadius = detonationZones(DETONATION_YIELDS[detonation.yieldKey])[0].radius
+  const core = turfCircle([detonation.lng, detonation.lat], outerRadius, { units: 'kilometers', steps: 48 })
+  const fallout = turfPolygon(detonationFalloutGeometry(detonation, simulation).coordinates)
+  return union(featureCollection([core, fallout])).geometry
+}
+
 const pause = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds))
 
 async function requestPopulation(area) {
@@ -416,8 +440,9 @@ function PlantMarker({ plant, selected, simulation, onClick, onDragEnd }) {
   </>
 }
 
-function DetonationMarker({ detonation, selected, onClick }) {
+function DetonationMarker({ detonation, selected, simulation, onClick }) {
   const zones = detonationZones(DETONATION_YIELDS[detonation.yieldKey])
+  const showEffects = selected && simulation
   return <>
     <Marker
       longitude={detonation.lng} latitude={detonation.lat} anchor="center"
@@ -425,12 +450,18 @@ function DetonationMarker({ detonation, selected, onClick }) {
     >
       <div style={{ width: selected ? 22 : 18, height: selected ? 22 : 18, borderRadius: '50%', background: 'radial-gradient(circle, #fff7d6 0%, #f97316 45%, #7f1d1d 100%)', border: '2px solid white', boxShadow: `0 0 ${selected ? 10 : 5}px rgba(249,115,22,0.9)`, cursor: 'pointer' }} />
     </Marker>
-    {selected && zones.map(zone => (
+    {showEffects && zones.map(zone => (
       <Source key={zone.key} id={`det-${detonation.id}-${zone.key}`} type="geojson" data={toFeature(circleGeometry(detonation.lng, detonation.lat, zone.radius))}>
         <Layer id={`det-${detonation.id}-${zone.key}-fill`} type="fill" paint={{ 'fill-color': zone.color, 'fill-opacity': 0.16 }} />
         <Layer id={`det-${detonation.id}-${zone.key}-line`} type="line" paint={{ 'line-color': zone.color, 'line-width': 1.5 }} />
       </Source>
     ))}
+    {showEffects && (
+      <Source id={`det-${detonation.id}-fallout`} type="geojson" data={toFeature(detonationFalloutGeometry(detonation, simulation))}>
+        <Layer id={`det-${detonation.id}-fallout-fill`} type="fill" paint={{ 'fill-color': '#eab308', 'fill-opacity': RAINFALL[simulation.rainfall].opacity }} />
+        <Layer id={`det-${detonation.id}-fallout-line`} type="line" paint={{ 'line-color': '#eab308', 'line-width': 1.5 }} />
+      </Source>
+    )}
   </>
 }
 
@@ -469,6 +500,7 @@ export default function NuclearMap() {
   const [placingDetonation, setPlacingDetonation] = useState(false)
   const [newDetonationYield, setNewDetonationYield] = useState('hiroshima')
   const [selectedDetonation, setSelectedDetonation] = useState(null)
+  const [detonationSimulation, setDetonationSimulation] = useState(null)
   const [detonationPopulation, setDetonationPopulation] = useState({ status: 'idle', result: null })
   const mapRef = useRef(null)
   const selectPlant = plant => {
@@ -480,6 +512,7 @@ export default function NuclearMap() {
     setSimulation(null)
     setPopulation({ status: 'idle', result: null })
     setSelectedDetonation(null)
+    setDetonationSimulation(null)
     setDetonationPopulation({ status: 'idle', result: null })
   }
   const toggleStatus = key => {
@@ -520,15 +553,31 @@ export default function NuclearMap() {
       .then(result => setPopulation({ status: 'success', result }))
       .catch(() => setPopulation({ status: 'error', result: null }))
   }
-  useEffect(() => {
+  const runDetonationSimulation = event => {
+    event.preventDefault()
     if (!selectedDetonation) return
-    const outerRadius = detonationZones(DETONATION_YIELDS[selectedDetonation.yieldKey])[0].radius
-    getPopulation(toFeature(circleGeometry(selectedDetonation.lng, selectedDetonation.lat, outerRadius)))
+    const nextSimulation = { direction: Number(conditions.direction), windForce: Number(conditions.windForce), rainfall: conditions.rainfall, duration: Number(conditions.duration) }
+    setDetonationSimulation(nextSimulation)
+    setDetonationPopulation({ status: 'loading', result: null })
+    getPopulation(toFeature(detonationSimulationArea(selectedDetonation, nextSimulation)))
       .then(result => setDetonationPopulation({ status: 'success', result }))
       .catch(() => setDetonationPopulation({ status: 'error', result: null }))
-  }, [selectedDetonation])
+  }
+  const isDetonation = !selectedPlant && !!selectedDetonation
+  const activeSelection = selectedPlant || selectedDetonation
+  const activeSimulation = isDetonation ? detonationSimulation : simulation
+  const activePopulation = isDetonation ? detonationPopulation : population
+  const clearActiveSimulation = () => {
+    if (isDetonation) { setDetonationSimulation(null); setDetonationPopulation({ status: 'idle', result: null }) }
+    else { setSimulation(null); setPopulation({ status: 'idle', result: null }) }
+  }
   const shareCaption = () => {
-    const populationText = population.status === 'success' ? Math.round(population.result.total_population).toLocaleString(locale === 'zh' ? 'zh-CN' : 'en-US') : copy.unknown
+    const populationText = activePopulation.status === 'success' ? Math.round(activePopulation.result.total_population).toLocaleString(locale === 'zh' ? 'zh-CN' : 'en-US') : copy.unknown
+    if (isDetonation) {
+      const headline = copy.detonationYield[selectedDetonation.yieldKey]
+      const populationLine = locale === 'zh' ? `受影响区域估算人口：${populationText}` : `Estimated residents in affected area: ${populationText}`
+      return [headline, populationLine]
+    }
     const headline = locale === 'zh'
       ? `${plantName(selectedPlant, locale)} · ${copy.level[simulation.level]}事故场景推演`
       : `${plantName(selectedPlant, locale)} · ${copy.level[simulation.level]} accident scenario`
@@ -537,14 +586,14 @@ export default function NuclearMap() {
   }
   const buildShareText = () => {
     const [headline, populationLine] = shareCaption()
-    return `${headline}\n${populationLine}\n${copy.disclaimer}`
+    return `${headline}\n${populationLine}\n${isDetonation ? copy.detonationDisclaimer : copy.disclaimer}`
   }
   const shareResult = async () => {
-    if (!selectedPlant || !simulation) return
+    if (!activeSelection || !activeSimulation) return
     const mapCanvas = mapRef.current?.getMap()?.getCanvas()
     const url = window.location.href
     const text = buildShareText()
-    const composed = mapCanvas && await composeShareImage(mapCanvas, shareCaption(), url, copy.disclaimer).catch(() => null)
+    const composed = mapCanvas && await composeShareImage(mapCanvas, shareCaption(), url, isDetonation ? copy.detonationDisclaimer : copy.disclaimer).catch(() => null)
     const blob = composed && await new Promise(resolve => composed.toBlob(resolve, 'image/png'))
     try {
       if (blob) {
@@ -590,6 +639,7 @@ export default function NuclearMap() {
     setSimulation(null)
     setPopulation({ status: 'idle', result: null })
     setSelectedDetonation(null)
+    setDetonationSimulation(null)
     setDetonationPopulation({ status: 'idle', result: null })
     setPlacingPlant(false)
     setMobileCreateOpen(false)
@@ -599,22 +649,28 @@ export default function NuclearMap() {
     const detonation = { id: `det-${Date.now()}`, lat, lng, yieldKey: newDetonationYield }
     setDetonations(previous => [...previous, detonation])
     setSelectedDetonation(detonation)
-    setDetonationPopulation({ status: 'loading', result: null })
+    setDetonationSimulation(null)
+    setDetonationPopulation({ status: 'idle', result: null })
     setSelectedPlant(null)
+    setSimulation(null)
+    setPopulation({ status: 'idle', result: null })
     setPlacingDetonation(false)
     setMobileCreateOpen(false)
+    setScenarioOpen(true)
   }
   const selectDetonation = detonation => {
-    setSelectedDetonation(previous => {
-      const next = previous?.id === detonation.id ? null : detonation
-      setDetonationPopulation(next ? { status: 'loading', result: null } : { status: 'idle', result: null })
-      return next
-    })
+    setSelectedDetonation(previous => previous?.id === detonation.id ? null : detonation)
     setSelectedPlant(null)
+    setSimulation(null)
+    setPopulation({ status: 'idle', result: null })
+    setDetonationSimulation(null)
+    setDetonationPopulation({ status: 'idle', result: null })
+    setScenarioOpen(true)
   }
   const removeDetonation = id => {
     setDetonations(previous => previous.filter(detonation => detonation.id !== id))
     setSelectedDetonation(null)
+    setDetonationSimulation(null)
     setDetonationPopulation({ status: 'idle', result: null })
   }
   const movePlant = (id, { lat, lng }) => {
@@ -676,28 +732,35 @@ export default function NuclearMap() {
   const mobileSheetStyle = { position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 1000, display: 'flex', flexDirection: 'column', gap: 12, maxHeight: '70vh', overflowY: 'auto', padding: '12px 12px calc(12px + env(safe-area-inset-bottom))', background: 'rgba(15,15,15,0.75)', backdropFilter: 'blur(10px)', borderTop: '1px solid #374151', borderRadius: '16px 16px 0 0' }
 
   const scenarioForm = (
-    <form onSubmit={runSimulation} className="ss-panel" style={mobilePanelStyle}>
+    <form onSubmit={isDetonation ? runDetonationSimulation : runSimulation} className="ss-panel" style={mobilePanelStyle}>
       <div style={{ fontWeight: 700, fontSize: 15 }}>{copy.scenario}</div>
-      <div style={{ color: selectedPlant ? '#9ca3af' : '#fbbf24', marginTop: 5, marginBottom: 12 }}>{selectedPlant ? `${plantName(selectedPlant, locale)}${copy.unitSeparator}${selectedPlant.capacity || copy.unknown} ${copy.mw}` : copy.selectHint}</div>
-      <label style={{ display: 'block', marginBottom: 10 }}><span style={{ display: 'block', color: '#d1d5db', marginBottom: 4 }}>{copy.release}</span><select value={conditions.level} onChange={event => update('level', event.target.value)} style={fieldStyle}>{Object.keys(SCENARIO_LEVELS).map(key => <option key={key} value={key}>{copy.level[key]}</option>)}</select></label>
+      <div style={{ color: activeSelection ? '#9ca3af' : '#fbbf24', marginTop: 5, marginBottom: 12 }}>
+        {selectedPlant ? `${plantName(selectedPlant, locale)}${copy.unitSeparator}${selectedPlant.capacity || copy.unknown} ${copy.mw}` : selectedDetonation ? copy.detonationYield[selectedDetonation.yieldKey] : copy.selectHint}
+      </div>
+      <label style={{ display: 'block', marginBottom: 10 }}>
+        <span style={{ display: 'block', color: '#d1d5db', marginBottom: 4 }}>{copy.release}</span>
+        {isDetonation
+          ? <div style={{ ...fieldStyle, opacity: 0.6, cursor: 'not-allowed' }}>{copy.detonationYield[selectedDetonation.yieldKey]}</div>
+          : <select value={conditions.level} onChange={event => update('level', event.target.value)} style={fieldStyle}>{Object.keys(SCENARIO_LEVELS).map(key => <option key={key} value={key}>{copy.level[key]}</option>)}</select>}
+      </label>
       <label style={{ display: 'block', marginBottom: 10 }}><span style={{ display: 'block', color: '#d1d5db', marginBottom: 4 }}>{copy.direction}: {conditions.direction}°</span><input type="range" min="0" max="359" value={conditions.direction} onChange={event => update('direction', event.target.value)} style={{ width: '100%' }} /><span style={{ color: '#9ca3af', fontSize: 11 }}>{copy.directionHint}</span></label>
       <label style={{ display: 'block', marginBottom: 10 }}><span style={{ display: 'block', color: '#d1d5db', marginBottom: 4 }}>{copy.wind}: {conditions.windForce}{copy.forceSuffix}</span><input type="range" min="0" max="12" step="1" value={conditions.windForce} onChange={event => update('windForce', event.target.value)} style={{ width: '100%' }} /><span style={{ color: '#9ca3af', fontSize: 11 }}>{copy.windHint}</span></label>
       <label style={{ display: 'block', marginBottom: 10 }}><span style={{ display: 'block', color: '#d1d5db', marginBottom: 4 }}>{copy.rainfall}</span><select value={conditions.rainfall} onChange={event => update('rainfall', event.target.value)} style={fieldStyle}>{Object.keys(RAINFALL).map(key => <option key={key} value={key}>{copy.rain[key]}</option>)}</select><span style={{ color: '#9ca3af', fontSize: 11 }}>{copy.rainHint}</span></label>
       <label style={{ display: 'block', marginBottom: 12 }}><span style={{ display: 'block', color: '#d1d5db', marginBottom: 4 }}>{copy.duration}</span><input type="number" min="0" step="1" value={conditions.duration} onChange={event => update('duration', event.target.value)} style={fieldStyle} /><span style={{ color: '#9ca3af', fontSize: 11 }}>{copy.ongoing}</span></label>
-      <button type="submit" disabled={!selectedPlant} style={{ width: '100%', padding: '8px 10px', fontSize: 13, fontWeight: 600, background: selectedPlant ? '#dc2626' : '#4b5563', color: 'white', border: 'none', borderRadius: 4, cursor: selectedPlant ? 'pointer' : 'not-allowed' }}>{copy.trigger}</button>
-      {simulation && <button type="button" onClick={() => { setSimulation(null); setPopulation({ status: 'idle', result: null }) }} style={{ width: '100%', padding: '7px 10px', marginTop: 8, fontSize: 12, background: '#374151', color: 'white', border: 'none', borderRadius: 4, cursor: 'pointer' }}>{copy.clear}</button>}
-      {simulation && <button type="button" onClick={shareResult} style={{ width: '100%', padding: '7px 10px', marginTop: 8, fontSize: 12, background: '#0f766e', color: 'white', border: 'none', borderRadius: 4, cursor: 'pointer' }}>{copy.share}</button>}
-      {shareStatus !== 'idle' && simulation && <div style={{ marginTop: 8, padding: '6px 8px', fontSize: 11, color: '#5eead4', background: 'rgba(15,118,110,0.15)', border: '1px solid #0f766e', borderRadius: 4 }}>
+      <button type="submit" disabled={!activeSelection} style={{ width: '100%', padding: '8px 10px', fontSize: 13, fontWeight: 600, background: activeSelection ? '#dc2626' : '#4b5563', color: 'white', border: 'none', borderRadius: 4, cursor: activeSelection ? 'pointer' : 'not-allowed' }}>{copy.trigger}</button>
+      {activeSimulation && <button type="button" onClick={clearActiveSimulation} style={{ width: '100%', padding: '7px 10px', marginTop: 8, fontSize: 12, background: '#374151', color: 'white', border: 'none', borderRadius: 4, cursor: 'pointer' }}>{copy.clear}</button>}
+      {activeSimulation && <button type="button" onClick={shareResult} style={{ width: '100%', padding: '7px 10px', marginTop: 8, fontSize: 12, background: '#0f766e', color: 'white', border: 'none', borderRadius: 4, cursor: 'pointer' }}>{copy.share}</button>}
+      {shareStatus !== 'idle' && activeSimulation && <div style={{ marginTop: 8, padding: '6px 8px', fontSize: 11, color: '#5eead4', background: 'rgba(15,118,110,0.15)', border: '1px solid #0f766e', borderRadius: 4 }}>
         {{ copied: copy.shareCopied, imageCopied: copy.shareImageCopied, downloaded: copy.shareDownloaded }[shareStatus]}{' · '}<a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(buildShareText())}&url=${encodeURIComponent(window.location.href)}`} target="_blank" rel="noopener noreferrer" style={{ color: '#5eead4' }}>{copy.shareX}</a>
       </div>}
-      {population.status !== 'idle' && <div style={{ marginTop: 12, paddingTop: 10, borderTop: '1px solid #374151' }}>
-        <div style={{ fontWeight: 600, marginBottom: 4 }}>{copy.populationTitle}</div>
-        {population.status === 'loading' && <div style={{ color: '#fbbf24' }}>{copy.populationLoading}</div>}
-        {population.status === 'success' && <div style={{ fontSize: 20, fontWeight: 700, color: '#f8fafc' }}>{Math.round(population.result.total_population).toLocaleString(locale === 'zh' ? 'zh-CN' : 'en-US')}</div>}
-        {population.status === 'error' && <div style={{ color: '#fca5a5' }}>{copy.populationError}</div>}
+      {activePopulation.status !== 'idle' && <div style={{ marginTop: 12, paddingTop: 10, borderTop: '1px solid #374151' }}>
+        <div style={{ fontWeight: 600, marginBottom: 4 }}>{isDetonation ? copy.detonationPopulationTitle : copy.populationTitle}</div>
+        {activePopulation.status === 'loading' && <div style={{ color: '#fbbf24' }}>{copy.populationLoading}</div>}
+        {activePopulation.status === 'success' && <div style={{ fontSize: 20, fontWeight: 700, color: '#f8fafc' }}>{Math.round(activePopulation.result.total_population).toLocaleString(locale === 'zh' ? 'zh-CN' : 'en-US')}</div>}
+        {activePopulation.status === 'error' && <div style={{ color: '#fca5a5' }}>{copy.populationError}</div>}
         <div style={{ color: '#9ca3af', fontSize: 11, lineHeight: 1.45, marginTop: 5 }}>{copy.populationNote}</div>
       </div>}
-      <div style={{ color: '#9ca3af', fontSize: 11, lineHeight: 1.45, marginTop: 10 }}>{copy.disclaimer}</div>
+      <div style={{ color: isDetonation ? '#fbbf24' : '#9ca3af', fontSize: 11, lineHeight: 1.45, marginTop: 10 }}>{isDetonation ? copy.detonationDisclaimer : copy.disclaimer}</div>
     </form>
   )
 
@@ -759,7 +822,7 @@ export default function NuclearMap() {
         <Layer id="lighting-raster" type="raster" paint={{ 'raster-opacity': 1 }} />
       </Source>
       {visiblePlants.map(plant => <PlantMarker key={plant.id} plant={plant} selected={selectedPlant?.id === plant.id} simulation={simulation} onClick={handlePlantClick} onDragEnd={movePlant} />)}
-      {detonations.map(detonation => <DetonationMarker key={detonation.id} detonation={detonation} selected={selectedDetonation?.id === detonation.id} onClick={selectDetonation} />)}
+      {detonations.map(detonation => <DetonationMarker key={detonation.id} detonation={detonation} selected={selectedDetonation?.id === detonation.id} simulation={detonationSimulation} onClick={selectDetonation} />)}
       {measurePoints.map((point, index) => (
         <Marker key={index} longitude={point.lng} latitude={point.lat} anchor="center">
           <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#facc15', border: '2px solid white', boxShadow: '0 0 4px rgba(0,0,0,0.6)' }} />
@@ -785,7 +848,7 @@ export default function NuclearMap() {
           {selectedPlant.custom && <button type="button" onClick={() => removePlant(selectedPlant.id)} style={{ marginTop: 8, padding: '4px 10px', fontSize: 12, background: '#7f1d1d', color: 'white', border: '1px solid #ef4444', borderRadius: 4, cursor: 'pointer', width: '100%' }}>{customCopy.remove}</button>}
         </div>
       </Popup>}
-      {selectedDetonation && <Popup longitude={selectedDetonation.lng} latitude={selectedDetonation.lat} anchor="bottom" offset={14} closeOnClick={false} onClose={() => { setSelectedDetonation(null); setDetonationPopulation({ status: 'idle', result: null }) }}>
+      {selectedDetonation && <Popup longitude={selectedDetonation.lng} latitude={selectedDetonation.lat} anchor="bottom" offset={14} closeOnClick={false} onClose={() => { setSelectedDetonation(null); setDetonationSimulation(null); setDetonationPopulation({ status: 'idle', result: null }) }}>
         <div style={{ minWidth: 220 }}>
           <strong>{copy.detonationYield[selectedDetonation.yieldKey]}</strong>
           <div style={{ marginTop: 6, fontSize: 12 }}>
@@ -796,13 +859,6 @@ export default function NuclearMap() {
               </div>
             ))}
           </div>
-          <div style={{ marginTop: 8, paddingTop: 8, borderTop: '1px solid #374151' }}>
-            <div style={{ fontWeight: 600, marginBottom: 2 }}>{copy.detonationPopulationTitle}</div>
-            {detonationPopulation.status === 'loading' && <div style={{ color: '#fbbf24' }}>{copy.populationLoading}</div>}
-            {detonationPopulation.status === 'success' && <div style={{ fontSize: 18, fontWeight: 700, color: '#f8fafc' }}>{Math.round(detonationPopulation.result.total_population).toLocaleString(locale === 'zh' ? 'zh-CN' : 'en-US')}</div>}
-            {detonationPopulation.status === 'error' && <div style={{ color: '#fca5a5' }}>{copy.populationError}</div>}
-          </div>
-          <div style={{ color: '#fbbf24', fontSize: 11, lineHeight: 1.4, marginTop: 8 }}>{copy.detonationDisclaimer}</div>
           <button type="button" onClick={() => removeDetonation(selectedDetonation.id)} style={{ marginTop: 8, padding: '4px 10px', fontSize: 12, background: '#7f1d1d', color: 'white', border: '1px solid #ef4444', borderRadius: 4, cursor: 'pointer', width: '100%' }}>{customCopy.removeDetonation}</button>
         </div>
       </Popup>}
