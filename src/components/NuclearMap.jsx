@@ -3,7 +3,7 @@ import Map, { Marker, NavigationControl, Popup, Source, Layer } from 'react-map-
 import { addProtocol, setWorkerUrl } from 'maplibre-gl'
 import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url'
 import 'maplibre-gl/dist/maplibre-gl.css'
-import { area as turfArea, bbox, bboxPolygon, circle as turfCircle, distance as turfDistance, featureCollection, intersect, midpoint as turfMidpoint, polygon as turfPolygon, union } from '@turf/turf'
+import { bbox, booleanPointInPolygon, circle as turfCircle, distance as turfDistance, featureCollection, midpoint as turfMidpoint, polygon as turfPolygon, union } from '@turf/turf'
 import QRCode from 'qrcode'
 import plants from '../data/plants.json'
 
@@ -26,6 +26,10 @@ const MAP_STYLE = {
   layers: [{ id: 'carto-voyager', type: 'raster', source: 'carto' }],
 }
 
+// Hidden per product decision (2026-08-22) - now that scenarios use live
+// weather instead of user-picked conditions, manual distance measurement is
+// less central to the workflow. Logic is left intact to re-enable easily.
+const MEASURE_FEATURE_ENABLED = false
 const STATUS_COLOR = { operating: '#22c55e', decommissioned: '#6b7280', construction: '#f59e0b', planned: '#3b82f6' }
 const REFERENCE_ZONES = [
   { radiusKm: 16, color: '#f97316', key: 'plume' },
@@ -89,10 +93,10 @@ function detonationZones(kt) {
 
 const COPY = {
   zh: {
-    title: '☢ StrikeScope — 全球核电站场景推演', statusTitle: '核电站状态', reactor: '堆型', capacity: '装机容量', selectPlant: '选择电站', planning: '规划参考区', simulation: '模拟范围', core: '全向近场警戒', downwind: '（顺风）', scenario: '事故场景推演', selectHint: '请先点击地图上的核电站', release: '事故类型', direction: '扩散方向', wind: '风力', rainfall: '降雨强度', duration: '释放持续时间（小时）', trigger: '触发模拟', clear: '清除模拟', ongoing: '输入 0 代表持续释放；远场仅表示稀释后的参考影响。', rainHint: '降雨越强，模拟越偏向近场湿沉降。', windHint: '0级无风 · 3级微风 · 6级强风 · 9级烈风 · 12级飓风', directionHint: '0° 北 · 90° 东 · 180° 南 · 270° 西', populationTitle: '模拟区域估算人口', populationLoading: '正在计算人口…', populationError: '暂时无法取得人口估算', populationNote: '基于 WorldPop 人口栅格；为模拟区域内常住人口估算，不代表实际暴露或撤离人数。', disclaimer: '仅为可视化推演：结合装机容量、释放时间与风向生成示意羽流；不是剂量预测或应急指令。', status: { operating: '运营中', decommissioned: '已关闭', construction: '建设中', planned: '计划中' }, reference: { plume: '羽流应急规划参考区 (16km)', ingestion: '摄入途径规划参考区 (80km)' }, level: { leak: '设备泄露（早期/轻微释放）', meltdown: '堆芯熔毁（安全壳排放）', catastrophic: '灾难性解体（堆芯抛撒）' }, levelIsotope: { leak: '主要为惰性气体（氙-133、氪-85）及微量碘-131；扩散快、持续时间短，地面污染有限。', meltdown: '碘-131、铯-134/137等挥发性裂变产物经安全壳排放释放；是中长期地面污染的主要来源。', catastrophic: '堆芯/石墨燃烧将锶-90等半挥发性核素一并抛送至高空；扩散范围最广，地面污染最重、持续最久。' }, zone: { plume: '羽流防护参考', monitoring: '监测参考' }, rain: { none: '无雨', light: '小雨', moderate: '中雨', heavy: '大雨' }, unknown: '未知', north: '北', east: '东', south: '南', west: '西', mw: 'MW', forceSuffix: '级', unitSeparator: ' · ', searchPlaceholder: '搜索电站或国家…', dataSource: '数据来源：Global Energy Monitor 全球核电追踪（Global Nuclear Power Tracker）', units: '机组数', commissioned: '投产年份', plannedStart: '计划投产', operator: '运营商', statusFilterHint: '点击可在地图上显示/隐藏该类电站', measure: '测量距离', measureHint: '在地图或核电站上依次点击多个点，测量折线总距离', measureClear: '清除测距', measureReset: '重新开始', measureTotal: '总距离', km: '公里', share: '分享结果', shareCopied: '内容已复制，可粘贴到微信或 Instagram 分享', shareImageCopied: '图片已复制（含二维码），可粘贴到微信或 Instagram 分享', shareDownloaded: '图片已保存（含二维码），可在聊天中作为图片发送', shareX: '分享到 X', close: '关闭', detonationYield: { davyCrockett: '"戴维·克罗克特"单兵核火箭筒（约20吨TNT当量，历史最小美军核武器）', w70: 'W70 Mod 3 中子弹（"朗斯"导弹增强辐射战斗部，约1千吨，历史数据，刻意降低放射性沉降）', hiroshima: '广岛"小男孩"型（15千吨，历史数据）', redbeard: '"红胡子"（Red Beard）英国早期战术核弹（约2万吨，历史数据）', trinity: '"三位一体"核试验（约21千吨，人类首次核试爆）', nagasaki: '长崎"胖子"型（21千吨，历史数据）', rds1: 'РДС-1（"乔一号"）苏联首次核试验（约2.2万吨，历史数据）', w76: 'W76 战略核弹头（约10万吨，美国"三叉戟"潜射导弹）', tn75: 'TN-75 法国"M51"潜射导弹弹头（约10万吨，公开估计值）', trident: '英国"三叉戟"（Holbrook）核弹头（约10万吨，基于美制W76改良，公开估计值）', df41: '东风-41（DF-41）洲际导弹分导弹头（约25万吨/枚，公开估计值，可携带多枚分导弹头）', w87: 'W87 战略核弹头（约30万吨，美国"民兵III"洲际导弹）', yarsRS24: '"亚尔斯"（RS-24 Yars）俄罗斯洲际导弹分导弹头（约30万吨/枚，公开估计值）', b61: 'B61 核航弹（最大约34万吨，美国现役可调当量航空炸弹）', w88: 'W88 战略核弹头（约47.5万吨，美国"三叉戟II"潜射导弹）', ss18: 'R-36M2"撒旦"（SS-18）俄罗斯洲际导弹分导弹头（约75万吨/枚，公开估计值）', megaton: '大型热核武器（约100万吨，示意）', b83: 'B83 核航弹（约120万吨，美军现役最大当量武器）', rds37: 'РДС-37 苏联首次两级氢弹试验（约160万吨，1955年，历史数据）', df5: '东风-5（DF-5）洲际导弹弹头（约400万吨，公开估计值，单枚大当量弹头）', ivyMike: '"常春藤麦克"氢弹试验（约1040万吨，人类首次氢弹试验）', castleBravo: '"喝彩城堡"核试验（约1500万吨，美国史上最大当量核试验）', tsarbomba: '沙皇炸弹级（5000万吨，人类史上最大当量核试验）' }, detonationZone: { fireball: '火球半径', thermalBurn: '三度烧伤半径（热辐射）', severe: '重度损毁半径（约20psi超压）', moderate: '中度损毁半径（约5psi超压）', light: '轻度损毁/玻璃破碎半径（约1psi超压）' }, detonationType: { fission: '纯裂变型（沉降强度：标准）', thermonuclear: '两级热核型（沉降强度：较低）', thermonuclearDirty: '"脏"热核型 · 弹壳裂变增强（沉降强度：高）', neutron: '中子弹 / 增强辐射型（沉降强度：显著降低）' }, detonationPopulationTitle: '受影响区域估算人口', detonationDisclaimer: '仅为教育性可视化：基于公开的核武器当量数据与简化的立方根冲击波缩放公式估算，不代表真实目标、军事数据或精确毁伤评估。',
+    title: '☢ StrikeScope — 全球核电站场景推演', statusTitle: '核电站状态', reactor: '堆型', capacity: '装机容量', selectPlant: '选择电站', planning: '规划参考区', simulation: '模拟范围', core: '全向近场警戒', downwind: '（顺风）', scenario: '事故场景推演', selectHint: '请先点击地图上的核电站', release: '事故类型', direction: '扩散方向', wind: '风力', rainfall: '降雨强度', duration: '释放持续时间（小时）', weather: '实时天气', weatherLoading: '正在获取当地实时天气…', weatherError: '无法获取实时天气，已使用默认条件', trigger: '触发模拟', clear: '清除模拟', ongoing: '输入 0 代表持续释放；远场仅表示稀释后的参考影响。', rainHint: '降雨越强，模拟越偏向近场湿沉降。', windHint: '0级无风 · 3级微风 · 6级强风 · 9级烈风 · 12级飓风', directionHint: '0° 北 · 90° 东 · 180° 南 · 270° 西', populationTitle: '模拟区域估算人口', populationLoading: '正在计算人口…', populationError: '暂时无法取得人口估算', populationNote: '基于 WorldPop 人口栅格（离线预计算，约11km格网精度）；为模拟区域内常住人口估算，不代表实际暴露或撤离人数。', disclaimer: '仅为可视化推演：结合装机容量、释放时间与风向生成示意羽流；不是剂量预测或应急指令。', status: { operating: '运营中', decommissioned: '已关闭', construction: '建设中', planned: '计划中' }, reference: { plume: '羽流应急规划参考区 (16km)', ingestion: '摄入途径规划参考区 (80km)' }, level: { leak: '设备泄露（早期/轻微释放）', meltdown: '堆芯熔毁（安全壳排放）', catastrophic: '灾难性解体（堆芯抛撒）' }, levelIsotope: { leak: '主要为惰性气体（氙-133、氪-85）及微量碘-131；扩散快、持续时间短，地面污染有限。', meltdown: '碘-131、铯-134/137等挥发性裂变产物经安全壳排放释放；是中长期地面污染的主要来源。', catastrophic: '堆芯/石墨燃烧将锶-90等半挥发性核素一并抛送至高空；扩散范围最广，地面污染最重、持续最久。' }, zone: { plume: '羽流防护参考', monitoring: '监测参考' }, rain: { none: '无雨', light: '小雨', moderate: '中雨', heavy: '大雨' }, unknown: '未知', north: '北', east: '东', south: '南', west: '西', mw: 'MW', forceSuffix: '级', unitSeparator: ' · ', searchPlaceholder: '搜索电站或国家…', dataSource: '数据来源：Global Energy Monitor 全球核电追踪（Global Nuclear Power Tracker）', units: '机组数', commissioned: '投产年份', plannedStart: '计划投产', operator: '运营商', statusFilterHint: '点击可在地图上显示/隐藏该类电站', measure: '测量距离', measureHint: '在地图或核电站上依次点击多个点，测量折线总距离', measureClear: '清除测距', measureReset: '重新开始', measureTotal: '总距离', km: '公里', share: '分享结果', shareCopied: '内容已复制，可粘贴到微信或 Instagram 分享', shareImageCopied: '图片已复制（含二维码），可粘贴到微信或 Instagram 分享', shareDownloaded: '图片已保存（含二维码），可在聊天中作为图片发送', shareX: '分享到 X', close: '关闭', detonationYield: { davyCrockett: '"戴维·克罗克特"单兵核火箭筒（约20吨TNT当量，历史最小美军核武器）', w70: 'W70 Mod 3 中子弹（"朗斯"导弹增强辐射战斗部，约1千吨，历史数据，刻意降低放射性沉降）', hiroshima: '广岛"小男孩"型（15千吨，历史数据）', redbeard: '"红胡子"（Red Beard）英国早期战术核弹（约2万吨，历史数据）', trinity: '"三位一体"核试验（约21千吨，人类首次核试爆）', nagasaki: '长崎"胖子"型（21千吨，历史数据）', rds1: 'РДС-1（"乔一号"）苏联首次核试验（约2.2万吨，历史数据）', w76: 'W76 战略核弹头（约10万吨，美国"三叉戟"潜射导弹）', tn75: 'TN-75 法国"M51"潜射导弹弹头（约10万吨，公开估计值）', trident: '英国"三叉戟"（Holbrook）核弹头（约10万吨，基于美制W76改良，公开估计值）', df41: '东风-41（DF-41）洲际导弹分导弹头（约25万吨/枚，公开估计值，可携带多枚分导弹头）', w87: 'W87 战略核弹头（约30万吨，美国"民兵III"洲际导弹）', yarsRS24: '"亚尔斯"（RS-24 Yars）俄罗斯洲际导弹分导弹头（约30万吨/枚，公开估计值）', b61: 'B61 核航弹（最大约34万吨，美国现役可调当量航空炸弹）', w88: 'W88 战略核弹头（约47.5万吨，美国"三叉戟II"潜射导弹）', ss18: 'R-36M2"撒旦"（SS-18）俄罗斯洲际导弹分导弹头（约75万吨/枚，公开估计值）', megaton: '大型热核武器（约100万吨，示意）', b83: 'B83 核航弹（约120万吨，美军现役最大当量武器）', rds37: 'РДС-37 苏联首次两级氢弹试验（约160万吨，1955年，历史数据）', df5: '东风-5（DF-5）洲际导弹弹头（约400万吨，公开估计值，单枚大当量弹头）', ivyMike: '"常春藤麦克"氢弹试验（约1040万吨，人类首次氢弹试验）', castleBravo: '"喝彩城堡"核试验（约1500万吨，美国史上最大当量核试验）', tsarbomba: '沙皇炸弹级（5000万吨，人类史上最大当量核试验）' }, detonationZone: { fireball: '火球半径', thermalBurn: '三度烧伤半径（热辐射）', severe: '重度损毁半径（约20psi超压）', moderate: '中度损毁半径（约5psi超压）', light: '轻度损毁/玻璃破碎半径（约1psi超压）' }, detonationType: { fission: '纯裂变型（沉降强度：标准）', thermonuclear: '两级热核型（沉降强度：较低）', thermonuclearDirty: '"脏"热核型 · 弹壳裂变增强（沉降强度：高）', neutron: '中子弹 / 增强辐射型（沉降强度：显著降低）' }, detonationPopulationTitle: '受影响区域估算人口', detonationDisclaimer: '仅为教育性可视化：基于公开的核武器当量数据与简化的立方根冲击波缩放公式估算，不代表真实目标、军事数据或精确毁伤评估。',
   },
   en: {
-    title: '☢ StrikeScope — Nuclear Scenario Explorer', statusTitle: 'Plant status', reactor: 'Reactor type', capacity: 'Installed capacity', selectPlant: 'Select plant', planning: 'Planning references', simulation: 'Simulation zones', core: 'All-direction near-field alert', downwind: ' (downwind)', scenario: 'Accident scenario', selectHint: 'Select a nuclear plant on the map first', release: 'Accident type', direction: 'Plume direction', wind: 'Wind force', rainfall: 'Rainfall', duration: 'Release duration (hours)', trigger: 'Run simulation', clear: 'Clear simulation', ongoing: 'Enter 0 for an ongoing release; the far field is a diluted reference only.', rainHint: 'Stronger rain shifts this illustration toward near-field wet deposition.', windHint: '0 calm · 3 gentle breeze · 6 strong breeze · 9 strong gale · 12 hurricane', directionHint: '0° N · 90° E · 180° S · 270° W', populationTitle: 'Estimated residents in simulation area', populationLoading: 'Calculating population…', populationError: 'Population estimate is currently unavailable', populationNote: 'Based on WorldPop population grids; this estimates resident population in the simulated area, not actual exposure or evacuation.', disclaimer: 'Visualization only: this illustrative plume uses capacity, duration, and wind. It is not a dose forecast or emergency instruction.', status: { operating: 'Operating', decommissioned: 'Closed', construction: 'Under construction', planned: 'Planned' }, reference: { plume: 'Plume planning reference (16 km)', ingestion: 'Ingestion planning reference (80 km)' }, level: { leak: 'Equipment leak (early/minor release)', meltdown: 'Core meltdown (containment venting)', catastrophic: 'Catastrophic destruction (core dispersal)' }, levelIsotope: { leak: 'Mostly noble gases (Xe-133, Kr-85) plus trace iodine-131; disperses quickly with limited ground deposition.', meltdown: 'Volatile fission products (iodine-131, cesium-134/137) released via containment venting; the main driver of medium- to long-term ground contamination.', catastrophic: 'A core/graphite fire lofts semi-volatile isotopes like strontium-90 as well; the widest dispersal and the heaviest, most persistent ground contamination.' }, zone: { plume: 'Plume protection reference', monitoring: 'Monitoring reference' }, rain: { none: 'No rain', light: 'Light rain', moderate: 'Moderate rain', heavy: 'Heavy rain' }, unknown: 'Unknown', north: 'N', east: 'E', south: 'S', west: 'W', mw: 'MW', forceSuffix: '', unitSeparator: ' · ', searchPlaceholder: 'Search plant or country…', dataSource: 'Data: Global Energy Monitor Global Nuclear Power Tracker', units: 'Units', commissioned: 'Commissioned', plannedStart: 'Planned start', operator: 'Operator', statusFilterHint: 'Click to show/hide this status on the map', measure: 'Measure distance', measureHint: 'Click multiple points on the map or on plants to measure the total path distance', measureClear: 'Clear measurement', measureReset: 'Restart', measureTotal: 'Total distance', km: 'km', share: 'Share result', shareCopied: 'Copied — paste into WeChat or Instagram to share', shareImageCopied: 'Image copied (with QR code) — paste into WeChat or Instagram to share', shareDownloaded: 'Image saved (with QR code) — send it as a photo in any chat app', shareX: 'Share on X', close: 'Close', detonationYield: { davyCrockett: 'Davy Crockett recoilless device (~20 tons, smallest deployed US warhead)', w70: 'W70 Mod 3 — Lance missile enhanced-radiation warhead ("neutron bomb"), ~1 kt, historical, deliberately reduced fallout', hiroshima: 'Hiroshima "Little Boy" (15 kt, historical)', redbeard: 'Red Beard — early British tactical nuclear bomb (~20 kt, historical)', trinity: 'Trinity test (~21 kt, first-ever nuclear detonation)', nagasaki: 'Nagasaki "Fat Man" (21 kt, historical)', rds1: 'RDS-1 "Joe-1" — first Soviet nuclear test (~22 kt, historical)', w76: 'W76 warhead (~100 kt, US Trident SLBM)', tn75: 'TN-75 — French M51 SLBM warhead (~100 kt, publicly estimated)', trident: 'UK Trident (Holbrook) warhead (~100 kt, based on US W76 design, publicly estimated)', df41: 'DF-41 ICBM MIRV warhead (~250 kt each, publicly estimated, multiple independently targetable warheads)', w87: 'W87 warhead (~300 kt, US Minuteman III ICBM)', yarsRS24: 'RS-24 Yars MIRV warhead (~300 kt each, Russian ICBM, publicly estimated)', b61: 'B61 gravity bomb (max ~340 kt, current US variable-yield bomb)', w88: 'W88 warhead (~475 kt, US Trident II SLBM)', ss18: 'R-36M2 "Satan" (SS-18) MIRV warhead (~750 kt each, Russian ICBM, publicly estimated)', megaton: 'Large thermonuclear (~1 Mt, illustrative)', b83: 'B83 gravity bomb (~1.2 Mt, largest yield in current US arsenal)', rds37: 'RDS-37 — first Soviet two-stage thermonuclear test (~1.6 Mt, 1955, historical)', df5: 'DF-5 ICBM warhead (~4 Mt, publicly estimated, single large warhead)', ivyMike: 'Ivy Mike test (~10.4 Mt, first thermonuclear device test)', castleBravo: 'Castle Bravo test (~15 Mt, largest US test ever)', tsarbomba: 'Tsar Bomba class (50 Mt, largest ever tested)' }, detonationZone: { fireball: 'Fireball radius', thermalBurn: '3rd-degree burn radius (thermal radiation)', severe: 'Severe destruction radius (~20 psi overpressure)', moderate: 'Moderate destruction radius (~5 psi overpressure)', light: 'Light damage / glass breakage radius (~1 psi overpressure)' }, detonationType: { fission: 'Pure fission (fallout: standard)', thermonuclear: 'Staged thermonuclear (fallout: reduced)', thermonuclearDirty: '"Dirty" thermonuclear — fissionable tamper (fallout: high)', neutron: 'Neutron / enhanced-radiation (fallout: much reduced)' }, detonationPopulationTitle: 'Estimated residents in affected area', detonationDisclaimer: 'Educational visualization only: based on publicly documented weapon yields and a simplified cube-root blast-scaling approximation. Not real targeting data, military information, or a precise damage assessment.',
+    title: '☢ StrikeScope — Nuclear Scenario Explorer', statusTitle: 'Plant status', reactor: 'Reactor type', capacity: 'Installed capacity', selectPlant: 'Select plant', planning: 'Planning references', simulation: 'Simulation zones', core: 'All-direction near-field alert', downwind: ' (downwind)', scenario: 'Accident scenario', selectHint: 'Select a nuclear plant on the map first', release: 'Accident type', direction: 'Plume direction', wind: 'Wind force', rainfall: 'Rainfall', duration: 'Release duration (hours)', weather: 'Live weather', weatherLoading: 'Fetching local weather…', weatherError: "Couldn't fetch live weather — using default conditions", trigger: 'Run simulation', clear: 'Clear simulation', ongoing: 'Enter 0 for an ongoing release; the far field is a diluted reference only.', rainHint: 'Stronger rain shifts this illustration toward near-field wet deposition.', windHint: '0 calm · 3 gentle breeze · 6 strong breeze · 9 strong gale · 12 hurricane', directionHint: '0° N · 90° E · 180° S · 270° W', populationTitle: 'Estimated residents in simulation area', populationLoading: 'Calculating population…', populationError: 'Population estimate is currently unavailable', populationNote: 'Based on a WorldPop population grid (precomputed offline, ~11 km cell resolution); this estimates resident population in the simulated area, not actual exposure or evacuation.', disclaimer: 'Visualization only: this illustrative plume uses capacity, duration, and wind. It is not a dose forecast or emergency instruction.', status: { operating: 'Operating', decommissioned: 'Closed', construction: 'Under construction', planned: 'Planned' }, reference: { plume: 'Plume planning reference (16 km)', ingestion: 'Ingestion planning reference (80 km)' }, level: { leak: 'Equipment leak (early/minor release)', meltdown: 'Core meltdown (containment venting)', catastrophic: 'Catastrophic destruction (core dispersal)' }, levelIsotope: { leak: 'Mostly noble gases (Xe-133, Kr-85) plus trace iodine-131; disperses quickly with limited ground deposition.', meltdown: 'Volatile fission products (iodine-131, cesium-134/137) released via containment venting; the main driver of medium- to long-term ground contamination.', catastrophic: 'A core/graphite fire lofts semi-volatile isotopes like strontium-90 as well; the widest dispersal and the heaviest, most persistent ground contamination.' }, zone: { plume: 'Plume protection reference', monitoring: 'Monitoring reference' }, rain: { none: 'No rain', light: 'Light rain', moderate: 'Moderate rain', heavy: 'Heavy rain' }, unknown: 'Unknown', north: 'N', east: 'E', south: 'S', west: 'W', mw: 'MW', forceSuffix: '', unitSeparator: ' · ', searchPlaceholder: 'Search plant or country…', dataSource: 'Data: Global Energy Monitor Global Nuclear Power Tracker', units: 'Units', commissioned: 'Commissioned', plannedStart: 'Planned start', operator: 'Operator', statusFilterHint: 'Click to show/hide this status on the map', measure: 'Measure distance', measureHint: 'Click multiple points on the map or on plants to measure the total path distance', measureClear: 'Clear measurement', measureReset: 'Restart', measureTotal: 'Total distance', km: 'km', share: 'Share result', shareCopied: 'Copied — paste into WeChat or Instagram to share', shareImageCopied: 'Image copied (with QR code) — paste into WeChat or Instagram to share', shareDownloaded: 'Image saved (with QR code) — send it as a photo in any chat app', shareX: 'Share on X', close: 'Close', detonationYield: { davyCrockett: 'Davy Crockett recoilless device (~20 tons, smallest deployed US warhead)', w70: 'W70 Mod 3 — Lance missile enhanced-radiation warhead ("neutron bomb"), ~1 kt, historical, deliberately reduced fallout', hiroshima: 'Hiroshima "Little Boy" (15 kt, historical)', redbeard: 'Red Beard — early British tactical nuclear bomb (~20 kt, historical)', trinity: 'Trinity test (~21 kt, first-ever nuclear detonation)', nagasaki: 'Nagasaki "Fat Man" (21 kt, historical)', rds1: 'RDS-1 "Joe-1" — first Soviet nuclear test (~22 kt, historical)', w76: 'W76 warhead (~100 kt, US Trident SLBM)', tn75: 'TN-75 — French M51 SLBM warhead (~100 kt, publicly estimated)', trident: 'UK Trident (Holbrook) warhead (~100 kt, based on US W76 design, publicly estimated)', df41: 'DF-41 ICBM MIRV warhead (~250 kt each, publicly estimated, multiple independently targetable warheads)', w87: 'W87 warhead (~300 kt, US Minuteman III ICBM)', yarsRS24: 'RS-24 Yars MIRV warhead (~300 kt each, Russian ICBM, publicly estimated)', b61: 'B61 gravity bomb (max ~340 kt, current US variable-yield bomb)', w88: 'W88 warhead (~475 kt, US Trident II SLBM)', ss18: 'R-36M2 "Satan" (SS-18) MIRV warhead (~750 kt each, Russian ICBM, publicly estimated)', megaton: 'Large thermonuclear (~1 Mt, illustrative)', b83: 'B83 gravity bomb (~1.2 Mt, largest yield in current US arsenal)', rds37: 'RDS-37 — first Soviet two-stage thermonuclear test (~1.6 Mt, 1955, historical)', df5: 'DF-5 ICBM warhead (~4 Mt, publicly estimated, single large warhead)', ivyMike: 'Ivy Mike test (~10.4 Mt, first thermonuclear device test)', castleBravo: 'Castle Bravo test (~15 Mt, largest US test ever)', tsarbomba: 'Tsar Bomba class (50 Mt, largest ever tested)' }, detonationZone: { fireball: 'Fireball radius', thermalBurn: '3rd-degree burn radius (thermal radiation)', severe: 'Severe destruction radius (~20 psi overpressure)', moderate: 'Moderate destruction radius (~5 psi overpressure)', light: 'Light damage / glass breakage radius (~1 psi overpressure)' }, detonationType: { fission: 'Pure fission (fallout: standard)', thermonuclear: 'Staged thermonuclear (fallout: reduced)', thermonuclearDirty: '"Dirty" thermonuclear — fissionable tamper (fallout: high)', neutron: 'Neutron / enhanced-radiation (fallout: much reduced)' }, detonationPopulationTitle: 'Estimated residents in affected area', detonationDisclaimer: 'Educational visualization only: based on publicly documented weapon yields and a simplified cube-root blast-scaling approximation. Not real targeting data, military information, or a precise damage assessment.',
   },
 }
 
@@ -313,6 +317,34 @@ addProtocol('lighting', async params => {
 // Midpoint wind speed (m/s) for each Beaufort force 0-12.
 const BEAUFORT_MS = [0, 0.8, 2.4, 4.4, 6.7, 9.4, 12.3, 15.5, 18.9, 22.6, 26.4, 30.5, 34]
 const windSpeedMs = force => BEAUFORT_MS[Math.min(12, Math.max(0, Math.round(force)))]
+// Standard Beaufort-scale upper bounds (m/s) for classifying a measured wind
+// speed into a force 0-12.
+const BEAUFORT_UPPER_MS = [0.5, 1.5, 3.3, 5.5, 7.9, 10.7, 13.8, 17.1, 20.7, 24.4, 28.4, 32.6]
+const beaufortFromWindSpeed = speedMs => {
+  const force = BEAUFORT_UPPER_MS.findIndex(upper => speedMs <= upper)
+  return force === -1 ? 12 : force
+}
+// Standard hourly precipitation-intensity thresholds (mm/h).
+const rainfallFromPrecipitation = mm => (mm <= 0 ? 'none' : mm <= 2.5 ? 'light' : mm <= 7.6 ? 'moderate' : 'heavy')
+
+// Live wind/rain conditions for a scenario location, from Open-Meteo (free,
+// keyless, CORS-enabled - fits this static site with no backend to hide a
+// key behind). Rate limiting is per calling IP, not per domain, so each
+// visitor's own browser making this call directly doesn't share a quota.
+async function fetchWeather(lat, lng) {
+  const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=wind_speed_10m,wind_direction_10m,precipitation&wind_speed_unit=ms`)
+  if (!response.ok) throw new Error(`Weather request failed (${response.status})`)
+  const { current } = await response.json()
+  // Meteorological wind direction is where the wind blows FROM; the plume
+  // model wants where it's headed (downwind), so this flips it 180 degrees.
+  const direction = (current.wind_direction_10m + 180) % 360
+  return {
+    direction,
+    windForce: beaufortFromWindSpeed(current.wind_speed_10m),
+    rainfall: rainfallFromPrecipitation(current.precipitation ?? 0),
+    windSpeedMs: current.wind_speed_10m,
+  }
+}
 
 // How far the plume's leading edge has plausibly advected: wind speed times
 // release duration, capped at 72h since a real plume dilutes to background
@@ -367,50 +399,49 @@ function detonationSimulationArea(detonation, simulation) {
   return union(featureCollection([core, fallout])).geometry
 }
 
-const pause = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds))
-
-async function requestPopulation(area) {
-  const submitted = await fetch('https://api.worldpop.org/v2/population', {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ geojson: area, year: 2026, resolution: '1km' }),
-  })
-  if (!submitted.ok) throw new Error(`Population request failed (${submitted.status})`)
-  const { task_id: taskId } = await submitted.json()
-  for (let attempt = 0; attempt < 30; attempt += 1) {
-    await pause(1000)
-    const task = await fetch(`https://api.worldpop.org/v2/tasks/${taskId}`)
-    if (!task.ok) throw new Error(`Population task failed (${task.status})`)
-    const result = await task.json()
-    if (result.status === 'success') return result.result
-    if (result.status === 'failure') throw new Error(result.error || 'Population task failed')
+// Population lookup runs entirely offline against a pre-baked grid (see
+// scripts/build-population-grid.mjs) instead of the live WorldPop task API -
+// that API's submit-then-poll cycle could take tens of seconds per request,
+// and had to be split into many parallel requests for any area larger than
+// 45,000 km^2 (fragile, and slower still). The grid is derived from
+// WorldPop's Global 2015-2030 constrained 1km population mosaic
+// (CC-BY 4.0, https://www.worldpop.org), aggregated to a coarser cell size
+// so it can ship as a static asset; see population-grid.json for the exact
+// resolution and source year.
+let populationGridPromise = null
+function loadPopulationGrid() {
+  if (!populationGridPromise) {
+    populationGridPromise = Promise.all([
+      fetch(new URL('../data/population-grid.dat', import.meta.url))
+        .then(response => response.body.pipeThrough(new DecompressionStream('gzip')))
+        .then(stream => new Response(stream).arrayBuffer()),
+      fetch(new URL('../data/population-grid.json', import.meta.url)).then(response => response.json()),
+    ]).then(([buffer, meta]) => ({ grid: new Uint32Array(buffer), meta }))
   }
-  throw new Error('Population request timed out')
-}
-
-function splitPopulationArea(area) {
-  if (turfArea(area) / 1e6 <= 45000) return [area]
-  const [west, south, east, north] = bbox(area)
-  const areas = []
-  for (let lng = Math.floor(west); lng < Math.ceil(east); lng += 1) {
-    for (let lat = Math.floor(south); lat < Math.ceil(north); lat += 1) {
-      const clipped = intersect(featureCollection([toFeature(area), bboxPolygon([lng, lat, Math.min(lng + 1, east), Math.min(lat + 1, north)])]))
-      if (clipped) areas.push(clipped.geometry)
-    }
-  }
-  return areas
+  return populationGridPromise
 }
 
 async function getPopulation(area) {
-  const parts = splitPopulationArea(area)
-  const results = []
-  for (let index = 0; index < parts.length; index += 3) {
-    results.push(...await Promise.all(parts.slice(index, index + 3).map(requestPopulation)))
+  const { grid, meta } = await loadPopulationGrid()
+  const { resolutionDegrees, cols, rows } = meta
+  const feature = toFeature(area)
+  const [west, south, east, north] = bbox(feature)
+  const colStart = Math.max(0, Math.floor((west + 180) / resolutionDegrees))
+  const colEnd = Math.min(cols - 1, Math.ceil((east + 180) / resolutionDegrees))
+  const rowStart = Math.max(0, Math.floor((90 - north) / resolutionDegrees))
+  const rowEnd = Math.min(rows - 1, Math.ceil((90 - south) / resolutionDegrees))
+  let total = 0
+  for (let row = rowStart; row <= rowEnd; row += 1) {
+    const lat = 90 - (row + 0.5) * resolutionDegrees
+    const rowBase = row * cols
+    for (let col = colStart; col <= colEnd; col += 1) {
+      const value = grid[rowBase + col]
+      if (!value) continue
+      const lng = -180 + (col + 0.5) * resolutionDegrees
+      if (booleanPointInPolygon([lng, lat], feature)) total += value
+    }
   }
-  return {
-    ...results[0],
-    total_population: results.reduce((total, result) => total + result.total_population, 0),
-  }
+  return { total_population: total }
 }
 
 const MARKER_SIZE_RANGE = [8, 22]
@@ -499,7 +530,8 @@ export default function NuclearMap() {
     return saved === 'zh' || saved === 'en' ? saved : (typeof navigator !== 'undefined' && (navigator.language || '').toLowerCase().startsWith('zh') ? 'zh' : 'en')
   })
   const [selectedPlant, setSelectedPlant] = useState(null)
-  const [conditions, setConditions] = useState({ level: 'meltdown', direction: 90, windForce: 3, rainfall: 'none', duration: 4 })
+  const [conditions, setConditions] = useState({ level: 'meltdown', duration: 4 })
+  const [weather, setWeather] = useState({ status: 'idle', direction: null, windForce: null, rainfall: null, windSpeedMs: null })
   const [simulation, setSimulation] = useState(null)
   const [population, setPopulation] = useState({ status: 'idle', result: null })
   const [customPlants, setCustomPlants] = useState([])
@@ -565,8 +597,8 @@ export default function NuclearMap() {
     : { title: 'Create nuclear plant', reactor: 'Reactor type', capacity: 'Capacity (MW)', status: 'Status', place: 'Place on map', placing: 'Click anywhere on the map to place it', location: 'Custom location', remove: 'Delete this plant', plantTab: 'Plant', detonationTab: 'Detonation', detonationTitle: 'Create nuclear detonation', yieldLabel: 'Yield / warhead class', placeDetonation: 'Place on map', placingDetonation: 'Click anywhere on the map to place it', removeDetonation: 'Delete this detonation point' }
   const runSimulation = (event) => {
     event.preventDefault()
-    if (!selectedPlant) return
-    const nextSimulation = { level: conditions.level, direction: Number(conditions.direction), windForce: Number(conditions.windForce), rainfall: conditions.rainfall, duration: Number(conditions.duration) }
+    if (!selectedPlant || weather.status === 'idle' || weather.status === 'loading') return
+    const nextSimulation = { level: conditions.level, direction: weather.direction, windForce: weather.windForce, rainfall: weather.rainfall, duration: Number(conditions.duration) }
     setSimulation(nextSimulation)
     setPopulation({ status: 'loading', result: null })
     getPopulation(simulationArea(selectedPlant, nextSimulation))
@@ -575,8 +607,8 @@ export default function NuclearMap() {
   }
   const runDetonationSimulation = event => {
     event.preventDefault()
-    if (!selectedDetonation) return
-    const nextSimulation = { direction: Number(conditions.direction), windForce: Number(conditions.windForce), rainfall: conditions.rainfall, duration: Number(conditions.duration) }
+    if (!selectedDetonation || weather.status === 'idle' || weather.status === 'loading') return
+    const nextSimulation = { direction: weather.direction, windForce: weather.windForce, rainfall: weather.rainfall, duration: Number(conditions.duration) }
     setDetonationSimulation(nextSimulation)
     setDetonationPopulation({ status: 'loading', result: null })
     getPopulation(detonationSimulationArea(selectedDetonation, nextSimulation))
@@ -585,6 +617,15 @@ export default function NuclearMap() {
   }
   const isDetonation = !selectedPlant && !!selectedDetonation
   const activeSelection = selectedPlant || selectedDetonation
+  useEffect(() => {
+    if (!activeSelection) { setWeather({ status: 'idle', direction: null, windForce: null, rainfall: null, windSpeedMs: null }); return }
+    let cancelled = false
+    setWeather({ status: 'loading', direction: null, windForce: null, rainfall: null, windSpeedMs: null })
+    fetchWeather(activeSelection.lat, activeSelection.lng)
+      .then(result => { if (!cancelled) setWeather({ status: 'success', ...result }) })
+      .catch(() => { if (!cancelled) setWeather({ status: 'error', direction: 90, windForce: 3, rainfall: 'none', windSpeedMs: null }) })
+    return () => { cancelled = true }
+  }, [activeSelection?.lat, activeSelection?.lng])
   const activeSimulation = isDetonation ? detonationSimulation : simulation
   const activePopulation = isDetonation ? detonationPopulation : population
   const clearActiveSimulation = () => {
@@ -764,11 +805,19 @@ export default function NuclearMap() {
           ? <div style={{ ...fieldStyle, opacity: 0.6, cursor: 'not-allowed' }}>{copy.detonationYield[selectedDetonation.yieldKey]}</div>
           : <><select value={conditions.level} onChange={event => update('level', event.target.value)} style={fieldStyle}>{Object.keys(SCENARIO_LEVELS).map(key => <option key={key} value={key}>{copy.level[key]}</option>)}</select><span style={{ display: 'block', color: '#9ca3af', fontSize: 11, marginTop: 4 }}>{copy.levelIsotope[conditions.level]}</span></>}
       </label>
-      <label style={{ display: 'block', marginBottom: 10 }}><span style={{ display: 'block', color: '#d1d5db', marginBottom: 4 }}>{copy.direction}: {conditions.direction}°</span><input type="range" min="0" max="359" value={conditions.direction} onChange={event => update('direction', event.target.value)} style={{ width: '100%' }} /><span style={{ color: '#9ca3af', fontSize: 11 }}>{copy.directionHint}</span></label>
-      <label style={{ display: 'block', marginBottom: 10 }}><span style={{ display: 'block', color: '#d1d5db', marginBottom: 4 }}>{copy.wind}: {conditions.windForce}{copy.forceSuffix}</span><input type="range" min="0" max="12" step="1" value={conditions.windForce} onChange={event => update('windForce', event.target.value)} style={{ width: '100%' }} /><span style={{ color: '#9ca3af', fontSize: 11 }}>{copy.windHint}</span></label>
-      <label style={{ display: 'block', marginBottom: 10 }}><span style={{ display: 'block', color: '#d1d5db', marginBottom: 4 }}>{copy.rainfall}</span><select value={conditions.rainfall} onChange={event => update('rainfall', event.target.value)} style={fieldStyle}>{Object.keys(RAINFALL).map(key => <option key={key} value={key}>{copy.rain[key]}</option>)}</select><span style={{ color: '#9ca3af', fontSize: 11 }}>{copy.rainHint}</span></label>
+      <div style={{ marginBottom: 12 }}>
+        <span style={{ display: 'block', color: '#d1d5db', marginBottom: 4 }}>{copy.weather}</span>
+        {weather.status === 'loading' && <div style={{ color: '#9ca3af', fontSize: 12 }}>{copy.weatherLoading}</div>}
+        {weather.status === 'error' && <div style={{ color: '#f87171', fontSize: 12, marginBottom: 4 }}>{copy.weatherError}</div>}
+        {(weather.status === 'success' || weather.status === 'error') && <>
+          <div style={fieldStyle}>{copy.wind} {weather.windForce}{copy.forceSuffix}{copy.unitSeparator}{copy.direction} {Math.round(weather.direction)}°{copy.unitSeparator}{copy.rain[weather.rainfall]}</div>
+          <span style={{ display: 'block', color: '#9ca3af', fontSize: 11, marginTop: 4 }}>{copy.directionHint}</span>
+          <span style={{ display: 'block', color: '#9ca3af', fontSize: 11 }}>{copy.windHint}</span>
+          <span style={{ display: 'block', color: '#9ca3af', fontSize: 11 }}>{copy.rainHint}</span>
+        </>}
+      </div>
       <label style={{ display: 'block', marginBottom: 12 }}><span style={{ display: 'block', color: '#d1d5db', marginBottom: 4 }}>{copy.duration}</span><input type="number" min="0" step="1" value={conditions.duration} onChange={event => update('duration', event.target.value)} style={fieldStyle} /><span style={{ color: '#9ca3af', fontSize: 11 }}>{copy.ongoing}</span></label>
-      <button type="submit" disabled={!activeSelection} style={{ width: '100%', padding: '8px 10px', fontSize: 13, fontWeight: 600, background: activeSelection ? '#dc2626' : '#4b5563', color: 'white', border: 'none', borderRadius: 4, cursor: activeSelection ? 'pointer' : 'not-allowed' }}>{copy.trigger}</button>
+      <button type="submit" disabled={!activeSelection || weather.status === 'loading' || weather.status === 'idle'} style={{ width: '100%', padding: '8px 10px', fontSize: 13, fontWeight: 600, background: activeSelection && weather.status !== 'loading' ? '#dc2626' : '#4b5563', color: 'white', border: 'none', borderRadius: 4, cursor: activeSelection && weather.status !== 'loading' ? 'pointer' : 'not-allowed' }}>{copy.trigger}</button>
       {activeSimulation && <button type="button" onClick={clearActiveSimulation} style={{ width: '100%', padding: '7px 10px', marginTop: 8, fontSize: 12, background: '#374151', color: 'white', border: 'none', borderRadius: 4, cursor: 'pointer' }}>{copy.clear}</button>}
       {activeSimulation && <button type="button" onClick={shareResult} style={{ width: '100%', padding: '7px 10px', marginTop: 8, fontSize: 12, background: '#0f766e', color: 'white', border: 'none', borderRadius: 4, cursor: 'pointer' }}>{copy.share}</button>}
       {shareStatus !== 'idle' && activeSimulation && <div style={{ marginTop: 8, padding: '6px 8px', fontSize: 11, color: '#5eead4', background: 'rgba(15,118,110,0.15)', border: '1px solid #0f766e', borderRadius: 4 }}>
@@ -916,12 +965,12 @@ export default function NuclearMap() {
             </button>)}
           </div>}
         </div>
-        <button
+        {MEASURE_FEATURE_ENABLED && <button
           type="button"
           onClick={toggleMeasuring}
           style={{ width: '100%', padding: '7px 10px', borderRadius: 6, border: '1px solid #6b7280', background: measuring ? '#f59e0b' : 'rgba(15,15,15,0.88)', color: 'white', cursor: 'pointer', fontSize: 12, fontWeight: measuring ? 700 : 400, boxShadow: '0 1px 4px rgba(0,0,0,0.45)' }}
-        >{measuring ? copy.measureClear : copy.measure}</button>
-        {measuring && <div style={{ color: '#d1d5db', fontSize: 11, background: 'rgba(15,15,15,0.85)', padding: '6px 8px', borderRadius: 6 }}>
+        >{measuring ? copy.measureClear : copy.measure}</button>}
+        {MEASURE_FEATURE_ENABLED && measuring && <div style={{ color: '#d1d5db', fontSize: 11, background: 'rgba(15,15,15,0.85)', padding: '6px 8px', borderRadius: 6 }}>
           {measureSegments.length > 0
             ? <><span style={{ color: '#facc15', fontWeight: 700 }}>{copy.measureTotal}: {Math.round(measureTotalKm).toLocaleString(locale === 'zh' ? 'zh-CN' : 'en-US')} {copy.km}</span>{' · '}<button type="button" onClick={() => setMeasurePoints([])} style={{ background: 'none', border: 'none', padding: 0, color: '#93c5fd', textDecoration: 'underline', cursor: 'pointer', font: 'inherit' }}>{copy.measureReset}</button></>
             : copy.measureHint}
