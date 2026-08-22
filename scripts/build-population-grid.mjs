@@ -6,11 +6,17 @@
  * the live WorldPop task-submission API on every simulation.
  *
  * Source data: WorldPop Global 2015-2030 constrained population counts,
- * https://www.worldpop.org (CC-BY 4.0). Download the global mosaic for the
- * target year from e.g.
- * https://data.worldpop.org/GIS/Population/Global_2015_2030/R2025A/<year>/0_Mosaicked/v1/1km/constrained/
- * and pass its local path via --input. */
-import { mkdir, writeFile } from 'node:fs/promises'
+ * https://www.worldpop.org (CC-BY 4.0), served anonymously (no account
+ * needed) from data.worldpop.org's public directory listing.
+ *
+ * Usage:
+ *   node build-population-grid.mjs                    # auto-discover this year's mosaic
+ *   node build-population-grid.mjs --year 2027         # auto-discover a specific year
+ *   node build-population-grid.mjs --url <tif url>     # skip discovery, read a known URL
+ *   node build-population-grid.mjs --input <local .tif> # read a local file (for testing)
+ * All forms accept --resolution <degrees> (default 0.1). */
+import { mkdir, rm, writeFile } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
 import { resolve } from 'node:path'
 import { gzipSync } from 'node:zlib'
 import { fromFile } from 'geotiff'
@@ -30,9 +36,49 @@ const argument = (name, fallback) => {
   return index === -1 ? fallback : process.argv[index + 1]
 }
 
-const inputPath = argument('--input')
-if (!inputPath) throw new Error('Usage: build-population-grid.mjs --input <path to WorldPop GeoTIFF> [--resolution 0.1]')
+// WorldPop tags each release "R<year><letter>" (R2024A, R2024B, R2025A, ...)
+// and there is no way to know the current tag in advance. Rather than
+// hardcoding one that will eventually go stale, discover every release
+// folder listed and try the newest first for the target data-year, falling
+// back to older releases only if the newest doesn't have that year yet.
+// If nothing is found at all, this throws - a scheduled sync run should
+// fail loudly on a WorldPop layout change, not silently ship stale data.
+async function resolveMosaicUrl(year) {
+  const base = 'https://data.worldpop.org/GIS/Population/Global_2015_2030/'
+  const listing = await fetch(base).then(response => response.text())
+  const releases = [...listing.matchAll(/href="(R\d{4}[A-Z])\/"/g)].map(match => match[1]).sort()
+  if (!releases.length) throw new Error(`No WorldPop release folders found at ${base} - the site layout may have changed.`)
+  for (let index = releases.length - 1; index >= 0; index -= 1) {
+    const release = releases[index]
+    const url = `${base}${release}/${year}/0_Mosaicked/v1/1km/constrained/global_pop_${year}_CN_1km_${release}_v1.tif`
+    // eslint-disable-next-line no-await-in-loop
+    const head = await fetch(url, { method: 'HEAD' })
+    if (head.ok) return url
+  }
+  throw new Error(`No WorldPop mosaic found for ${year} in any release (checked: ${releases.join(', ')}).`)
+}
+
+const explicitInputPath = argument('--input')
+const explicitUrl = argument('--url')
+const targetYear = argument('--year', String(new Date().getFullYear()))
 const targetResolution = Number(argument('--resolution', '0.1'))
+
+const sourceUrl = explicitInputPath ? null : (explicitUrl ?? await resolveMosaicUrl(targetYear))
+// This server advertises Accept-Ranges but doesn't actually honor Range
+// requests (always returns the full body), so geotiff's fromUrl windowed
+// reads don't work against it - download to a temp file and read that
+// instead, same as a human would with curl.
+let inputPath = explicitInputPath
+let downloadedTempPath = null
+if (sourceUrl) {
+  console.log(`Downloading ${sourceUrl}`)
+  const response = await fetch(sourceUrl)
+  if (!response.ok) throw new Error(`Download failed: HTTP ${response.status}`)
+  downloadedTempPath = resolve(tmpdir(), `worldpop-population-${targetYear}.tif`)
+  await writeFile(downloadedTempPath, Buffer.from(await response.arrayBuffer()))
+  inputPath = downloadedTempPath
+  console.log(`Downloaded to ${downloadedTempPath}`)
+}
 
 const tiff = await fromFile(inputPath)
 const image = await tiff.getImage()
@@ -51,13 +97,15 @@ const rows = Math.round(180 / targetResolution)
 const grid = new Float64Array(cols * rows)
 
 // Read the source raster in horizontal row-block chunks to bound memory -
-// the full raster at float32 would be several GB uncompressed.
+// the full raster at float32 would be several GB uncompressed - and, when
+// reading from a URL, to keep each HTTP range request a reasonable size.
 const bytesPerPixel = 4
 const chunkBudgetBytes = 512 * 1024 * 1024
 const rowsPerChunk = Math.max(1, Math.floor(chunkBudgetBytes / (width * bytesPerPixel)))
 
 for (let y0 = 0; y0 < height; y0 += rowsPerChunk) {
   const y1 = Math.min(height, y0 + rowsPerChunk)
+  // eslint-disable-next-line no-await-in-loop
   const [raster] = await image.readRasters({ window: [0, y0, width, y1] })
   for (let row = 0; row < y1 - y0; row += 1) {
     const srcY = y0 + row
@@ -87,7 +135,7 @@ const compressed = gzipSync(Buffer.from(encoded.buffer), { level: 9 })
 await mkdir(resolve(root, 'src/data'), { recursive: true })
 await writeFile(output, compressed)
 await writeFile(metaOutput, `${JSON.stringify({
-  source: inputPath,
+  source: sourceUrl ?? explicitInputPath,
   resolutionDegrees: targetResolution,
   cols,
   rows,
@@ -99,3 +147,5 @@ await writeFile(metaOutput, `${JSON.stringify({
 }, null, 2)}\n`)
 
 console.log(`Wrote ${cols}x${rows} grid: ${(encoded.byteLength / 1e6).toFixed(1)} MB raw -> ${(compressed.byteLength / 1e6).toFixed(1)} MB gzipped, at ${output}`)
+
+if (downloadedTempPath) await rm(downloadedTempPath, { force: true })

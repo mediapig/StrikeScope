@@ -1,0 +1,49 @@
+name: Sync population grid
+
+on:
+  schedule:
+    # Once a year, well after WorldPop's typical late-summer release cadence
+    # for the current-year mosaic (observed: 2026 data published mid-Aug 2025).
+    - cron: '0 4 1 9 *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run data:population
+      - id: diff
+        run: |
+          if git diff --quiet -- src/data/population-grid.dat src/data/population-grid.json; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+      - if: steps.diff.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          commit-message: 'Sync population grid from WorldPop'
+          title: 'Sync population grid from WorldPop'
+          body: |
+            Automated annual refresh via `npm run data:population`
+            (`scripts/build-population-grid.mjs`).
+
+            Check before merging:
+            - `src/data/population-grid.json`'s `totalPopulation` is in a
+              sane range (recent runs: ~8.2-8.3 billion).
+            - `source` URL looks like a real WorldPop mosaic for the
+              expected year, not a fallback to an older release.
+          branch: sync-population-grid
+          add-paths: |
+            src/data/population-grid.dat
+            src/data/population-grid.json
