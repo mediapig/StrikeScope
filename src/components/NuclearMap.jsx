@@ -221,8 +221,12 @@ function PlantMarker({ plant, selected, simulation, onClick, onDragEnd }) {
 }
 
 const fieldStyle = { width: '100%', padding: 7, borderRadius: 4, border: '1px solid #4b5563', background: '#1f2937', color: 'white' }
-const panelStyle = { background: 'rgba(15,15,15,0.92)', color: 'white', padding: 16, borderRadius: 8, fontSize: 13, backdropFilter: 'blur(4px)', width: 270, flexShrink: 0 }
-const panelColumnStyle = { position: 'absolute', top: 16, right: 16, zIndex: 1000, display: 'flex', flexDirection: 'column', gap: 16, maxHeight: 'calc(100vh - 32px)', overflowY: 'auto' }
+const panelStyle = { background: 'rgba(15,15,15,0.92)', color: 'white', padding: 16, borderRadius: 8, fontSize: 13, backdropFilter: 'blur(4px)', flexShrink: 0 }
+const panelColumnStyle = { display: 'flex', flexDirection: 'column', gap: 16, maxHeight: 'calc(100vh - 32px)', overflowY: 'auto', pointerEvents: 'auto' }
+// Both floating columns live in one flex-wrap row: side by side while there's
+// room (desktop), wrapping to a vertical stack when there isn't (mobile) -
+// no fixed breakpoint needed, it just responds to actual available width.
+const topRowStyle = { position: 'absolute', top: 16, left: 16, right: 16, zIndex: 1000, display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16, pointerEvents: 'none' }
 
 export default function NuclearMap() {
   const [locale, setLocale] = useState(() => {
@@ -330,6 +334,13 @@ export default function NuclearMap() {
       .maplibregl-popup-anchor-bottom .maplibregl-popup-tip { border-top-color: rgba(15,15,15,0.96); }
       .maplibregl-popup-anchor-top .maplibregl-popup-tip { border-bottom-color: rgba(15,15,15,0.96); }
       .maplibregl-popup-close-button { color: white; font-size: 16px; padding: 4px 8px; }
+      .ss-panel { width: 270px; }
+      .ss-control-column { width: 220px; }
+      @media (max-width: 640px) {
+        .ss-panel, .ss-control-column { width: min(260px, calc(100vw - 24px)); }
+        .ss-title { display: none; }
+        .ss-legend { max-width: calc(100vw - 24px); }
+      }
     `}</style>
     <Map
       ref={mapRef}
@@ -371,7 +382,7 @@ export default function NuclearMap() {
     </Map>
     <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', mixBlendMode: 'overlay', opacity: Math.max(0, Math.min(1, (6 - zoom) / 3)), background: 'radial-gradient(ellipse 55% 55% at 46% 44%, rgba(255,244,214,0.95) 0%, rgba(255,244,214,0.4) 30%, rgba(255,244,214,0) 55%)' }} />
 
-    <div style={{ position: 'absolute', bottom: 30, left: 16, zIndex: 1000, background: 'rgba(15,15,15,0.85)', color: 'white', padding: '12px 16px', borderRadius: 8, fontSize: 12, backdropFilter: 'blur(4px)' }}>
+    <div className="ss-legend" style={{ position: 'absolute', bottom: 30, left: 16, zIndex: 1000, background: 'rgba(15,15,15,0.85)', color: 'white', padding: '12px 16px', borderRadius: 8, fontSize: 12, backdropFilter: 'blur(4px)' }}>
       <div style={{ fontWeight: 600, marginBottom: 8 }}>{copy.statusTitle}</div>
       {Object.entries(STATUS_COLOR).map(([key, color]) => <button key={key} type="button" onClick={() => toggleStatus(key)} title={copy.statusFilterHint} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, width: '100%', background: 'transparent', border: 'none', padding: 0, color: 'white', font: 'inherit', textAlign: 'left', cursor: 'pointer', opacity: hiddenStatuses.has(key) ? 0.4 : 1 }}><div style={{ width: 10, height: 10, borderRadius: '50%', background: color }} /><span style={{ textDecoration: hiddenStatuses.has(key) ? 'line-through' : 'none' }}>{copy.status[key]}</span></button>)}
       {selectedPlant && !simulation && <><div style={{ fontWeight: 600, margin: '12px 0 8px' }}>{copy.planning}</div>{REFERENCE_ZONES.map(zone => <div key={zone.key} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}><div style={{ width: 20, height: 2, background: zone.color }} /><span>{copy.reference[zone.key]}</span></div>)}</>}
@@ -379,68 +390,70 @@ export default function NuclearMap() {
       <div style={{ marginTop: 10, paddingTop: 8, borderTop: '1px solid #374151', color: '#9ca3af', fontSize: 10, lineHeight: 1.4 }}>{copy.dataSource}</div>
     </div>
 
-    <div style={panelColumnStyle}>
-    <form onSubmit={runSimulation} style={panelStyle}>
-      <div style={{ fontWeight: 700, fontSize: 15 }}>{copy.scenario}</div>
-      <div style={{ color: selectedPlant ? '#9ca3af' : '#fbbf24', marginTop: 5, marginBottom: 12 }}>{selectedPlant ? `${plantName(selectedPlant, locale)}${copy.unitSeparator}${selectedPlant.capacity || copy.unknown} ${copy.mw}` : copy.selectHint}</div>
-      <label style={{ display: 'block', marginBottom: 10 }}><span style={{ display: 'block', color: '#d1d5db', marginBottom: 4 }}>{copy.release}</span><select value={conditions.level} onChange={event => update('level', event.target.value)} style={fieldStyle}>{Object.keys(SCENARIO_LEVELS).map(key => <option key={key} value={key}>{copy.level[key]}</option>)}</select></label>
-      <label style={{ display: 'block', marginBottom: 10 }}><span style={{ display: 'block', color: '#d1d5db', marginBottom: 4 }}>{copy.direction}: {conditions.direction}°</span><input type="range" min="0" max="359" value={conditions.direction} onChange={event => update('direction', event.target.value)} style={{ width: '100%' }} /><span style={{ color: '#9ca3af', fontSize: 11 }}>{copy.directionHint}</span></label>
-      <label style={{ display: 'block', marginBottom: 10 }}><span style={{ display: 'block', color: '#d1d5db', marginBottom: 4 }}>{copy.wind}: {conditions.windForce}{copy.forceSuffix}</span><input type="range" min="0" max="12" step="1" value={conditions.windForce} onChange={event => update('windForce', event.target.value)} style={{ width: '100%' }} /><span style={{ color: '#9ca3af', fontSize: 11 }}>{copy.windHint}</span></label>
-      <label style={{ display: 'block', marginBottom: 10 }}><span style={{ display: 'block', color: '#d1d5db', marginBottom: 4 }}>{copy.rainfall}</span><select value={conditions.rainfall} onChange={event => update('rainfall', event.target.value)} style={fieldStyle}>{Object.keys(RAINFALL).map(key => <option key={key} value={key}>{copy.rain[key]}</option>)}</select><span style={{ color: '#9ca3af', fontSize: 11 }}>{copy.rainHint}</span></label>
-      <label style={{ display: 'block', marginBottom: 12 }}><span style={{ display: 'block', color: '#d1d5db', marginBottom: 4 }}>{copy.duration}</span><input type="number" min="0" step="1" value={conditions.duration} onChange={event => update('duration', event.target.value)} style={fieldStyle} /><span style={{ color: '#9ca3af', fontSize: 11 }}>{copy.ongoing}</span></label>
-      <button type="submit" disabled={!selectedPlant} style={{ width: '100%', padding: '8px 10px', fontSize: 13, fontWeight: 600, background: selectedPlant ? '#dc2626' : '#4b5563', color: 'white', border: 'none', borderRadius: 4, cursor: selectedPlant ? 'pointer' : 'not-allowed' }}>{copy.trigger}</button>
-      {simulation && <button type="button" onClick={() => { setSimulation(null); setPopulation({ status: 'idle', result: null }) }} style={{ width: '100%', padding: '7px 10px', marginTop: 8, fontSize: 12, background: '#374151', color: 'white', border: 'none', borderRadius: 4, cursor: 'pointer' }}>{copy.clear}</button>}
-      {population.status !== 'idle' && <div style={{ marginTop: 12, paddingTop: 10, borderTop: '1px solid #374151' }}>
-        <div style={{ fontWeight: 600, marginBottom: 4 }}>{copy.populationTitle}</div>
-        {population.status === 'loading' && <div style={{ color: '#fbbf24' }}>{copy.populationLoading}</div>}
-        {population.status === 'success' && <div style={{ fontSize: 20, fontWeight: 700, color: '#f8fafc' }}>{Math.round(population.result.total_population).toLocaleString(locale === 'zh' ? 'zh-CN' : 'en-US')}</div>}
-        {population.status === 'error' && <div style={{ color: '#fca5a5' }}>{copy.populationError}</div>}
-        <div style={{ color: '#9ca3af', fontSize: 11, lineHeight: 1.45, marginTop: 5 }}>{copy.populationNote}</div>
-      </div>}
-      <div style={{ color: '#9ca3af', fontSize: 11, lineHeight: 1.45, marginTop: 10 }}>{copy.disclaimer}</div>
-    </form>
-
-    <form onSubmit={event => { event.preventDefault(); setPlacingPlant(true); setMeasuring(false); setMeasurePoints([]) }} style={panelStyle}>
-      <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 10 }}>{customCopy.title}</div>
-      <label style={{ display: 'block', marginBottom: 9 }}><span style={{ display: 'block', color: '#d1d5db', marginBottom: 4 }}>{customCopy.name}</span><input value={newPlant.name} onChange={event => updateNewPlant('name', event.target.value)} placeholder={customCopy.title} style={fieldStyle} /></label>
-      <label style={{ display: 'block', marginBottom: 9 }}><span style={{ display: 'block', color: '#d1d5db', marginBottom: 4 }}>{customCopy.reactor}</span><select value={newPlant.reactorType} onChange={event => updateNewPlant('reactorType', event.target.value)} style={fieldStyle}><option>PWR</option><option>BWR</option><option>PHWR</option><option>HTGR</option><option>FBR</option><option>SMR</option></select></label>
-      <label style={{ display: 'block', marginBottom: 9 }}><span style={{ display: 'block', color: '#d1d5db', marginBottom: 4 }}>{customCopy.capacity}</span><input type="number" min="1" value={newPlant.capacity} onChange={event => updateNewPlant('capacity', event.target.value)} style={fieldStyle} /></label>
-      <label style={{ display: 'block', marginBottom: 12 }}><span style={{ display: 'block', color: '#d1d5db', marginBottom: 4 }}>{customCopy.status}</span><select value={newPlant.status} onChange={event => updateNewPlant('status', event.target.value)} style={fieldStyle}>{Object.keys(STATUS_COLOR).map(key => <option key={key} value={key}>{copy.status[key]}</option>)}</select></label>
-      <button type="submit" style={{ width: '100%', padding: '8px 10px', fontSize: 13, fontWeight: 600, background: placingPlant ? '#f59e0b' : '#2563eb', color: 'white', border: 'none', borderRadius: 4, cursor: 'pointer' }}>{placingPlant ? customCopy.placing : customCopy.place}</button>
-    </form>
-    </div>
-
-    <div style={{ position: 'absolute', top: 16, left: '50%', transform: 'translateX(-50%)', zIndex: 1000, color: 'white', fontSize: 18, fontWeight: 700, textShadow: '0 1px 4px rgba(0,0,0,0.8)', letterSpacing: 2, pointerEvents: 'none' }}>{copy.title}</div>
-    <div style={{ position: 'absolute', top: 16, left: 16, zIndex: 1000, display: 'flex', flexDirection: 'column', gap: 8, width: 220 }}>
-      <div style={{ display: 'flex', overflow: 'hidden', border: '1px solid #6b7280', borderRadius: 6, background: 'rgba(15,15,15,0.88)', boxShadow: '0 1px 4px rgba(0,0,0,0.45)' }} aria-label="Language selector">
-        {[['zh', '中文'], ['en', 'English']].map(([value, label]) => <button key={value} type="button" onClick={() => setLocale(value)} aria-pressed={locale === value} style={{ padding: '7px 10px', border: 'none', background: locale === value ? '#2563eb' : 'transparent', color: 'white', cursor: 'pointer', fontSize: 12, fontWeight: locale === value ? 700 : 400 }}>{label}</button>)}
-      </div>
-      <div style={{ position: 'relative' }}>
-        <input
-          value={searchQuery}
-          onChange={event => setSearchQuery(event.target.value)}
-          onKeyDown={event => { if (event.key === 'Enter' && searchMatches.length > 0) searchSelect(searchMatches[0]) }}
-          placeholder={copy.searchPlaceholder}
-          aria-label={copy.searchPlaceholder}
-          style={{ ...fieldStyle, background: 'rgba(15,15,15,0.88)', boxShadow: '0 1px 4px rgba(0,0,0,0.45)' }}
-        />
-        {searchMatches.length > 0 && <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: 4, background: 'rgba(15,15,15,0.95)', border: '1px solid #4b5563', borderRadius: 6, maxHeight: 260, overflowY: 'auto' }}>
-          {searchMatches.map(plant => <button key={plant.id} type="button" onClick={() => searchSelect(plant)} style={{ display: 'block', width: '100%', textAlign: 'left', padding: '7px 10px', background: 'transparent', border: 'none', borderBottom: '1px solid #27303f', color: 'white', cursor: 'pointer' }}>
-            <div style={{ fontSize: 12 }}>{plantName(plant, locale)}</div>
-            <div style={{ color: '#9ca3af', fontSize: 11 }}>{countryName(plant, locale)}</div>
-          </button>)}
+    <div className="ss-title" style={{ position: 'absolute', top: 16, left: '50%', transform: 'translateX(-50%)', zIndex: 1000, color: 'white', fontSize: 18, fontWeight: 700, textShadow: '0 1px 4px rgba(0,0,0,0.8)', letterSpacing: 2, pointerEvents: 'none' }}>{copy.title}</div>
+    <div style={topRowStyle}>
+      <div className="ss-control-column" style={{ display: 'flex', flexDirection: 'column', gap: 8, pointerEvents: 'auto' }}>
+        <div style={{ display: 'flex', overflow: 'hidden', border: '1px solid #6b7280', borderRadius: 6, background: 'rgba(15,15,15,0.88)', boxShadow: '0 1px 4px rgba(0,0,0,0.45)' }} aria-label="Language selector">
+          {[['zh', '中文'], ['en', 'English']].map(([value, label]) => <button key={value} type="button" onClick={() => setLocale(value)} aria-pressed={locale === value} style={{ padding: '7px 10px', border: 'none', background: locale === value ? '#2563eb' : 'transparent', color: 'white', cursor: 'pointer', fontSize: 12, fontWeight: locale === value ? 700 : 400 }}>{label}</button>)}
+        </div>
+        <div style={{ position: 'relative' }}>
+          <input
+            value={searchQuery}
+            onChange={event => setSearchQuery(event.target.value)}
+            onKeyDown={event => { if (event.key === 'Enter' && searchMatches.length > 0) searchSelect(searchMatches[0]) }}
+            placeholder={copy.searchPlaceholder}
+            aria-label={copy.searchPlaceholder}
+            style={{ ...fieldStyle, background: 'rgba(15,15,15,0.88)', boxShadow: '0 1px 4px rgba(0,0,0,0.45)' }}
+          />
+          {searchMatches.length > 0 && <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: 4, background: 'rgba(15,15,15,0.95)', border: '1px solid #4b5563', borderRadius: 6, maxHeight: 260, overflowY: 'auto' }}>
+            {searchMatches.map(plant => <button key={plant.id} type="button" onClick={() => searchSelect(plant)} style={{ display: 'block', width: '100%', textAlign: 'left', padding: '7px 10px', background: 'transparent', border: 'none', borderBottom: '1px solid #27303f', color: 'white', cursor: 'pointer' }}>
+              <div style={{ fontSize: 12 }}>{plantName(plant, locale)}</div>
+              <div style={{ color: '#9ca3af', fontSize: 11 }}>{countryName(plant, locale)}</div>
+            </button>)}
+          </div>}
+        </div>
+        <button
+          type="button"
+          onClick={toggleMeasuring}
+          style={{ width: '100%', padding: '7px 10px', borderRadius: 6, border: '1px solid #6b7280', background: measuring ? '#f59e0b' : 'rgba(15,15,15,0.88)', color: 'white', cursor: 'pointer', fontSize: 12, fontWeight: measuring ? 700 : 400, boxShadow: '0 1px 4px rgba(0,0,0,0.45)' }}
+        >{measuring ? copy.measureClear : copy.measure}</button>
+        {measuring && <div style={{ color: '#d1d5db', fontSize: 11, background: 'rgba(15,15,15,0.85)', padding: '6px 8px', borderRadius: 6 }}>
+          {measureSegments.length > 0
+            ? <><span style={{ color: '#facc15', fontWeight: 700 }}>{copy.measureTotal}: {Math.round(measureTotalKm).toLocaleString(locale === 'zh' ? 'zh-CN' : 'en-US')} {copy.km}</span>{' · '}<button type="button" onClick={() => setMeasurePoints([])} style={{ background: 'none', border: 'none', padding: 0, color: '#93c5fd', textDecoration: 'underline', cursor: 'pointer', font: 'inherit' }}>{copy.measureReset}</button></>
+            : copy.measureHint}
         </div>}
       </div>
-      <button
-        type="button"
-        onClick={toggleMeasuring}
-        style={{ width: '100%', padding: '7px 10px', borderRadius: 6, border: '1px solid #6b7280', background: measuring ? '#f59e0b' : 'rgba(15,15,15,0.88)', color: 'white', cursor: 'pointer', fontSize: 12, fontWeight: measuring ? 700 : 400, boxShadow: '0 1px 4px rgba(0,0,0,0.45)' }}
-      >{measuring ? copy.measureClear : copy.measure}</button>
-      {measuring && <div style={{ color: '#d1d5db', fontSize: 11, background: 'rgba(15,15,15,0.85)', padding: '6px 8px', borderRadius: 6 }}>
-        {measureSegments.length > 0
-          ? <><span style={{ color: '#facc15', fontWeight: 700 }}>{copy.measureTotal}: {Math.round(measureTotalKm).toLocaleString(locale === 'zh' ? 'zh-CN' : 'en-US')} {copy.km}</span>{' · '}<button type="button" onClick={() => setMeasurePoints([])} style={{ background: 'none', border: 'none', padding: 0, color: '#93c5fd', textDecoration: 'underline', cursor: 'pointer', font: 'inherit' }}>{copy.measureReset}</button></>
-          : copy.measureHint}
-      </div>}
+
+      <div style={panelColumnStyle}>
+        <form onSubmit={runSimulation} className="ss-panel" style={panelStyle}>
+          <div style={{ fontWeight: 700, fontSize: 15 }}>{copy.scenario}</div>
+          <div style={{ color: selectedPlant ? '#9ca3af' : '#fbbf24', marginTop: 5, marginBottom: 12 }}>{selectedPlant ? `${plantName(selectedPlant, locale)}${copy.unitSeparator}${selectedPlant.capacity || copy.unknown} ${copy.mw}` : copy.selectHint}</div>
+          <label style={{ display: 'block', marginBottom: 10 }}><span style={{ display: 'block', color: '#d1d5db', marginBottom: 4 }}>{copy.release}</span><select value={conditions.level} onChange={event => update('level', event.target.value)} style={fieldStyle}>{Object.keys(SCENARIO_LEVELS).map(key => <option key={key} value={key}>{copy.level[key]}</option>)}</select></label>
+          <label style={{ display: 'block', marginBottom: 10 }}><span style={{ display: 'block', color: '#d1d5db', marginBottom: 4 }}>{copy.direction}: {conditions.direction}°</span><input type="range" min="0" max="359" value={conditions.direction} onChange={event => update('direction', event.target.value)} style={{ width: '100%' }} /><span style={{ color: '#9ca3af', fontSize: 11 }}>{copy.directionHint}</span></label>
+          <label style={{ display: 'block', marginBottom: 10 }}><span style={{ display: 'block', color: '#d1d5db', marginBottom: 4 }}>{copy.wind}: {conditions.windForce}{copy.forceSuffix}</span><input type="range" min="0" max="12" step="1" value={conditions.windForce} onChange={event => update('windForce', event.target.value)} style={{ width: '100%' }} /><span style={{ color: '#9ca3af', fontSize: 11 }}>{copy.windHint}</span></label>
+          <label style={{ display: 'block', marginBottom: 10 }}><span style={{ display: 'block', color: '#d1d5db', marginBottom: 4 }}>{copy.rainfall}</span><select value={conditions.rainfall} onChange={event => update('rainfall', event.target.value)} style={fieldStyle}>{Object.keys(RAINFALL).map(key => <option key={key} value={key}>{copy.rain[key]}</option>)}</select><span style={{ color: '#9ca3af', fontSize: 11 }}>{copy.rainHint}</span></label>
+          <label style={{ display: 'block', marginBottom: 12 }}><span style={{ display: 'block', color: '#d1d5db', marginBottom: 4 }}>{copy.duration}</span><input type="number" min="0" step="1" value={conditions.duration} onChange={event => update('duration', event.target.value)} style={fieldStyle} /><span style={{ color: '#9ca3af', fontSize: 11 }}>{copy.ongoing}</span></label>
+          <button type="submit" disabled={!selectedPlant} style={{ width: '100%', padding: '8px 10px', fontSize: 13, fontWeight: 600, background: selectedPlant ? '#dc2626' : '#4b5563', color: 'white', border: 'none', borderRadius: 4, cursor: selectedPlant ? 'pointer' : 'not-allowed' }}>{copy.trigger}</button>
+          {simulation && <button type="button" onClick={() => { setSimulation(null); setPopulation({ status: 'idle', result: null }) }} style={{ width: '100%', padding: '7px 10px', marginTop: 8, fontSize: 12, background: '#374151', color: 'white', border: 'none', borderRadius: 4, cursor: 'pointer' }}>{copy.clear}</button>}
+          {population.status !== 'idle' && <div style={{ marginTop: 12, paddingTop: 10, borderTop: '1px solid #374151' }}>
+            <div style={{ fontWeight: 600, marginBottom: 4 }}>{copy.populationTitle}</div>
+            {population.status === 'loading' && <div style={{ color: '#fbbf24' }}>{copy.populationLoading}</div>}
+            {population.status === 'success' && <div style={{ fontSize: 20, fontWeight: 700, color: '#f8fafc' }}>{Math.round(population.result.total_population).toLocaleString(locale === 'zh' ? 'zh-CN' : 'en-US')}</div>}
+            {population.status === 'error' && <div style={{ color: '#fca5a5' }}>{copy.populationError}</div>}
+            <div style={{ color: '#9ca3af', fontSize: 11, lineHeight: 1.45, marginTop: 5 }}>{copy.populationNote}</div>
+          </div>}
+          <div style={{ color: '#9ca3af', fontSize: 11, lineHeight: 1.45, marginTop: 10 }}>{copy.disclaimer}</div>
+        </form>
+
+        <form onSubmit={event => { event.preventDefault(); setPlacingPlant(true); setMeasuring(false); setMeasurePoints([]) }} className="ss-panel" style={panelStyle}>
+          <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 10 }}>{customCopy.title}</div>
+          <label style={{ display: 'block', marginBottom: 9 }}><span style={{ display: 'block', color: '#d1d5db', marginBottom: 4 }}>{customCopy.name}</span><input value={newPlant.name} onChange={event => updateNewPlant('name', event.target.value)} placeholder={customCopy.title} style={fieldStyle} /></label>
+          <label style={{ display: 'block', marginBottom: 9 }}><span style={{ display: 'block', color: '#d1d5db', marginBottom: 4 }}>{customCopy.reactor}</span><select value={newPlant.reactorType} onChange={event => updateNewPlant('reactorType', event.target.value)} style={fieldStyle}><option>PWR</option><option>BWR</option><option>PHWR</option><option>HTGR</option><option>FBR</option><option>SMR</option></select></label>
+          <label style={{ display: 'block', marginBottom: 9 }}><span style={{ display: 'block', color: '#d1d5db', marginBottom: 4 }}>{customCopy.capacity}</span><input type="number" min="1" value={newPlant.capacity} onChange={event => updateNewPlant('capacity', event.target.value)} style={fieldStyle} /></label>
+          <label style={{ display: 'block', marginBottom: 12 }}><span style={{ display: 'block', color: '#d1d5db', marginBottom: 4 }}>{customCopy.status}</span><select value={newPlant.status} onChange={event => updateNewPlant('status', event.target.value)} style={fieldStyle}>{Object.keys(STATUS_COLOR).map(key => <option key={key} value={key}>{copy.status[key]}</option>)}</select></label>
+          <button type="submit" style={{ width: '100%', padding: '8px 10px', fontSize: 13, fontWeight: 600, background: placingPlant ? '#f59e0b' : '#2563eb', color: 'white', border: 'none', borderRadius: 4, cursor: 'pointer' }}>{placingPlant ? customCopy.placing : customCopy.place}</button>
+        </form>
+      </div>
     </div>
   </div>
 }
