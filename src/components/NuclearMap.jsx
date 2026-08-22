@@ -440,6 +440,7 @@ export default function NuclearMap() {
       minZoom={1.2}
       style={{ width: '100%', height: '100%' }}
       mapStyle={MAP_STYLE}
+      canvasContextAttributes={{ preserveDrawingBuffer: true }}
       onClick={handleMapClick}
       onMove={event => setZoom(event.viewState.zoom)}
       cursor={placingPlant || measuring ? 'crosshair' : 'grab'}
