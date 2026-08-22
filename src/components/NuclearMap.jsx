@@ -43,12 +43,37 @@ const RAINFALL = {
   heavy: { distanceFactor: 0.62, opacity: 0.24 },
 }
 
+// Publicly documented weapon yields (historical devices) and illustrative
+// generic warhead classes, in kilotons - not any specific current arsenal's
+// classified figures.
+const DETONATION_YIELDS = { tactical: 1, hiroshima: 15, nagasaki: 21, strategic: 300, megaton: 1000, tsarbomba: 50000 }
+const DETONATION_ZONE_COLOR = { fireball: '#f8fafc', thermalBurn: '#f97316', severe: '#dc2626', moderate: '#eab308', light: '#3b82f6' }
+// Illustrative cube-root blast-scaling approximation (the standard way
+// unclassified nuclear-effects estimators like NUKEMAP scale distance with
+// yield), not a precise damage model. Radii in km for yield in kilotons.
+function detonationEffects(kt) {
+  const cubeRoot = Math.cbrt(kt)
+  return {
+    fireball: 0.11 * kt ** 0.4,
+    thermalBurn: 1.03 * kt ** 0.41,
+    severe: 0.28 * cubeRoot,
+    moderate: 0.66 * cubeRoot,
+    light: 2.2 * cubeRoot,
+  }
+}
+function detonationZones(kt) {
+  const effects = detonationEffects(kt)
+  return Object.entries(effects)
+    .map(([key, radius]) => ({ key, radius, color: DETONATION_ZONE_COLOR[key] }))
+    .sort((a, b) => b.radius - a.radius)
+}
+
 const COPY = {
   zh: {
-    title: '☢ StrikeScope — 全球核电站场景推演', statusTitle: '核电站状态', reactor: '堆型', capacity: '装机容量', selectPlant: '选择电站', planning: '规划参考区', simulation: '模拟范围', core: '全向近场警戒', downwind: '（顺风）', scenario: '事故场景推演', selectHint: '请先点击地图上的核电站', release: '放射性释放规模', direction: '扩散方向', wind: '风力', rainfall: '降雨强度', duration: '释放持续时间（小时）', trigger: '触发模拟', clear: '清除模拟', ongoing: '输入 0 代表持续释放；远场仅表示稀释后的参考影响。', rainHint: '降雨越强，模拟越偏向近场湿沉降。', windHint: '0级无风 · 3级微风 · 6级强风 · 9级烈风 · 12级飓风', directionHint: '0° 北 · 90° 东 · 180° 南 · 270° 西', populationTitle: '模拟区域估算人口', populationLoading: '正在计算人口…', populationError: '暂时无法取得人口估算', populationNote: '基于 WorldPop 人口栅格；为模拟区域内常住人口估算，不代表实际暴露或撤离人数。', disclaimer: '仅为可视化推演：结合装机容量、释放时间与风向生成示意羽流；不是剂量预测或应急指令。', status: { operating: '运营中', decommissioned: '已关闭', construction: '建设中', planned: '计划中' }, reference: { plume: '羽流应急规划参考区 (16km)', ingestion: '摄入途径规划参考区 (80km)' }, level: { low: '小规模释放', medium: '中等规模释放', high: '大规模释放' }, zone: { plume: '羽流防护参考', monitoring: '监测参考' }, rain: { none: '无雨', light: '小雨', moderate: '中雨', heavy: '大雨' }, unknown: '未知', north: '北', east: '东', south: '南', west: '西', mw: 'MW', forceSuffix: '级', unitSeparator: ' · ', searchPlaceholder: '搜索电站或国家…', dataSource: '数据来源：Global Energy Monitor 全球核电追踪（Global Nuclear Power Tracker）', units: '机组数', commissioned: '投产年份', plannedStart: '计划投产', operator: '运营商', statusFilterHint: '点击可在地图上显示/隐藏该类电站', measure: '测量距离', measureHint: '在地图或核电站上依次点击多个点，测量折线总距离', measureClear: '清除测距', measureReset: '重新开始', measureTotal: '总距离', km: '公里', share: '分享结果', shareCopied: '内容已复制，可粘贴到微信或 Instagram 分享', shareImageCopied: '图片已复制（含二维码），可粘贴到微信或 Instagram 分享', shareDownloaded: '图片已保存（含二维码），可在聊天中作为图片发送', shareX: '分享到 X', close: '关闭',
+    title: '☢ StrikeScope — 全球核电站场景推演', statusTitle: '核电站状态', reactor: '堆型', capacity: '装机容量', selectPlant: '选择电站', planning: '规划参考区', simulation: '模拟范围', core: '全向近场警戒', downwind: '（顺风）', scenario: '事故场景推演', selectHint: '请先点击地图上的核电站', release: '放射性释放规模', direction: '扩散方向', wind: '风力', rainfall: '降雨强度', duration: '释放持续时间（小时）', trigger: '触发模拟', clear: '清除模拟', ongoing: '输入 0 代表持续释放；远场仅表示稀释后的参考影响。', rainHint: '降雨越强，模拟越偏向近场湿沉降。', windHint: '0级无风 · 3级微风 · 6级强风 · 9级烈风 · 12级飓风', directionHint: '0° 北 · 90° 东 · 180° 南 · 270° 西', populationTitle: '模拟区域估算人口', populationLoading: '正在计算人口…', populationError: '暂时无法取得人口估算', populationNote: '基于 WorldPop 人口栅格；为模拟区域内常住人口估算，不代表实际暴露或撤离人数。', disclaimer: '仅为可视化推演：结合装机容量、释放时间与风向生成示意羽流；不是剂量预测或应急指令。', status: { operating: '运营中', decommissioned: '已关闭', construction: '建设中', planned: '计划中' }, reference: { plume: '羽流应急规划参考区 (16km)', ingestion: '摄入途径规划参考区 (80km)' }, level: { low: '小规模释放', medium: '中等规模释放', high: '大规模释放' }, zone: { plume: '羽流防护参考', monitoring: '监测参考' }, rain: { none: '无雨', light: '小雨', moderate: '中雨', heavy: '大雨' }, unknown: '未知', north: '北', east: '东', south: '南', west: '西', mw: 'MW', forceSuffix: '级', unitSeparator: ' · ', searchPlaceholder: '搜索电站或国家…', dataSource: '数据来源：Global Energy Monitor 全球核电追踪（Global Nuclear Power Tracker）', units: '机组数', commissioned: '投产年份', plannedStart: '计划投产', operator: '运营商', statusFilterHint: '点击可在地图上显示/隐藏该类电站', measure: '测量距离', measureHint: '在地图或核电站上依次点击多个点，测量折线总距离', measureClear: '清除测距', measureReset: '重新开始', measureTotal: '总距离', km: '公里', share: '分享结果', shareCopied: '内容已复制，可粘贴到微信或 Instagram 分享', shareImageCopied: '图片已复制（含二维码），可粘贴到微信或 Instagram 分享', shareDownloaded: '图片已保存（含二维码），可在聊天中作为图片发送', shareX: '分享到 X', close: '关闭', detonationYield: { tactical: '战术核武器（约1千吨）', hiroshima: '广岛"小男孩"型（15千吨，历史数据）', nagasaki: '长崎"胖子"型（21千吨，历史数据）', strategic: '现代战略核弹头（约300千吨，示意）', megaton: '大型热核武器（约100万吨，示意）', tsarbomba: '沙皇炸弹级（5000万吨，人类史上最大当量核试验）' }, detonationZone: { fireball: '火球半径', thermalBurn: '三度烧伤半径（热辐射）', severe: '重度损毁半径（约20psi超压）', moderate: '中度损毁半径（约5psi超压）', light: '轻度损毁/玻璃破碎半径（约1psi超压）' }, detonationPopulationTitle: '受影响区域估算人口', detonationDisclaimer: '仅为教育性可视化：基于公开的核武器当量数据与简化的立方根冲击波缩放公式估算，不代表真实目标、军事数据或精确毁伤评估。',
   },
   en: {
-    title: '☢ StrikeScope — Nuclear Scenario Explorer', statusTitle: 'Plant status', reactor: 'Reactor type', capacity: 'Installed capacity', selectPlant: 'Select plant', planning: 'Planning references', simulation: 'Simulation zones', core: 'All-direction near-field alert', downwind: ' (downwind)', scenario: 'Accident scenario', selectHint: 'Select a nuclear plant on the map first', release: 'Radioactive release scale', direction: 'Plume direction', wind: 'Wind force', rainfall: 'Rainfall', duration: 'Release duration (hours)', trigger: 'Run simulation', clear: 'Clear simulation', ongoing: 'Enter 0 for an ongoing release; the far field is a diluted reference only.', rainHint: 'Stronger rain shifts this illustration toward near-field wet deposition.', windHint: '0 calm · 3 gentle breeze · 6 strong breeze · 9 strong gale · 12 hurricane', directionHint: '0° N · 90° E · 180° S · 270° W', populationTitle: 'Estimated residents in simulation area', populationLoading: 'Calculating population…', populationError: 'Population estimate is currently unavailable', populationNote: 'Based on WorldPop population grids; this estimates resident population in the simulated area, not actual exposure or evacuation.', disclaimer: 'Visualization only: this illustrative plume uses capacity, duration, and wind. It is not a dose forecast or emergency instruction.', status: { operating: 'Operating', decommissioned: 'Closed', construction: 'Under construction', planned: 'Planned' }, reference: { plume: 'Plume planning reference (16 km)', ingestion: 'Ingestion planning reference (80 km)' }, level: { low: 'Small release', medium: 'Moderate release', high: 'Large release' }, zone: { plume: 'Plume protection reference', monitoring: 'Monitoring reference' }, rain: { none: 'No rain', light: 'Light rain', moderate: 'Moderate rain', heavy: 'Heavy rain' }, unknown: 'Unknown', north: 'N', east: 'E', south: 'S', west: 'W', mw: 'MW', forceSuffix: '', unitSeparator: ' · ', searchPlaceholder: 'Search plant or country…', dataSource: 'Data: Global Energy Monitor Global Nuclear Power Tracker', units: 'Units', commissioned: 'Commissioned', plannedStart: 'Planned start', operator: 'Operator', statusFilterHint: 'Click to show/hide this status on the map', measure: 'Measure distance', measureHint: 'Click multiple points on the map or on plants to measure the total path distance', measureClear: 'Clear measurement', measureReset: 'Restart', measureTotal: 'Total distance', km: 'km', share: 'Share result', shareCopied: 'Copied — paste into WeChat or Instagram to share', shareImageCopied: 'Image copied (with QR code) — paste into WeChat or Instagram to share', shareDownloaded: 'Image saved (with QR code) — send it as a photo in any chat app', shareX: 'Share on X', close: 'Close',
+    title: '☢ StrikeScope — Nuclear Scenario Explorer', statusTitle: 'Plant status', reactor: 'Reactor type', capacity: 'Installed capacity', selectPlant: 'Select plant', planning: 'Planning references', simulation: 'Simulation zones', core: 'All-direction near-field alert', downwind: ' (downwind)', scenario: 'Accident scenario', selectHint: 'Select a nuclear plant on the map first', release: 'Radioactive release scale', direction: 'Plume direction', wind: 'Wind force', rainfall: 'Rainfall', duration: 'Release duration (hours)', trigger: 'Run simulation', clear: 'Clear simulation', ongoing: 'Enter 0 for an ongoing release; the far field is a diluted reference only.', rainHint: 'Stronger rain shifts this illustration toward near-field wet deposition.', windHint: '0 calm · 3 gentle breeze · 6 strong breeze · 9 strong gale · 12 hurricane', directionHint: '0° N · 90° E · 180° S · 270° W', populationTitle: 'Estimated residents in simulation area', populationLoading: 'Calculating population…', populationError: 'Population estimate is currently unavailable', populationNote: 'Based on WorldPop population grids; this estimates resident population in the simulated area, not actual exposure or evacuation.', disclaimer: 'Visualization only: this illustrative plume uses capacity, duration, and wind. It is not a dose forecast or emergency instruction.', status: { operating: 'Operating', decommissioned: 'Closed', construction: 'Under construction', planned: 'Planned' }, reference: { plume: 'Plume planning reference (16 km)', ingestion: 'Ingestion planning reference (80 km)' }, level: { low: 'Small release', medium: 'Moderate release', high: 'Large release' }, zone: { plume: 'Plume protection reference', monitoring: 'Monitoring reference' }, rain: { none: 'No rain', light: 'Light rain', moderate: 'Moderate rain', heavy: 'Heavy rain' }, unknown: 'Unknown', north: 'N', east: 'E', south: 'S', west: 'W', mw: 'MW', forceSuffix: '', unitSeparator: ' · ', searchPlaceholder: 'Search plant or country…', dataSource: 'Data: Global Energy Monitor Global Nuclear Power Tracker', units: 'Units', commissioned: 'Commissioned', plannedStart: 'Planned start', operator: 'Operator', statusFilterHint: 'Click to show/hide this status on the map', measure: 'Measure distance', measureHint: 'Click multiple points on the map or on plants to measure the total path distance', measureClear: 'Clear measurement', measureReset: 'Restart', measureTotal: 'Total distance', km: 'km', share: 'Share result', shareCopied: 'Copied — paste into WeChat or Instagram to share', shareImageCopied: 'Image copied (with QR code) — paste into WeChat or Instagram to share', shareDownloaded: 'Image saved (with QR code) — send it as a photo in any chat app', shareX: 'Share on X', close: 'Close', detonationYield: { tactical: 'Small tactical (~1 kt)', hiroshima: 'Hiroshima "Little Boy" (15 kt, historical)', nagasaki: 'Nagasaki "Fat Man" (21 kt, historical)', strategic: 'Modern strategic warhead (~300 kt, illustrative)', megaton: 'Large thermonuclear (~1 Mt, illustrative)', tsarbomba: 'Tsar Bomba class (50 Mt, largest ever tested)' }, detonationZone: { fireball: 'Fireball radius', thermalBurn: '3rd-degree burn radius (thermal radiation)', severe: 'Severe destruction radius (~20 psi overpressure)', moderate: 'Moderate destruction radius (~5 psi overpressure)', light: 'Light damage / glass breakage radius (~1 psi overpressure)' }, detonationPopulationTitle: 'Estimated residents in affected area', detonationDisclaimer: 'Educational visualization only: based on publicly documented weapon yields and a simplified cube-root blast-scaling approximation. Not real targeting data, military information, or a precise damage assessment.',
   },
 }
 
@@ -391,6 +416,24 @@ function PlantMarker({ plant, selected, simulation, onClick, onDragEnd }) {
   </>
 }
 
+function DetonationMarker({ detonation, selected, onClick }) {
+  const zones = detonationZones(DETONATION_YIELDS[detonation.yieldKey])
+  return <>
+    <Marker
+      longitude={detonation.lng} latitude={detonation.lat} anchor="center"
+      onClick={event => { event.originalEvent.stopPropagation(); onClick(detonation) }}
+    >
+      <div style={{ width: selected ? 22 : 18, height: selected ? 22 : 18, borderRadius: '50%', background: 'radial-gradient(circle, #fff7d6 0%, #f97316 45%, #7f1d1d 100%)', border: '2px solid white', boxShadow: `0 0 ${selected ? 10 : 5}px rgba(249,115,22,0.9)`, cursor: 'pointer' }} />
+    </Marker>
+    {selected && zones.map(zone => (
+      <Source key={zone.key} id={`det-${detonation.id}-${zone.key}`} type="geojson" data={toFeature(circleGeometry(detonation.lng, detonation.lat, zone.radius))}>
+        <Layer id={`det-${detonation.id}-${zone.key}-fill`} type="fill" paint={{ 'fill-color': zone.color, 'fill-opacity': 0.16 }} />
+        <Layer id={`det-${detonation.id}-${zone.key}-line`} type="line" paint={{ 'line-color': zone.color, 'line-width': 1.5 }} />
+      </Source>
+    ))}
+  </>
+}
+
 const fieldStyle = { width: '100%', padding: 7, borderRadius: 4, border: '1px solid #4b5563', background: '#1f2937', color: 'white' }
 const panelStyle = { background: 'rgba(15,15,15,0.92)', color: 'white', padding: 16, borderRadius: 8, fontSize: 13, backdropFilter: 'blur(4px)', flexShrink: 0 }
 const panelColumnStyle = { display: 'flex', flexDirection: 'column', gap: 16, maxHeight: 'calc(100vh - 32px)', overflowY: 'auto', pointerEvents: 'auto' }
@@ -421,6 +464,12 @@ export default function NuclearMap() {
   const [mobileCreateOpen, setMobileCreateOpen] = useState(false)
   const [scenarioOpen, setScenarioOpen] = useState(false)
   const [shareStatus, setShareStatus] = useState('idle')
+  const [createMode, setCreateMode] = useState('plant')
+  const [detonations, setDetonations] = useState([])
+  const [placingDetonation, setPlacingDetonation] = useState(false)
+  const [newDetonationYield, setNewDetonationYield] = useState('hiroshima')
+  const [selectedDetonation, setSelectedDetonation] = useState(null)
+  const [detonationPopulation, setDetonationPopulation] = useState({ status: 'idle', result: null })
   const mapRef = useRef(null)
   const selectPlant = plant => {
     setSelectedPlant(previous => {
@@ -430,6 +479,8 @@ export default function NuclearMap() {
     })
     setSimulation(null)
     setPopulation({ status: 'idle', result: null })
+    setSelectedDetonation(null)
+    setDetonationPopulation({ status: 'idle', result: null })
   }
   const toggleStatus = key => {
     setHiddenStatuses(previous => {
@@ -457,8 +508,8 @@ export default function NuclearMap() {
     return () => query.removeEventListener('change', handleChange)
   }, [])
   const customCopy = locale === 'zh'
-    ? { title: '新建核电站', name: '名称', reactor: '堆型', capacity: '装机容量（MW）', status: '状态', place: '在地图上放置', placing: '请在地图任意位置点击放置', location: '自定义位置', remove: '删除此核电站' }
-    : { title: 'Create nuclear plant', name: 'Name', reactor: 'Reactor type', capacity: 'Capacity (MW)', status: 'Status', place: 'Place on map', placing: 'Click anywhere on the map to place it', location: 'Custom location', remove: 'Delete this plant' }
+    ? { title: '新建核电站', name: '名称', reactor: '堆型', capacity: '装机容量（MW）', status: '状态', place: '在地图上放置', placing: '请在地图任意位置点击放置', location: '自定义位置', remove: '删除此核电站', plantTab: '核电站', detonationTab: '核爆点', detonationTitle: '新建核爆炸点', yieldLabel: '当量型号', placeDetonation: '在地图上放置', placingDetonation: '请在地图任意位置点击放置', removeDetonation: '删除此爆点' }
+    : { title: 'Create nuclear plant', name: 'Name', reactor: 'Reactor type', capacity: 'Capacity (MW)', status: 'Status', place: 'Place on map', placing: 'Click anywhere on the map to place it', location: 'Custom location', remove: 'Delete this plant', plantTab: 'Plant', detonationTab: 'Detonation', detonationTitle: 'Create nuclear detonation', yieldLabel: 'Yield / warhead class', placeDetonation: 'Place on map', placingDetonation: 'Click anywhere on the map to place it', removeDetonation: 'Delete this detonation point' }
   const runSimulation = (event) => {
     event.preventDefault()
     if (!selectedPlant) return
@@ -469,6 +520,13 @@ export default function NuclearMap() {
       .then(result => setPopulation({ status: 'success', result }))
       .catch(() => setPopulation({ status: 'error', result: null }))
   }
+  useEffect(() => {
+    if (!selectedDetonation) return
+    const outerRadius = detonationZones(DETONATION_YIELDS[selectedDetonation.yieldKey])[0].radius
+    getPopulation(toFeature(circleGeometry(selectedDetonation.lng, selectedDetonation.lat, outerRadius)))
+      .then(result => setDetonationPopulation({ status: 'success', result }))
+      .catch(() => setDetonationPopulation({ status: 'error', result: null }))
+  }, [selectedDetonation])
   const shareCaption = () => {
     const populationText = population.status === 'success' ? Math.round(population.result.total_population).toLocaleString(locale === 'zh' ? 'zh-CN' : 'en-US') : copy.unknown
     const headline = locale === 'zh'
@@ -531,9 +589,33 @@ export default function NuclearMap() {
     setSelectedPlant(plant)
     setSimulation(null)
     setPopulation({ status: 'idle', result: null })
+    setSelectedDetonation(null)
+    setDetonationPopulation({ status: 'idle', result: null })
     setPlacingPlant(false)
     setMobileCreateOpen(false)
     setScenarioOpen(true)
+  }
+  const placeDetonation = ({ lat, lng }) => {
+    const detonation = { id: `det-${Date.now()}`, lat, lng, yieldKey: newDetonationYield }
+    setDetonations(previous => [...previous, detonation])
+    setSelectedDetonation(detonation)
+    setDetonationPopulation({ status: 'loading', result: null })
+    setSelectedPlant(null)
+    setPlacingDetonation(false)
+    setMobileCreateOpen(false)
+  }
+  const selectDetonation = detonation => {
+    setSelectedDetonation(previous => {
+      const next = previous?.id === detonation.id ? null : detonation
+      setDetonationPopulation(next ? { status: 'loading', result: null } : { status: 'idle', result: null })
+      return next
+    })
+    setSelectedPlant(null)
+  }
+  const removeDetonation = id => {
+    setDetonations(previous => previous.filter(detonation => detonation.id !== id))
+    setSelectedDetonation(null)
+    setDetonationPopulation({ status: 'idle', result: null })
   }
   const movePlant = (id, { lat, lng }) => {
     setCustomPlants(previous => previous.map(plant => plant.id === id ? { ...plant, lat, lng } : plant))
@@ -549,6 +631,7 @@ export default function NuclearMap() {
   const addMeasurePoint = point => setMeasurePoints(previous => [...previous, point])
   const handleMapClick = event => {
     if (placingPlant) { placePlant(event.lngLat); return }
+    if (placingDetonation) { placeDetonation(event.lngLat); return }
     if (measuring) addMeasurePoint(event.lngLat)
   }
   const handlePlantClick = plant => {
@@ -559,6 +642,7 @@ export default function NuclearMap() {
     setMeasuring(previous => !previous)
     setMeasurePoints([])
     setPlacingPlant(false)
+    setPlacingDetonation(false)
   }
   const visiblePlants = [...plants, ...customPlants].filter(plant => !hiddenStatuses.has(plant.status))
   const searchMatches = (() => {
@@ -618,13 +702,30 @@ export default function NuclearMap() {
   )
 
   const createForm = (
-    <form onSubmit={event => { event.preventDefault(); setPlacingPlant(true); setMeasuring(false); setMeasurePoints([]) }} className="ss-panel" style={mobilePanelStyle}>
-      <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 10 }}>{customCopy.title}</div>
-      <label style={{ display: 'block', marginBottom: 9 }}><span style={{ display: 'block', color: '#d1d5db', marginBottom: 4 }}>{customCopy.name}</span><input value={newPlant.name} onChange={event => updateNewPlant('name', event.target.value)} placeholder={customCopy.title} style={fieldStyle} /></label>
-      <label style={{ display: 'block', marginBottom: 9 }}><span style={{ display: 'block', color: '#d1d5db', marginBottom: 4 }}>{customCopy.reactor}</span><select value={newPlant.reactorType} onChange={event => updateNewPlant('reactorType', event.target.value)} style={fieldStyle}><option>PWR</option><option>BWR</option><option>PHWR</option><option>HTGR</option><option>FBR</option><option>SMR</option></select></label>
-      <label style={{ display: 'block', marginBottom: 9 }}><span style={{ display: 'block', color: '#d1d5db', marginBottom: 4 }}>{customCopy.capacity}</span><input type="number" min="1" value={newPlant.capacity} onChange={event => updateNewPlant('capacity', event.target.value)} style={fieldStyle} /></label>
-      <label style={{ display: 'block', marginBottom: 12 }}><span style={{ display: 'block', color: '#d1d5db', marginBottom: 4 }}>{customCopy.status}</span><select value={newPlant.status} onChange={event => updateNewPlant('status', event.target.value)} style={fieldStyle}>{Object.keys(STATUS_COLOR).map(key => <option key={key} value={key}>{copy.status[key]}</option>)}</select></label>
-      <button type="submit" style={{ width: '100%', padding: '8px 10px', fontSize: 13, fontWeight: 600, background: placingPlant ? '#f59e0b' : '#2563eb', color: 'white', border: 'none', borderRadius: 4, cursor: 'pointer' }}>{placingPlant ? customCopy.placing : customCopy.place}</button>
+    <form onSubmit={event => {
+      event.preventDefault()
+      if (createMode === 'plant') { setPlacingPlant(true); setPlacingDetonation(false) }
+      else { setPlacingDetonation(true); setPlacingPlant(false) }
+      setMeasuring(false); setMeasurePoints([])
+    }} className="ss-panel" style={mobilePanelStyle}>
+      <div style={{ display: 'flex', gap: 6, marginBottom: 12 }}>
+        <button type="button" onClick={() => setCreateMode('plant')} style={{ flex: 1, padding: '6px', fontSize: 12, fontWeight: createMode === 'plant' ? 700 : 400, background: createMode === 'plant' ? '#2563eb' : '#374151', color: 'white', border: 'none', borderRadius: 4, cursor: 'pointer' }}>{customCopy.plantTab}</button>
+        <button type="button" onClick={() => setCreateMode('detonation')} style={{ flex: 1, padding: '6px', fontSize: 12, fontWeight: createMode === 'detonation' ? 700 : 400, background: createMode === 'detonation' ? '#dc2626' : '#374151', color: 'white', border: 'none', borderRadius: 4, cursor: 'pointer' }}>{customCopy.detonationTab}</button>
+      </div>
+      {createMode === 'plant' ? <>
+        <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 10 }}>{customCopy.title}</div>
+        <label style={{ display: 'block', marginBottom: 9 }}><span style={{ display: 'block', color: '#d1d5db', marginBottom: 4 }}>{customCopy.name}</span><input value={newPlant.name} onChange={event => updateNewPlant('name', event.target.value)} placeholder={customCopy.title} style={fieldStyle} /></label>
+        <label style={{ display: 'block', marginBottom: 9 }}><span style={{ display: 'block', color: '#d1d5db', marginBottom: 4 }}>{customCopy.reactor}</span><select value={newPlant.reactorType} onChange={event => updateNewPlant('reactorType', event.target.value)} style={fieldStyle}><option>PWR</option><option>BWR</option><option>PHWR</option><option>HTGR</option><option>FBR</option><option>SMR</option></select></label>
+        <label style={{ display: 'block', marginBottom: 9 }}><span style={{ display: 'block', color: '#d1d5db', marginBottom: 4 }}>{customCopy.capacity}</span><input type="number" min="1" value={newPlant.capacity} onChange={event => updateNewPlant('capacity', event.target.value)} style={fieldStyle} /></label>
+        <label style={{ display: 'block', marginBottom: 12 }}><span style={{ display: 'block', color: '#d1d5db', marginBottom: 4 }}>{customCopy.status}</span><select value={newPlant.status} onChange={event => updateNewPlant('status', event.target.value)} style={fieldStyle}>{Object.keys(STATUS_COLOR).map(key => <option key={key} value={key}>{copy.status[key]}</option>)}</select></label>
+      </> : <>
+        <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 10 }}>{customCopy.detonationTitle}</div>
+        <label style={{ display: 'block', marginBottom: 12 }}><span style={{ display: 'block', color: '#d1d5db', marginBottom: 4 }}>{customCopy.yieldLabel}</span><select value={newDetonationYield} onChange={event => setNewDetonationYield(event.target.value)} style={fieldStyle}>{Object.keys(DETONATION_YIELDS).map(key => <option key={key} value={key}>{copy.detonationYield[key]}</option>)}</select></label>
+        <div style={{ color: '#fbbf24', fontSize: 11, lineHeight: 1.4, marginBottom: 12 }}>{copy.detonationDisclaimer}</div>
+      </>}
+      <button type="submit" style={{ width: '100%', padding: '8px 10px', fontSize: 13, fontWeight: 600, background: (createMode === 'plant' ? placingPlant : placingDetonation) ? '#f59e0b' : (createMode === 'plant' ? '#2563eb' : '#dc2626'), color: 'white', border: 'none', borderRadius: 4, cursor: 'pointer' }}>
+        {createMode === 'plant' ? (placingPlant ? customCopy.placing : customCopy.place) : (placingDetonation ? customCopy.placingDetonation : customCopy.placeDetonation)}
+      </button>
     </form>
   )
 
@@ -651,13 +752,14 @@ export default function NuclearMap() {
       canvasContextAttributes={{ preserveDrawingBuffer: true }}
       onClick={handleMapClick}
       onMove={event => setZoom(event.viewState.zoom)}
-      cursor={placingPlant || measuring ? 'crosshair' : 'grab'}
+      cursor={placingPlant || placingDetonation || measuring ? 'crosshair' : 'grab'}
     >
       <NavigationControl position="top-right" />
       <Source id="lighting" type="raster" tiles={lightingTiles} tileSize={LIGHT_TILE_SIZE} maxzoom={3}>
         <Layer id="lighting-raster" type="raster" paint={{ 'raster-opacity': 1 }} />
       </Source>
       {visiblePlants.map(plant => <PlantMarker key={plant.id} plant={plant} selected={selectedPlant?.id === plant.id} simulation={simulation} onClick={handlePlantClick} onDragEnd={movePlant} />)}
+      {detonations.map(detonation => <DetonationMarker key={detonation.id} detonation={detonation} selected={selectedDetonation?.id === detonation.id} onClick={selectDetonation} />)}
       {measurePoints.map((point, index) => (
         <Marker key={index} longitude={point.lng} latitude={point.lat} anchor="center">
           <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#facc15', border: '2px solid white', boxShadow: '0 0 4px rgba(0,0,0,0.6)' }} />
@@ -681,6 +783,27 @@ export default function NuclearMap() {
           <div style={{ color: '#9ca3af', fontSize: 12, marginTop: 2 }}>{countryName(selectedPlant, locale)}</div>
           <div style={{ marginTop: 6, fontSize: 13 }}>{copy.reactor}: {selectedPlant.reactorType}<br />{copy.statusTitle}: <span style={{ color: STATUS_COLOR[selectedPlant.status] || '#6b7280' }}>{copy.status[selectedPlant.status]}</span><br />{selectedPlant.capacity > 0 && <>{copy.capacity}: {selectedPlant.capacity} {copy.mw}</>}{selectedPlant.unitCount > 0 && <><br />{copy.units}: {selectedPlant.unitCount}</>}{selectedPlant.startYear && <><br />{selectedPlant.status === 'operating' ? copy.commissioned : copy.plannedStart}: {selectedPlant.startYear}</>}{selectedPlant.operator && <><br />{copy.operator}: {selectedPlant.operator}</>}</div>
           {selectedPlant.custom && <button type="button" onClick={() => removePlant(selectedPlant.id)} style={{ marginTop: 8, padding: '4px 10px', fontSize: 12, background: '#7f1d1d', color: 'white', border: '1px solid #ef4444', borderRadius: 4, cursor: 'pointer', width: '100%' }}>{customCopy.remove}</button>}
+        </div>
+      </Popup>}
+      {selectedDetonation && <Popup longitude={selectedDetonation.lng} latitude={selectedDetonation.lat} anchor="bottom" offset={14} closeOnClick={false} onClose={() => { setSelectedDetonation(null); setDetonationPopulation({ status: 'idle', result: null }) }}>
+        <div style={{ minWidth: 220 }}>
+          <strong>{copy.detonationYield[selectedDetonation.yieldKey]}</strong>
+          <div style={{ marginTop: 6, fontSize: 12 }}>
+            {detonationZones(DETONATION_YIELDS[selectedDetonation.yieldKey]).map(zone => (
+              <div key={zone.key} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+                <div style={{ width: 8, height: 8, borderRadius: '50%', background: zone.color, flexShrink: 0 }} />
+                <span>{copy.detonationZone[zone.key]}: {zone.radius < 1 ? Math.round(zone.radius * 1000) + ' m' : zone.radius.toFixed(1) + ' km'}</span>
+              </div>
+            ))}
+          </div>
+          <div style={{ marginTop: 8, paddingTop: 8, borderTop: '1px solid #374151' }}>
+            <div style={{ fontWeight: 600, marginBottom: 2 }}>{copy.detonationPopulationTitle}</div>
+            {detonationPopulation.status === 'loading' && <div style={{ color: '#fbbf24' }}>{copy.populationLoading}</div>}
+            {detonationPopulation.status === 'success' && <div style={{ fontSize: 18, fontWeight: 700, color: '#f8fafc' }}>{Math.round(detonationPopulation.result.total_population).toLocaleString(locale === 'zh' ? 'zh-CN' : 'en-US')}</div>}
+            {detonationPopulation.status === 'error' && <div style={{ color: '#fca5a5' }}>{copy.populationError}</div>}
+          </div>
+          <div style={{ color: '#fbbf24', fontSize: 11, lineHeight: 1.4, marginTop: 8 }}>{copy.detonationDisclaimer}</div>
+          <button type="button" onClick={() => removeDetonation(selectedDetonation.id)} style={{ marginTop: 8, padding: '4px 10px', fontSize: 12, background: '#7f1d1d', color: 'white', border: '1px solid #ef4444', borderRadius: 4, cursor: 'pointer', width: '100%' }}>{customCopy.removeDetonation}</button>
         </div>
       </Popup>}
     </Map>
