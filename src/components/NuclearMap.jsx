@@ -154,9 +154,19 @@ async function getPopulation(area) {
   }
 }
 
+const MARKER_SIZE_RANGE = [8, 22]
+const MARKER_SIZE_MAX_CAPACITY = 11000
+
+// Area-proportional (sqrt) scale so marker size reads as "installed capacity"
+// rather than "radius", which would visually overstate large plants.
+function capacityMarkerSize(capacity) {
+  const ratio = Math.sqrt(Math.min(Math.max(capacity, 0), MARKER_SIZE_MAX_CAPACITY) / MARKER_SIZE_MAX_CAPACITY)
+  return MARKER_SIZE_RANGE[0] + (MARKER_SIZE_RANGE[1] - MARKER_SIZE_RANGE[0]) * ratio
+}
+
 function PlantMarker({ plant, selected, simulation, onClick, onDragEnd }) {
   const color = STATUS_COLOR[plant.status] || '#6b7280'
-  const size = selected ? 16 : 12
+  const size = capacityMarkerSize(plant.capacity || 0) + (selected ? 5 : 0)
   const simulationZones = simulation && selected ? (() => {
     const level = SCENARIO_LEVELS[simulation.level]
     // Electrical capacity is only a visual proxy for potential inventory, but
@@ -200,7 +210,8 @@ function PlantMarker({ plant, selected, simulation, onClick, onDragEnd }) {
 }
 
 const fieldStyle = { width: '100%', padding: 7, borderRadius: 4, border: '1px solid #4b5563', background: '#1f2937', color: 'white' }
-const panelStyle = { position: 'absolute', top: 16, right: 16, zIndex: 1000, background: 'rgba(15,15,15,0.92)', color: 'white', padding: 16, borderRadius: 8, fontSize: 13, backdropFilter: 'blur(4px)', width: 270 }
+const panelStyle = { background: 'rgba(15,15,15,0.92)', color: 'white', padding: 16, borderRadius: 8, fontSize: 13, backdropFilter: 'blur(4px)', width: 270, flexShrink: 0 }
+const panelColumnStyle = { position: 'absolute', top: 16, right: 16, zIndex: 1000, display: 'flex', flexDirection: 'column', gap: 16, maxHeight: 'calc(100vh - 32px)', overflowY: 'auto' }
 
 export default function NuclearMap() {
   const [locale, setLocale] = useState(() => {
@@ -349,6 +360,7 @@ export default function NuclearMap() {
       <div style={{ marginTop: 10, paddingTop: 8, borderTop: '1px solid #374151', color: '#9ca3af', fontSize: 10, lineHeight: 1.4 }}>{copy.dataSource}</div>
     </div>
 
+    <div style={panelColumnStyle}>
     <form onSubmit={runSimulation} style={panelStyle}>
       <div style={{ fontWeight: 700, fontSize: 15 }}>{copy.scenario}</div>
       <div style={{ color: selectedPlant ? '#9ca3af' : '#fbbf24', marginTop: 5, marginBottom: 12 }}>{selectedPlant ? `${plantName(selectedPlant, locale)}${copy.unitSeparator}${selectedPlant.capacity || copy.unknown} ${copy.mw}` : copy.selectHint}</div>
@@ -369,7 +381,7 @@ export default function NuclearMap() {
       <div style={{ color: '#9ca3af', fontSize: 11, lineHeight: 1.45, marginTop: 10 }}>{copy.disclaimer}</div>
     </form>
 
-    <form onSubmit={event => { event.preventDefault(); setPlacingPlant(true); setMeasuring(false); setMeasurePoints([]) }} style={{ ...panelStyle, top: 600 }}>
+    <form onSubmit={event => { event.preventDefault(); setPlacingPlant(true); setMeasuring(false); setMeasurePoints([]) }} style={panelStyle}>
       <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 10 }}>{customCopy.title}</div>
       <label style={{ display: 'block', marginBottom: 9 }}><span style={{ display: 'block', color: '#d1d5db', marginBottom: 4 }}>{customCopy.name}</span><input value={newPlant.name} onChange={event => updateNewPlant('name', event.target.value)} placeholder={customCopy.title} style={fieldStyle} /></label>
       <label style={{ display: 'block', marginBottom: 9 }}><span style={{ display: 'block', color: '#d1d5db', marginBottom: 4 }}>{customCopy.reactor}</span><select value={newPlant.reactorType} onChange={event => updateNewPlant('reactorType', event.target.value)} style={fieldStyle}><option>PWR</option><option>BWR</option><option>PHWR</option><option>HTGR</option><option>FBR</option><option>SMR</option></select></label>
@@ -377,6 +389,7 @@ export default function NuclearMap() {
       <label style={{ display: 'block', marginBottom: 12 }}><span style={{ display: 'block', color: '#d1d5db', marginBottom: 4 }}>{customCopy.status}</span><select value={newPlant.status} onChange={event => updateNewPlant('status', event.target.value)} style={fieldStyle}>{Object.keys(STATUS_COLOR).map(key => <option key={key} value={key}>{copy.status[key]}</option>)}</select></label>
       <button type="submit" style={{ width: '100%', padding: '8px 10px', fontSize: 13, fontWeight: 600, background: placingPlant ? '#f59e0b' : '#2563eb', color: 'white', border: 'none', borderRadius: 4, cursor: 'pointer' }}>{placingPlant ? customCopy.placing : customCopy.place}</button>
     </form>
+    </div>
 
     <div style={{ position: 'absolute', top: 16, left: '50%', transform: 'translateX(-50%)', zIndex: 1000, color: 'white', fontSize: 18, fontWeight: 700, textShadow: '0 1px 4px rgba(0,0,0,0.8)', letterSpacing: 2, pointerEvents: 'none' }}>{copy.title}</div>
     <div style={{ position: 'absolute', top: 16, left: 16, zIndex: 1000, display: 'flex', flexDirection: 'column', gap: 8, width: 220 }}>
