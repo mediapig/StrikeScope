@@ -13,6 +13,7 @@
   "dependencies": {
     "@turf/turf": "^7.4.0",
     "maplibre-gl": "^6.5.0",
+    "qrcode": "^1.5.4",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-map-gl": "^8.1.2",

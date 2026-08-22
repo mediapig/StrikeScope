@@ -4,6 +4,7 @@ import { setWorkerUrl } from 'maplibre-gl'
 import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { area as turfArea, bbox, bboxPolygon, circle as turfCircle, distance as turfDistance, featureCollection, intersect, midpoint as turfMidpoint, polygon as turfPolygon, union } from '@turf/turf'
+import QRCode from 'qrcode'
 import plants from '../data/plants.json'
 
 // Bundlers can't resolve maplibre-gl's own worker URL from inside its module
@@ -44,10 +45,10 @@ const RAINFALL = {
 
 const COPY = {
   zh: {
-    title: '☢ StrikeScope — 全球核电站场景推演', statusTitle: '核电站状态', reactor: '堆型', capacity: '装机容量', selectPlant: '选择电站', planning: '规划参考区', simulation: '模拟范围', core: '全向近场警戒', downwind: '（顺风）', scenario: '事故场景推演', selectHint: '请先点击地图上的核电站', release: '放射性释放规模', direction: '扩散方向', wind: '风力', rainfall: '降雨强度', duration: '释放持续时间（小时）', trigger: '触发模拟', clear: '清除模拟', ongoing: '输入 0 代表持续释放；远场仅表示稀释后的参考影响。', rainHint: '降雨越强，模拟越偏向近场湿沉降。', windHint: '0级无风 · 3级微风 · 6级强风 · 9级烈风 · 12级飓风', directionHint: '0° 北 · 90° 东 · 180° 南 · 270° 西', populationTitle: '模拟区域估算人口', populationLoading: '正在计算人口…', populationError: '暂时无法取得人口估算', populationNote: '基于 WorldPop 人口栅格；为模拟区域内常住人口估算，不代表实际暴露或撤离人数。', disclaimer: '仅为可视化推演：结合装机容量、释放时间与风向生成示意羽流；不是剂量预测或应急指令。', status: { operating: '运营中', decommissioned: '已关闭', construction: '建设中', planned: '计划中' }, reference: { plume: '羽流应急规划参考区 (16km)', ingestion: '摄入途径规划参考区 (80km)' }, level: { low: '小规模释放', medium: '中等规模释放', high: '大规模释放' }, zone: { plume: '羽流防护参考', monitoring: '监测参考' }, rain: { none: '无雨', light: '小雨', moderate: '中雨', heavy: '大雨' }, unknown: '未知', north: '北', east: '东', south: '南', west: '西', mw: 'MW', forceSuffix: '级', unitSeparator: ' · ', searchPlaceholder: '搜索电站或国家…', dataSource: '数据来源：Global Energy Monitor 全球核电追踪（Global Nuclear Power Tracker）', units: '机组数', commissioned: '投产年份', plannedStart: '计划投产', operator: '运营商', statusFilterHint: '点击可在地图上显示/隐藏该类电站', measure: '测量距离', measureHint: '在地图或核电站上依次点击多个点，测量折线总距离', measureClear: '清除测距', measureReset: '重新开始', measureTotal: '总距离', km: '公里', share: '分享结果', shareCopied: '内容已复制，可粘贴到微信或 Instagram 分享', shareX: '分享到 X', close: '关闭',
+    title: '☢ StrikeScope — 全球核电站场景推演', statusTitle: '核电站状态', reactor: '堆型', capacity: '装机容量', selectPlant: '选择电站', planning: '规划参考区', simulation: '模拟范围', core: '全向近场警戒', downwind: '（顺风）', scenario: '事故场景推演', selectHint: '请先点击地图上的核电站', release: '放射性释放规模', direction: '扩散方向', wind: '风力', rainfall: '降雨强度', duration: '释放持续时间（小时）', trigger: '触发模拟', clear: '清除模拟', ongoing: '输入 0 代表持续释放；远场仅表示稀释后的参考影响。', rainHint: '降雨越强，模拟越偏向近场湿沉降。', windHint: '0级无风 · 3级微风 · 6级强风 · 9级烈风 · 12级飓风', directionHint: '0° 北 · 90° 东 · 180° 南 · 270° 西', populationTitle: '模拟区域估算人口', populationLoading: '正在计算人口…', populationError: '暂时无法取得人口估算', populationNote: '基于 WorldPop 人口栅格；为模拟区域内常住人口估算，不代表实际暴露或撤离人数。', disclaimer: '仅为可视化推演：结合装机容量、释放时间与风向生成示意羽流；不是剂量预测或应急指令。', status: { operating: '运营中', decommissioned: '已关闭', construction: '建设中', planned: '计划中' }, reference: { plume: '羽流应急规划参考区 (16km)', ingestion: '摄入途径规划参考区 (80km)' }, level: { low: '小规模释放', medium: '中等规模释放', high: '大规模释放' }, zone: { plume: '羽流防护参考', monitoring: '监测参考' }, rain: { none: '无雨', light: '小雨', moderate: '中雨', heavy: '大雨' }, unknown: '未知', north: '北', east: '东', south: '南', west: '西', mw: 'MW', forceSuffix: '级', unitSeparator: ' · ', searchPlaceholder: '搜索电站或国家…', dataSource: '数据来源：Global Energy Monitor 全球核电追踪（Global Nuclear Power Tracker）', units: '机组数', commissioned: '投产年份', plannedStart: '计划投产', operator: '运营商', statusFilterHint: '点击可在地图上显示/隐藏该类电站', measure: '测量距离', measureHint: '在地图或核电站上依次点击多个点，测量折线总距离', measureClear: '清除测距', measureReset: '重新开始', measureTotal: '总距离', km: '公里', share: '分享结果', shareCopied: '内容已复制，可粘贴到微信或 Instagram 分享', shareImageCopied: '图片已复制（含二维码），可粘贴到微信或 Instagram 分享', shareDownloaded: '图片已保存（含二维码），可在聊天中作为图片发送', shareX: '分享到 X', close: '关闭',
   },
   en: {
-    title: '☢ StrikeScope — Nuclear Scenario Explorer', statusTitle: 'Plant status', reactor: 'Reactor type', capacity: 'Installed capacity', selectPlant: 'Select plant', planning: 'Planning references', simulation: 'Simulation zones', core: 'All-direction near-field alert', downwind: ' (downwind)', scenario: 'Accident scenario', selectHint: 'Select a nuclear plant on the map first', release: 'Radioactive release scale', direction: 'Plume direction', wind: 'Wind force', rainfall: 'Rainfall', duration: 'Release duration (hours)', trigger: 'Run simulation', clear: 'Clear simulation', ongoing: 'Enter 0 for an ongoing release; the far field is a diluted reference only.', rainHint: 'Stronger rain shifts this illustration toward near-field wet deposition.', windHint: '0 calm · 3 gentle breeze · 6 strong breeze · 9 strong gale · 12 hurricane', directionHint: '0° N · 90° E · 180° S · 270° W', populationTitle: 'Estimated residents in simulation area', populationLoading: 'Calculating population…', populationError: 'Population estimate is currently unavailable', populationNote: 'Based on WorldPop population grids; this estimates resident population in the simulated area, not actual exposure or evacuation.', disclaimer: 'Visualization only: this illustrative plume uses capacity, duration, and wind. It is not a dose forecast or emergency instruction.', status: { operating: 'Operating', decommissioned: 'Closed', construction: 'Under construction', planned: 'Planned' }, reference: { plume: 'Plume planning reference (16 km)', ingestion: 'Ingestion planning reference (80 km)' }, level: { low: 'Small release', medium: 'Moderate release', high: 'Large release' }, zone: { plume: 'Plume protection reference', monitoring: 'Monitoring reference' }, rain: { none: 'No rain', light: 'Light rain', moderate: 'Moderate rain', heavy: 'Heavy rain' }, unknown: 'Unknown', north: 'N', east: 'E', south: 'S', west: 'W', mw: 'MW', forceSuffix: '', unitSeparator: ' · ', searchPlaceholder: 'Search plant or country…', dataSource: 'Data: Global Energy Monitor Global Nuclear Power Tracker', units: 'Units', commissioned: 'Commissioned', plannedStart: 'Planned start', operator: 'Operator', statusFilterHint: 'Click to show/hide this status on the map', measure: 'Measure distance', measureHint: 'Click multiple points on the map or on plants to measure the total path distance', measureClear: 'Clear measurement', measureReset: 'Restart', measureTotal: 'Total distance', km: 'km', share: 'Share result', shareCopied: 'Copied — paste into WeChat or Instagram to share', shareX: 'Share on X', close: 'Close',
+    title: '☢ StrikeScope — Nuclear Scenario Explorer', statusTitle: 'Plant status', reactor: 'Reactor type', capacity: 'Installed capacity', selectPlant: 'Select plant', planning: 'Planning references', simulation: 'Simulation zones', core: 'All-direction near-field alert', downwind: ' (downwind)', scenario: 'Accident scenario', selectHint: 'Select a nuclear plant on the map first', release: 'Radioactive release scale', direction: 'Plume direction', wind: 'Wind force', rainfall: 'Rainfall', duration: 'Release duration (hours)', trigger: 'Run simulation', clear: 'Clear simulation', ongoing: 'Enter 0 for an ongoing release; the far field is a diluted reference only.', rainHint: 'Stronger rain shifts this illustration toward near-field wet deposition.', windHint: '0 calm · 3 gentle breeze · 6 strong breeze · 9 strong gale · 12 hurricane', directionHint: '0° N · 90° E · 180° S · 270° W', populationTitle: 'Estimated residents in simulation area', populationLoading: 'Calculating population…', populationError: 'Population estimate is currently unavailable', populationNote: 'Based on WorldPop population grids; this estimates resident population in the simulated area, not actual exposure or evacuation.', disclaimer: 'Visualization only: this illustrative plume uses capacity, duration, and wind. It is not a dose forecast or emergency instruction.', status: { operating: 'Operating', decommissioned: 'Closed', construction: 'Under construction', planned: 'Planned' }, reference: { plume: 'Plume planning reference (16 km)', ingestion: 'Ingestion planning reference (80 km)' }, level: { low: 'Small release', medium: 'Moderate release', high: 'Large release' }, zone: { plume: 'Plume protection reference', monitoring: 'Monitoring reference' }, rain: { none: 'No rain', light: 'Light rain', moderate: 'Moderate rain', heavy: 'Heavy rain' }, unknown: 'Unknown', north: 'N', east: 'E', south: 'S', west: 'W', mw: 'MW', forceSuffix: '', unitSeparator: ' · ', searchPlaceholder: 'Search plant or country…', dataSource: 'Data: Global Energy Monitor Global Nuclear Power Tracker', units: 'Units', commissioned: 'Commissioned', plannedStart: 'Planned start', operator: 'Operator', statusFilterHint: 'Click to show/hide this status on the map', measure: 'Measure distance', measureHint: 'Click multiple points on the map or on plants to measure the total path distance', measureClear: 'Clear measurement', measureReset: 'Restart', measureTotal: 'Total distance', km: 'km', share: 'Share result', shareCopied: 'Copied — paste into WeChat or Instagram to share', shareImageCopied: 'Image copied (with QR code) — paste into WeChat or Instagram to share', shareDownloaded: 'Image saved (with QR code) — send it as a photo in any chat app', shareX: 'Share on X', close: 'Close',
   },
 }
 
@@ -94,6 +95,45 @@ function circleGeometry(lng, lat, radiusKm) {
 }
 
 const toFeature = geometry => ({ type: 'Feature', properties: {}, geometry })
+
+// Composes a shareable snapshot: the current map canvas, a dark caption bar
+// with the scenario headline, and a small scannable QR code linking back to
+// the app. Runs on a detached canvas so the live map is never touched.
+async function composeShareImage(mapCanvas, caption, url) {
+  const canvas = document.createElement('canvas')
+  canvas.width = mapCanvas.width
+  canvas.height = mapCanvas.height
+  const ctx = canvas.getContext('2d')
+  ctx.drawImage(mapCanvas, 0, 0)
+
+  const scale = canvas.width / 1200
+  const barHeight = Math.round(120 * scale)
+  const gradient = ctx.createLinearGradient(0, canvas.height - barHeight, 0, canvas.height)
+  gradient.addColorStop(0, 'rgba(0,0,0,0)')
+  gradient.addColorStop(1, 'rgba(0,0,0,0.88)')
+  ctx.fillStyle = gradient
+  ctx.fillRect(0, canvas.height - barHeight, canvas.width, barHeight)
+
+  const qrSize = Math.round(90 * scale)
+  const qrMargin = Math.round(24 * scale)
+  const qrCanvas = document.createElement('canvas')
+  await QRCode.toCanvas(qrCanvas, url, { width: qrSize, margin: 1, color: { dark: '#0f172a', light: '#ffffff' } })
+  const qrX = canvas.width - qrSize - qrMargin
+  const qrY = canvas.height - qrSize - qrMargin
+  ctx.fillStyle = '#ffffff'
+  ctx.fillRect(qrX - 6 * scale, qrY - 6 * scale, qrSize + 12 * scale, qrSize + 12 * scale)
+  ctx.drawImage(qrCanvas, qrX, qrY)
+
+  ctx.fillStyle = '#ffffff'
+  ctx.textBaseline = 'alphabetic'
+  ctx.font = `700 ${Math.round(30 * scale)}px system-ui, sans-serif`
+  ctx.fillText(caption[0], qrMargin, canvas.height - barHeight + Math.round(48 * scale), qrX - qrMargin * 2)
+  ctx.font = `${Math.round(22 * scale)}px system-ui, sans-serif`
+  ctx.fillStyle = '#d1d5db'
+  ctx.fillText(caption[1], qrMargin, canvas.height - barHeight + Math.round(86 * scale), qrX - qrMargin * 2)
+
+  return canvas
+}
 
 // Subsolar point (the point on Earth directly under the sun) via the
 // standard low-precision solar-position formulas (NOAA/Meeus).
@@ -339,26 +379,31 @@ export default function NuclearMap() {
       .then(result => setPopulation({ status: 'success', result }))
       .catch(() => setPopulation({ status: 'error', result: null }))
   }
-  const buildShareText = () => {
+  const shareCaption = () => {
     const populationText = population.status === 'success' ? Math.round(population.result.total_population).toLocaleString(locale === 'zh' ? 'zh-CN' : 'en-US') : copy.unknown
-    return locale === 'zh'
-      ? `${plantName(selectedPlant, locale)} · ${copy.level[simulation.level]}事故场景推演\n模拟区域估算人口：${populationText}\n${copy.disclaimer}`
-      : `${plantName(selectedPlant, locale)} · ${copy.level[simulation.level]} accident scenario\nEstimated residents in simulation area: ${populationText}\n${copy.disclaimer}`
+    const headline = locale === 'zh'
+      ? `${plantName(selectedPlant, locale)} · ${copy.level[simulation.level]}事故场景推演`
+      : `${plantName(selectedPlant, locale)} · ${copy.level[simulation.level]} accident scenario`
+    const populationLine = locale === 'zh' ? `模拟区域估算人口：${populationText}` : `Estimated residents in simulation area: ${populationText}`
+    return [headline, populationLine]
+  }
+  const buildShareText = () => {
+    const [headline, populationLine] = shareCaption()
+    return `${headline}\n${populationLine}\n${copy.disclaimer}`
   }
   const shareResult = async () => {
     if (!selectedPlant || !simulation) return
-    const text = buildShareText()
+    const mapCanvas = mapRef.current?.getMap()?.getCanvas()
     const url = window.location.href
-    const canvas = mapRef.current?.getMap()?.getCanvas()
+    const text = buildShareText()
+    const composed = mapCanvas && await composeShareImage(mapCanvas, shareCaption(), url).catch(() => null)
+    const blob = composed && await new Promise(resolve => composed.toBlob(resolve, 'image/png'))
     try {
-      if (canvas && navigator.canShare) {
-        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'))
-        if (blob) {
-          const file = new File([blob], 'strikescope.png', { type: 'image/png' })
-          if (navigator.canShare({ files: [file] })) {
-            await navigator.share({ files: [file], title: copy.title, text })
-            return
-          }
+      if (blob) {
+        const file = new File([blob], 'strikescope.png', { type: 'image/png' })
+        if (navigator.canShare?.({ files: [file] })) {
+          await navigator.share({ files: [file], title: copy.title, text })
+          return
         }
       }
       if (navigator.share) {
@@ -367,6 +412,24 @@ export default function NuclearMap() {
       }
     } catch (error) {
       if (error?.name === 'AbortError') return
+    }
+    if (blob && navigator.clipboard?.write && typeof ClipboardItem !== 'undefined') {
+      try {
+        await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
+        setShareStatus('imageCopied')
+        setTimeout(() => setShareStatus('idle'), 4000)
+        return
+      } catch { /* fall through to download */ }
+    }
+    if (blob) {
+      const link = document.createElement('a')
+      link.href = URL.createObjectURL(blob)
+      link.download = 'strikescope-scenario.png'
+      link.click()
+      URL.revokeObjectURL(link.href)
+      setShareStatus('downloaded')
+      setTimeout(() => setShareStatus('idle'), 4000)
+      return
     }
     await navigator.clipboard?.writeText(`${text}\n${url}`)
     setShareStatus('copied')
@@ -441,8 +504,8 @@ export default function NuclearMap() {
       <button type="submit" disabled={!selectedPlant} style={{ width: '100%', padding: '8px 10px', fontSize: 13, fontWeight: 600, background: selectedPlant ? '#dc2626' : '#4b5563', color: 'white', border: 'none', borderRadius: 4, cursor: selectedPlant ? 'pointer' : 'not-allowed' }}>{copy.trigger}</button>
       {simulation && <button type="button" onClick={() => { setSimulation(null); setPopulation({ status: 'idle', result: null }) }} style={{ width: '100%', padding: '7px 10px', marginTop: 8, fontSize: 12, background: '#374151', color: 'white', border: 'none', borderRadius: 4, cursor: 'pointer' }}>{copy.clear}</button>}
       {simulation && <button type="button" onClick={shareResult} style={{ width: '100%', padding: '7px 10px', marginTop: 8, fontSize: 12, background: '#0f766e', color: 'white', border: 'none', borderRadius: 4, cursor: 'pointer' }}>{copy.share}</button>}
-      {shareStatus === 'copied' && simulation && <div style={{ marginTop: 8, padding: '6px 8px', fontSize: 11, color: '#5eead4', background: 'rgba(15,118,110,0.15)', border: '1px solid #0f766e', borderRadius: 4 }}>
-        {copy.shareCopied}{' · '}<a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(buildShareText())}&url=${encodeURIComponent(window.location.href)}`} target="_blank" rel="noopener noreferrer" style={{ color: '#5eead4' }}>{copy.shareX}</a>
+      {shareStatus !== 'idle' && simulation && <div style={{ marginTop: 8, padding: '6px 8px', fontSize: 11, color: '#5eead4', background: 'rgba(15,118,110,0.15)', border: '1px solid #0f766e', borderRadius: 4 }}>
+        {{ copied: copy.shareCopied, imageCopied: copy.shareImageCopied, downloaded: copy.shareDownloaded }[shareStatus]}{' · '}<a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(buildShareText())}&url=${encodeURIComponent(window.location.href)}`} target="_blank" rel="noopener noreferrer" style={{ color: '#5eead4' }}>{copy.shareX}</a>
       </div>}
       {population.status !== 'idle' && <div style={{ marginTop: 12, paddingTop: 10, borderTop: '1px solid #374151' }}>
         <div style={{ fontWeight: 600, marginBottom: 4 }}>{copy.populationTitle}</div>
