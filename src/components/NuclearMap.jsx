@@ -96,10 +96,34 @@ function circleGeometry(lng, lat, radiusKm) {
 
 const toFeature = geometry => ({ type: 'Feature', properties: {}, geometry })
 
+// Breaks text into lines that fit maxWidth, splitting on spaces where
+// available (Latin scripts) and falling back to per-character breaks
+// (CJK scripts, which carry no spaces) when a line has none.
+function wrapCanvasText(ctx, text, maxWidth) {
+  const units = text.includes(' ') ? text.split(' ') : [...text]
+  const sep = text.includes(' ') ? ' ' : ''
+  const lines = []
+  let current = ''
+  for (const unit of units) {
+    const attempt = current ? current + sep + unit : unit
+    if (current && ctx.measureText(attempt).width > maxWidth) {
+      lines.push(current)
+      current = unit
+    } else {
+      current = attempt
+    }
+  }
+  if (current) lines.push(current)
+  return lines
+}
+
 // Composes a shareable snapshot: the current map canvas, a dark caption bar
-// with the scenario headline, and a small scannable QR code linking back to
-// the app. Runs on a detached canvas so the live map is never touched.
-async function composeShareImage(mapCanvas, caption, url) {
+// with the scenario headline and a disclaimer that this is a simulation
+// (baked into the pixels, not just the share text - the text metadata gets
+// stripped the moment someone saves and reposts just the image), and a
+// small scannable QR code linking back to the app. Runs on a detached
+// canvas so the live map is never touched.
+async function composeShareImage(mapCanvas, caption, url, disclaimer) {
   const canvas = document.createElement('canvas')
   canvas.width = mapCanvas.width
   canvas.height = mapCanvas.height
@@ -107,30 +131,45 @@ async function composeShareImage(mapCanvas, caption, url) {
   ctx.drawImage(mapCanvas, 0, 0)
 
   const scale = canvas.width / 1200
-  const barHeight = Math.round(120 * scale)
-  const gradient = ctx.createLinearGradient(0, canvas.height - barHeight, 0, canvas.height)
+  const qrSize = Math.round(90 * scale)
+  const qrMargin = Math.round(24 * scale)
+  const textWidth = canvas.width - qrSize - qrMargin * 3
+  const disclaimerFontSize = Math.round(17 * scale)
+  const disclaimerLineHeight = Math.round(disclaimerFontSize * 1.35)
+  ctx.font = `${disclaimerFontSize}px system-ui, sans-serif`
+  const disclaimerLines = wrapCanvasText(ctx, disclaimer, textWidth)
+  const barHeight = Math.max(Math.round(96 * scale) + disclaimerLines.length * disclaimerLineHeight, qrSize + qrMargin * 2)
+  const barTop = canvas.height - barHeight
+
+  const gradient = ctx.createLinearGradient(0, barTop, 0, canvas.height)
   gradient.addColorStop(0, 'rgba(0,0,0,0)')
   gradient.addColorStop(1, 'rgba(0,0,0,0.88)')
   ctx.fillStyle = gradient
-  ctx.fillRect(0, canvas.height - barHeight, canvas.width, barHeight)
+  ctx.fillRect(0, barTop, canvas.width, barHeight)
 
-  const qrSize = Math.round(90 * scale)
-  const qrMargin = Math.round(24 * scale)
-  const qrCanvas = document.createElement('canvas')
-  await QRCode.toCanvas(qrCanvas, url, { width: qrSize, margin: 1, color: { dark: '#0f172a', light: '#ffffff' } })
   const qrX = canvas.width - qrSize - qrMargin
   const qrY = canvas.height - qrSize - qrMargin
+  const qrCanvas = document.createElement('canvas')
+  await QRCode.toCanvas(qrCanvas, url, { width: qrSize, margin: 1, color: { dark: '#0f172a', light: '#ffffff' } })
   ctx.fillStyle = '#ffffff'
   ctx.fillRect(qrX - 6 * scale, qrY - 6 * scale, qrSize + 12 * scale, qrSize + 12 * scale)
   ctx.drawImage(qrCanvas, qrX, qrY)
 
-  ctx.fillStyle = '#ffffff'
   ctx.textBaseline = 'alphabetic'
+  ctx.fillStyle = '#ffffff'
   ctx.font = `700 ${Math.round(30 * scale)}px system-ui, sans-serif`
-  ctx.fillText(caption[0], qrMargin, canvas.height - barHeight + Math.round(48 * scale), qrX - qrMargin * 2)
+  ctx.fillText(caption[0], qrMargin, barTop + Math.round(38 * scale), textWidth)
   ctx.font = `${Math.round(22 * scale)}px system-ui, sans-serif`
   ctx.fillStyle = '#d1d5db'
-  ctx.fillText(caption[1], qrMargin, canvas.height - barHeight + Math.round(86 * scale), qrX - qrMargin * 2)
+  ctx.fillText(caption[1], qrMargin, barTop + Math.round(72 * scale), textWidth)
+
+  ctx.font = `${disclaimerFontSize}px system-ui, sans-serif`
+  ctx.fillStyle = '#fbbf24'
+  let disclaimerY = barTop + Math.round(96 * scale)
+  for (const line of disclaimerLines) {
+    ctx.fillText(line, qrMargin, disclaimerY, textWidth)
+    disclaimerY += disclaimerLineHeight
+  }
 
   return canvas
 }
@@ -436,7 +475,7 @@ export default function NuclearMap() {
     const mapCanvas = mapRef.current?.getMap()?.getCanvas()
     const url = window.location.href
     const text = buildShareText()
-    const composed = mapCanvas && await composeShareImage(mapCanvas, shareCaption(), url).catch(() => null)
+    const composed = mapCanvas && await composeShareImage(mapCanvas, shareCaption(), url, copy.disclaimer).catch(() => null)
     const blob = composed && await new Promise(resolve => composed.toBlob(resolve, 'image/png'))
     try {
       if (blob) {
