@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Map, { Marker, NavigationControl, Popup, Source, Layer } from 'react-map-gl/maplibre'
-import { setWorkerUrl } from 'maplibre-gl'
+import { addProtocol, setWorkerUrl } from 'maplibre-gl'
 import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url'
 import 'maplibre-gl/dist/maplibre-gl.css'
-import { area as turfArea, bbox, bboxPolygon, circle as turfCircle, difference as turfDifference, distance as turfDistance, featureCollection, intersect, midpoint as turfMidpoint, polygon as turfPolygon, union } from '@turf/turf'
+import { area as turfArea, bbox, bboxPolygon, circle as turfCircle, distance as turfDistance, featureCollection, intersect, midpoint as turfMidpoint, polygon as turfPolygon, union } from '@turf/turf'
 import QRCode from 'qrcode'
 import plants from '../data/plants.json'
 
@@ -151,46 +151,70 @@ function subsolarPoint(date) {
   const lng = (((rightAscension - greenwichMeanSiderealTime) % 360) + 540) % 360 - 180
   return { lat: declination, lng }
 }
-// Approximates real Lambertian sun lighting (brightness ~ cos of the angle
-// from the subsolar point) as a large number of thin, non-overlapping
-// concentric rings, each carrying the cosine-falloff opacity for its own
-// radius - with enough rings the discrete steps are well under what the
-// eye can distinguish, reading as a smooth gradient.
+// Real Lambertian sun lighting (brightness ~ cos of the angle from the
+// subsolar point), rendered as genuine per-pixel raster tiles rather than
+// approximated with polygons. A custom protocol renders each requested
+// tile on a small canvas using standard Web Mercator tile math, exactly
+// like any other raster basemap layer - so it tiles seamlessly (no polygon
+// edges to show seams between) and follows the globe's curvature exactly
+// like the CARTO tiles already do (no 4-corner-quad distortion).
 // (Three earlier attempts each had real problems, all found by direct
-// inspection rather than assumption: overlapping semi-transparent circles
+// inspection rather than assumption. Overlapping semi-transparent circles
 // relying on alpha compounding toward the center rendered inconsistently
 // under globe projection, likely a depth-test/z-fighting interaction with
-// coplanar 3D fills; a single terminator-shaped polygon closing through a
+// coplanar 3D fills. A single terminator-shaped polygon closing through a
 // pole is topologically a full great circle that MapLibre's 2D fill can't
-// triangulate; and a MapLibre `image` source stretched over the whole
-// globe rendered as a distorted, sharp-edged mess - `image` sources are a
-// simple 4-corner quad meant for small local overlays, and linearly
-// interpolating between 4 points spanning the entire sphere doesn't
-// follow its curvature at all. Non-overlapping rings, well short of
-// hemisphere-spanning radius, hit none of these.)
-const LIGHT_BANDS = 30
-const LIGHT_MAX_RADIUS_DEG = 85
-const LIGHT_DAY_PEAK_OPACITY = 0.12
-const LIGHT_NIGHT_PEAK_OPACITY = 0.5
-const KM_PER_DEGREE = (2 * Math.PI * 6371) / 360
-function lightingRings(center, peakOpacity) {
+// triangulate. Non-overlapping concentric ring polygons avoided both of
+// those, and looked smooth near the terminator where the eye is looking
+// for a gradient - but every ring boundary is still a real polygon edge,
+// and it shows as a visible seam line on close inspection, particularly
+// deep on the night side where many thin rings stack up looking like
+// radar circles. A raster tile source doesn't have this: there's no
+// polygon edge anywhere, just pixels.)
+const LIGHT_TILE_SIZE = 128
+const LIGHT_DAY_PEAK_ALPHA = 0.14
+const LIGHT_NIGHT_PEAK_ALPHA = 0.5
+let currentSubsolarPoint = subsolarPoint(new Date())
+function renderLightingTile(z, x, y) {
   const rad = Math.PI / 180
-  const boundaries = Array.from({ length: LIGHT_BANDS + 1 }, (_, index) => LIGHT_MAX_RADIUS_DEG * index / LIGHT_BANDS)
-  const circle = radiusDeg => turfCircle([center.lng, center.lat], radiusDeg * KM_PER_DEGREE, { units: 'kilometers', steps: 64 })
-  return Array.from({ length: LIGHT_BANDS }, (_, index) => {
-    const inner = boundaries[index]
-    const outer = boundaries[index + 1]
-    const midAngle = (inner + outer) / 2
-    const opacity = peakOpacity * Math.max(0, Math.cos(midAngle * rad))
-    const feature = index === 0 ? circle(outer) : turfDifference(featureCollection([circle(outer), circle(inner)]))
-    return { feature, opacity }
-  })
+  const n = 2 ** z
+  const canvas = document.createElement('canvas')
+  canvas.width = LIGHT_TILE_SIZE
+  canvas.height = LIGHT_TILE_SIZE
+  const ctx = canvas.getContext('2d')
+  const image = ctx.createImageData(LIGHT_TILE_SIZE, LIGHT_TILE_SIZE)
+  const sunLatRad = currentSubsolarPoint.lat * rad
+  const sunLngRad = currentSubsolarPoint.lng * rad
+  const sinSunLat = Math.sin(sunLatRad)
+  const cosSunLat = Math.cos(sunLatRad)
+  for (let py = 0; py < LIGHT_TILE_SIZE; py += 1) {
+    const yMerc = (y + (py + 0.5) / LIGHT_TILE_SIZE) / n
+    const latRad = Math.atan(Math.sinh(Math.PI * (1 - 2 * yMerc)))
+    const sinLat = Math.sin(latRad)
+    const cosLat = Math.cos(latRad)
+    for (let px = 0; px < LIGHT_TILE_SIZE; px += 1) {
+      const xMerc = (x + (px + 0.5) / LIGHT_TILE_SIZE) / n
+      const lngRad = (xMerc * 360 - 180) * rad
+      const cosAngle = sinLat * sinSunLat + cosLat * cosSunLat * Math.cos(lngRad - sunLngRad)
+      const i = (py * LIGHT_TILE_SIZE + px) * 4
+      if (cosAngle >= 0) {
+        image.data[i] = 255; image.data[i + 1] = 247; image.data[i + 2] = 214
+        image.data[i + 3] = Math.round(255 * LIGHT_DAY_PEAK_ALPHA * cosAngle)
+      } else {
+        image.data[i] = 0; image.data[i + 1] = 0; image.data[i + 2] = 0
+        image.data[i + 3] = Math.round(255 * LIGHT_NIGHT_PEAK_ALPHA * -cosAngle)
+      }
+    }
+  }
+  ctx.putImageData(image, 0, 0)
+  return new Promise(resolve => canvas.toBlob(resolve, 'image/png'))
 }
-function lightingGradient(date) {
-  const sun = subsolarPoint(date)
-  const antisolar = { lat: -sun.lat, lng: ((sun.lng + 180 + 540) % 360) - 180 }
-  return { sun, day: lightingRings(sun, LIGHT_DAY_PEAK_OPACITY), night: lightingRings(antisolar, LIGHT_NIGHT_PEAK_OPACITY) }
-}
+addProtocol('lighting', async params => {
+  const match = params.url.match(/^lighting:\/\/(\d+)\/(\d+)\/(\d+)/)
+  const [, z, x, y] = match
+  const blob = await renderLightingTile(Number(z), Number(x), Number(y))
+  return { data: await blob.arrayBuffer() }
+})
 
 // Midpoint wind speed (m/s) for each Beaufort force 0-12.
 const BEAUFORT_MS = [0, 0.8, 2.4, 4.4, 6.7, 9.4, 12.3, 15.5, 18.9, 22.6, 26.4, 30.5, 34]
@@ -505,7 +529,15 @@ export default function NuclearMap() {
     return { key: index, distanceKm: turfDistance(from, to, { units: 'kilometers' }), midpoint: turfMidpoint(from, to).geometry.coordinates }
   })
   const measureTotalKm = measureSegments.reduce((total, segment) => total + segment.distanceKm, 0)
-  const lighting = useMemo(() => lightingGradient(now), [now])
+  // Updates the module-level subsolar point the tile protocol reads from -
+  // done in an effect, not during render, since it's a side effect on
+  // state outside the component. Changing the tile URLs (embedding the
+  // current minute) makes react-map-gl call source.setTiles() so MapLibre
+  // re-requests the visible tiles once that's updated.
+  useEffect(() => {
+    currentSubsolarPoint = subsolarPoint(now)
+  }, [now])
+  const lightingTiles = useMemo(() => [`lighting://{z}/{x}/{y}?t=${Math.floor(now.getTime() / 60000)}`], [now])
   const mobilePanelStyle = isMobile ? { ...panelStyle, width: '100%' } : panelStyle
   const mobileSheetStyle = { position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 1000, display: 'flex', flexDirection: 'column', gap: 12, maxHeight: '70vh', overflowY: 'auto', padding: '12px 12px calc(12px + env(safe-area-inset-bottom))', background: 'rgba(15,15,15,0.75)', backdropFilter: 'blur(10px)', borderTop: '1px solid #374151', borderRadius: '16px 16px 0 0' }
 
@@ -572,16 +604,9 @@ export default function NuclearMap() {
       cursor={placingPlant || measuring ? 'crosshair' : 'grab'}
     >
       <NavigationControl position="top-right" />
-      {lighting.day.map(({ feature, opacity }, index) => (
-        <Source key={`day-${index}`} id={`day-${index}`} type="geojson" data={feature}>
-          <Layer id={`day-${index}-fill`} type="fill" paint={{ 'fill-color': '#fff7d6', 'fill-opacity': opacity }} />
-        </Source>
-      ))}
-      {lighting.night.map(({ feature, opacity }, index) => (
-        <Source key={`night-${index}`} id={`night-${index}`} type="geojson" data={feature}>
-          <Layer id={`night-${index}-fill`} type="fill" paint={{ 'fill-color': '#000000', 'fill-opacity': opacity }} />
-        </Source>
-      ))}
+      <Source id="lighting" type="raster" tiles={lightingTiles} tileSize={LIGHT_TILE_SIZE} maxzoom={5}>
+        <Layer id="lighting-raster" type="raster" paint={{ 'raster-opacity': 1 }} />
+      </Source>
       {visiblePlants.map(plant => <PlantMarker key={plant.id} plant={plant} selected={selectedPlant?.id === plant.id} simulation={simulation} onClick={handlePlantClick} onDragEnd={movePlant} />)}
       {measurePoints.map((point, index) => (
         <Marker key={index} longitude={point.lng} latitude={point.lat} anchor="center">
@@ -611,7 +636,7 @@ export default function NuclearMap() {
     </Map>
     <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', mixBlendMode: 'overlay', opacity: Math.max(0, Math.min(1, (6 - zoom) / 3)), background: 'radial-gradient(ellipse 55% 55% at 46% 44%, rgba(255,244,214,0.95) 0%, rgba(255,244,214,0.4) 30%, rgba(255,244,214,0) 55%)' }} />
 
-    <div className="ss-legend" style={{ position: 'absolute', bottom: 30, left: 16, zIndex: 1000, background: 'rgba(15,15,15,0.85)', color: 'white', padding: '12px 16px', borderRadius: 8, fontSize: 12, backdropFilter: 'blur(4px)' }}>
+    <div className="ss-legend" style={{ position: 'absolute', bottom: 'calc(30px + env(safe-area-inset-bottom))', left: 16, zIndex: 1000, background: 'rgba(15,15,15,0.85)', color: 'white', padding: '12px 16px', borderRadius: 8, fontSize: 12, backdropFilter: 'blur(4px)' }}>
       <div style={{ fontWeight: 600, marginBottom: 8 }}>{copy.statusTitle}</div>
       {Object.entries(STATUS_COLOR).map(([key, color]) => <button key={key} type="button" onClick={() => toggleStatus(key)} title={copy.statusFilterHint} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, width: '100%', background: 'transparent', border: 'none', padding: 0, color: 'white', font: 'inherit', textAlign: 'left', cursor: 'pointer', opacity: hiddenStatuses.has(key) ? 0.4 : 1 }}><div style={{ width: 10, height: 10, borderRadius: '50%', background: color }} /><span style={{ textDecoration: hiddenStatuses.has(key) ? 'line-through' : 'none' }}>{copy.status[key]}</span></button>)}
       {selectedPlant && !simulation && <><div style={{ fontWeight: 600, margin: '12px 0 8px' }}>{copy.planning}</div>{REFERENCE_ZONES.map(zone => <div key={zone.key} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}><div style={{ width: 20, height: 2, background: zone.color }} /><span>{copy.reference[zone.key]}</span></div>)}</>}
