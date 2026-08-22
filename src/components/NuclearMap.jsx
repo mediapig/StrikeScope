@@ -579,7 +579,7 @@ export default function NuclearMap() {
     const nextSimulation = { direction: Number(conditions.direction), windForce: Number(conditions.windForce), rainfall: conditions.rainfall, duration: Number(conditions.duration) }
     setDetonationSimulation(nextSimulation)
     setDetonationPopulation({ status: 'loading', result: null })
-    getPopulation(toFeature(detonationSimulationArea(selectedDetonation, nextSimulation)))
+    getPopulation(detonationSimulationArea(selectedDetonation, nextSimulation))
       .then(result => setDetonationPopulation({ status: 'success', result }))
       .catch(() => setDetonationPopulation({ status: 'error', result: null }))
   }
