@@ -44,10 +44,10 @@ const RAINFALL = {
 
 const COPY = {
   zh: {
-    title: '☢ StrikeScope — 全球核电站场景推演', statusTitle: '核电站状态', reactor: '堆型', capacity: '装机容量', selectPlant: '选择电站', planning: '规划参考区', simulation: '模拟范围', core: '全向近场警戒', downwind: '（顺风）', scenario: '事故场景推演', selectHint: '请先点击地图上的核电站', release: '放射性释放规模', direction: '扩散方向', wind: '风力', rainfall: '降雨强度', duration: '释放持续时间（小时）', trigger: '触发模拟', clear: '清除模拟', ongoing: '输入 0 代表持续释放；远场仅表示稀释后的参考影响。', rainHint: '降雨越强，模拟越偏向近场湿沉降。', windHint: '0级无风 · 3级微风 · 6级强风 · 9级烈风 · 12级飓风', directionHint: '0° 北 · 90° 东 · 180° 南 · 270° 西', populationTitle: '模拟区域估算人口', populationLoading: '正在计算人口…', populationError: '暂时无法取得人口估算', populationNote: '基于 WorldPop 人口栅格；为模拟区域内常住人口估算，不代表实际暴露或撤离人数。', disclaimer: '仅为可视化推演：结合装机容量、释放时间与风向生成示意羽流；不是剂量预测或应急指令。', status: { operating: '运营中', decommissioned: '已关闭', construction: '建设中', planned: '计划中' }, reference: { plume: '羽流应急规划参考区 (16km)', ingestion: '摄入途径规划参考区 (80km)' }, level: { low: '小规模释放', medium: '中等规模释放', high: '大规模释放' }, zone: { plume: '羽流防护参考', monitoring: '监测参考' }, rain: { none: '无雨', light: '小雨', moderate: '中雨', heavy: '大雨' }, unknown: '未知', north: '北', east: '东', south: '南', west: '西', mw: 'MW', forceSuffix: '级', unitSeparator: ' · ', searchPlaceholder: '搜索电站或国家…', dataSource: '数据来源：Global Energy Monitor 全球核电追踪（Global Nuclear Power Tracker）', units: '机组数', commissioned: '投产年份', plannedStart: '计划投产', operator: '运营商',
+    title: '☢ StrikeScope — 全球核电站场景推演', statusTitle: '核电站状态', reactor: '堆型', capacity: '装机容量', selectPlant: '选择电站', planning: '规划参考区', simulation: '模拟范围', core: '全向近场警戒', downwind: '（顺风）', scenario: '事故场景推演', selectHint: '请先点击地图上的核电站', release: '放射性释放规模', direction: '扩散方向', wind: '风力', rainfall: '降雨强度', duration: '释放持续时间（小时）', trigger: '触发模拟', clear: '清除模拟', ongoing: '输入 0 代表持续释放；远场仅表示稀释后的参考影响。', rainHint: '降雨越强，模拟越偏向近场湿沉降。', windHint: '0级无风 · 3级微风 · 6级强风 · 9级烈风 · 12级飓风', directionHint: '0° 北 · 90° 东 · 180° 南 · 270° 西', populationTitle: '模拟区域估算人口', populationLoading: '正在计算人口…', populationError: '暂时无法取得人口估算', populationNote: '基于 WorldPop 人口栅格；为模拟区域内常住人口估算，不代表实际暴露或撤离人数。', disclaimer: '仅为可视化推演：结合装机容量、释放时间与风向生成示意羽流；不是剂量预测或应急指令。', status: { operating: '运营中', decommissioned: '已关闭', construction: '建设中', planned: '计划中' }, reference: { plume: '羽流应急规划参考区 (16km)', ingestion: '摄入途径规划参考区 (80km)' }, level: { low: '小规模释放', medium: '中等规模释放', high: '大规模释放' }, zone: { plume: '羽流防护参考', monitoring: '监测参考' }, rain: { none: '无雨', light: '小雨', moderate: '中雨', heavy: '大雨' }, unknown: '未知', north: '北', east: '东', south: '南', west: '西', mw: 'MW', forceSuffix: '级', unitSeparator: ' · ', searchPlaceholder: '搜索电站或国家…', dataSource: '数据来源：Global Energy Monitor 全球核电追踪（Global Nuclear Power Tracker）', units: '机组数', commissioned: '投产年份', plannedStart: '计划投产', operator: '运营商', statusFilterHint: '点击可在地图上显示/隐藏该类电站',
   },
   en: {
-    title: '☢ StrikeScope — Nuclear Scenario Explorer', statusTitle: 'Plant status', reactor: 'Reactor type', capacity: 'Installed capacity', selectPlant: 'Select plant', planning: 'Planning references', simulation: 'Simulation zones', core: 'All-direction near-field alert', downwind: ' (downwind)', scenario: 'Accident scenario', selectHint: 'Select a nuclear plant on the map first', release: 'Radioactive release scale', direction: 'Plume direction', wind: 'Wind force', rainfall: 'Rainfall', duration: 'Release duration (hours)', trigger: 'Run simulation', clear: 'Clear simulation', ongoing: 'Enter 0 for an ongoing release; the far field is a diluted reference only.', rainHint: 'Stronger rain shifts this illustration toward near-field wet deposition.', windHint: '0 calm · 3 gentle breeze · 6 strong breeze · 9 strong gale · 12 hurricane', directionHint: '0° N · 90° E · 180° S · 270° W', populationTitle: 'Estimated residents in simulation area', populationLoading: 'Calculating population…', populationError: 'Population estimate is currently unavailable', populationNote: 'Based on WorldPop population grids; this estimates resident population in the simulated area, not actual exposure or evacuation.', disclaimer: 'Visualization only: this illustrative plume uses capacity, duration, and wind. It is not a dose forecast or emergency instruction.', status: { operating: 'Operating', decommissioned: 'Closed', construction: 'Under construction', planned: 'Planned' }, reference: { plume: 'Plume planning reference (16 km)', ingestion: 'Ingestion planning reference (80 km)' }, level: { low: 'Small release', medium: 'Moderate release', high: 'Large release' }, zone: { plume: 'Plume protection reference', monitoring: 'Monitoring reference' }, rain: { none: 'No rain', light: 'Light rain', moderate: 'Moderate rain', heavy: 'Heavy rain' }, unknown: 'Unknown', north: 'N', east: 'E', south: 'S', west: 'W', mw: 'MW', forceSuffix: '', unitSeparator: ' · ', searchPlaceholder: 'Search plant or country…', dataSource: 'Data: Global Energy Monitor Global Nuclear Power Tracker', units: 'Units', commissioned: 'Commissioned', plannedStart: 'Planned start', operator: 'Operator',
+    title: '☢ StrikeScope — Nuclear Scenario Explorer', statusTitle: 'Plant status', reactor: 'Reactor type', capacity: 'Installed capacity', selectPlant: 'Select plant', planning: 'Planning references', simulation: 'Simulation zones', core: 'All-direction near-field alert', downwind: ' (downwind)', scenario: 'Accident scenario', selectHint: 'Select a nuclear plant on the map first', release: 'Radioactive release scale', direction: 'Plume direction', wind: 'Wind force', rainfall: 'Rainfall', duration: 'Release duration (hours)', trigger: 'Run simulation', clear: 'Clear simulation', ongoing: 'Enter 0 for an ongoing release; the far field is a diluted reference only.', rainHint: 'Stronger rain shifts this illustration toward near-field wet deposition.', windHint: '0 calm · 3 gentle breeze · 6 strong breeze · 9 strong gale · 12 hurricane', directionHint: '0° N · 90° E · 180° S · 270° W', populationTitle: 'Estimated residents in simulation area', populationLoading: 'Calculating population…', populationError: 'Population estimate is currently unavailable', populationNote: 'Based on WorldPop population grids; this estimates resident population in the simulated area, not actual exposure or evacuation.', disclaimer: 'Visualization only: this illustrative plume uses capacity, duration, and wind. It is not a dose forecast or emergency instruction.', status: { operating: 'Operating', decommissioned: 'Closed', construction: 'Under construction', planned: 'Planned' }, reference: { plume: 'Plume planning reference (16 km)', ingestion: 'Ingestion planning reference (80 km)' }, level: { low: 'Small release', medium: 'Moderate release', high: 'Large release' }, zone: { plume: 'Plume protection reference', monitoring: 'Monitoring reference' }, rain: { none: 'No rain', light: 'Light rain', moderate: 'Moderate rain', heavy: 'Heavy rain' }, unknown: 'Unknown', north: 'N', east: 'E', south: 'S', west: 'W', mw: 'MW', forceSuffix: '', unitSeparator: ' · ', searchPlaceholder: 'Search plant or country…', dataSource: 'Data: Global Energy Monitor Global Nuclear Power Tracker', units: 'Units', commissioned: 'Commissioned', plannedStart: 'Planned start', operator: 'Operator', statusFilterHint: 'Click to show/hide this status on the map',
   },
 }
 
@@ -216,8 +216,17 @@ export default function NuclearMap() {
   const [newPlant, setNewPlant] = useState({ name: '', reactorType: 'PWR', capacity: 1000, status: 'operating' })
   const [searchQuery, setSearchQuery] = useState('')
   const [zoom, setZoom] = useState(2)
+  const [hiddenStatuses, setHiddenStatuses] = useState(() => new Set())
   const mapRef = useRef(null)
   const selectPlant = plant => { setSelectedPlant(previous => previous?.id === plant.id ? null : plant); setSimulation(null); setPopulation({ status: 'idle', result: null }) }
+  const toggleStatus = key => {
+    setHiddenStatuses(previous => {
+      const next = new Set(previous)
+      if (next.has(key)) next.delete(key); else next.add(key)
+      return next
+    })
+    setSelectedPlant(previous => previous?.status === key ? null : previous)
+  }
   const update = (key, value) => setConditions(previous => ({ ...previous, [key]: value }))
   const updateNewPlant = (key, value) => setNewPlant(previous => ({ ...previous, [key]: value }))
   const copy = COPY[locale]
@@ -258,10 +267,11 @@ export default function NuclearMap() {
     setPopulation({ status: 'idle', result: null })
   }
   const handleMapClick = event => { if (placingPlant) placePlant(event.lngLat) }
+  const visiblePlants = [...plants, ...customPlants].filter(plant => !hiddenStatuses.has(plant.status))
   const searchMatches = (() => {
     const query = searchQuery.trim().toLowerCase()
     if (!query) return []
-    return [...plants, ...customPlants]
+    return visiblePlants
       .filter(plant => plantName(plant, locale).toLowerCase().includes(query) || countryName(plant, locale).toLowerCase().includes(query))
       .slice(0, 8)
   })()
@@ -289,7 +299,7 @@ export default function NuclearMap() {
       cursor={placingPlant ? 'crosshair' : 'grab'}
     >
       <NavigationControl position="top-right" />
-      {[...plants, ...customPlants].map(plant => <PlantMarker key={plant.id} plant={plant} selected={selectedPlant?.id === plant.id} simulation={simulation} onClick={selectPlant} onDragEnd={movePlant} />)}
+      {visiblePlants.map(plant => <PlantMarker key={plant.id} plant={plant} selected={selectedPlant?.id === plant.id} simulation={simulation} onClick={selectPlant} onDragEnd={movePlant} />)}
       {selectedPlant && <Popup longitude={selectedPlant.lng} latitude={selectedPlant.lat} anchor="bottom" offset={14} closeOnClick={false} onClose={() => setSelectedPlant(null)}>
         <div style={{ minWidth: 180 }}>
           <strong>{plantName(selectedPlant, locale)}</strong>
@@ -303,7 +313,7 @@ export default function NuclearMap() {
 
     <div style={{ position: 'absolute', bottom: 30, left: 16, zIndex: 1000, background: 'rgba(15,15,15,0.85)', color: 'white', padding: '12px 16px', borderRadius: 8, fontSize: 12, backdropFilter: 'blur(4px)' }}>
       <div style={{ fontWeight: 600, marginBottom: 8 }}>{copy.statusTitle}</div>
-      {Object.entries(STATUS_COLOR).map(([key, color]) => <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}><div style={{ width: 10, height: 10, borderRadius: '50%', background: color }} /><span>{copy.status[key]}</span></div>)}
+      {Object.entries(STATUS_COLOR).map(([key, color]) => <button key={key} type="button" onClick={() => toggleStatus(key)} title={copy.statusFilterHint} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, width: '100%', background: 'transparent', border: 'none', padding: 0, color: 'white', font: 'inherit', textAlign: 'left', cursor: 'pointer', opacity: hiddenStatuses.has(key) ? 0.4 : 1 }}><div style={{ width: 10, height: 10, borderRadius: '50%', background: color }} /><span style={{ textDecoration: hiddenStatuses.has(key) ? 'line-through' : 'none' }}>{copy.status[key]}</span></button>)}
       {selectedPlant && !simulation && <><div style={{ fontWeight: 600, margin: '12px 0 8px' }}>{copy.planning}</div>{REFERENCE_ZONES.map(zone => <div key={zone.key} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}><div style={{ width: 20, height: 2, background: zone.color }} /><span>{copy.reference[zone.key]}</span></div>)}</>}
       {simulation && <><div style={{ fontWeight: 600, margin: '12px 0 8px' }}>{copy.simulation}</div><div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}><div style={{ width: 10, height: 10, borderRadius: '50%', background: '#ef4444' }} /><span>{copy.core}</span></div>{SCENARIO_LEVELS[simulation.level].zones.map(zone => <div key={zone.key} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}><div style={{ width: 20, height: 2, background: zone.color }} /><span>{copy.zone[zone.key]}{copy.downwind}</span></div>)}</>}
       <div style={{ marginTop: 10, paddingTop: 8, borderTop: '1px solid #374151', color: '#9ca3af', fontSize: 10, lineHeight: 1.4 }}>{copy.dataSource}</div>
